@@ -1,0 +1,66 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap:    <http://usefulinc.com/ns/doap#> .
+@prefix fno:     <https://w3id.org/function/ontology#> .
+@prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
+@prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
+@prefix ex:      <http://example.org/> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xs:     <http://www.w3.org/2001/XMLSchema#> .
+
+#############
+# FUNCTIONS #
+#############
+
+ex:sum a fno:Function ;
+  fno:name "Sum of two integers" ;
+  rdfs:label "Sum of two integers" ;
+  dcterms:description "Returns the sum of two given integers" ;
+  fno:expects ( ex:int1 ex:int2 ) ;
+  fno:returns ( ex:intOut ) .
+
+#####################
+# FUNCTION MAPPINGS #
+#####################
+
+ex:sumMapping a fnoi:Mapping ;
+  fno:function ex:sum ;
+  fno:implementation ex:internalTestFunctions ;
+  fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "sum" ] .
+
+
+##############
+# PARAMETERS #
+##############
+
+ex:int1 a fno:Parameter ;
+    fno:name "integer 1" ;
+    rdfs:label "integer 1" ;
+    fno:predicate ex:p_int1 ;
+    fno:type xs:integer ;
+    fno:required "true"^^xs:boolean .
+
+ex:int2 a fno:Parameter ;
+    fno:name "integer 2" ;
+    rdfs:label "integer 2" ;
+    fno:predicate ex:p_int2 ;
+    fno:type xs:integer ;
+    fno:required "true"^^xs:boolean .
+
+
+###########
+# OUTPUTS #
+###########
+
+ex:intOut a fno:Output ;
+    fno:name "integer output" ;
+    rdfs:label "integer output" ;
+    fno:predicate ex:o_int ;
+    fno:type xs:integer .
+
+###########
+# CLASSES #
+###########
+
+ex:internalTestFunctions a fnoi:javaClass ;
+  #doap:download-page "./src/test/resources/aaabimfunctions/AaabimFunctions.jar" ;
+  fnoi:class-name "be.ugent.idlab.knows.InternalTestFunctions" .
