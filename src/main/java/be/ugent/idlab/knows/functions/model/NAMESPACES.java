@@ -10,7 +10,7 @@ public enum NAMESPACES {
     FNO("https://w3id.org/function/ontology#"),
     FNOM("https://w3id.org/function/vocabulary/mapping#"),
     LIB("http://example.com/library#"),
-    RDFNS("http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
+    RDF("http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
     ;
     private final String uri;
 

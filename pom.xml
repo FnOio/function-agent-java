@@ -16,6 +16,7 @@
     <jena.version>4.3.2</jena.version>
     <slf4j.version>1.7.35</slf4j.version>
     <junit.version>4.13.2</junit.version>
+    <lombok.version>1.18.22</lombok.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
@@ -46,6 +47,14 @@
       <groupId>org.apache.jena</groupId>
       <artifactId>jena-arq</artifactId>
       <version>${jena.version}</version>
+    </dependency>
+
+    <!-- get rid of getters / setters / constructors for pure data objects -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Unit test framework -->
