@@ -11,7 +11,7 @@ import lombok.Data;
 public class Parameter {
     private final String uri;
     private final String name;
-    private final String predicateUri;
-    private final Class<?> type;
-    private boolean isRequired = true;
+    private final String predicateUri;  // TODO: make optional? makes only sense in an RDF context like RML, no?
+    private final String typeUri;   // TODO: use FnO mapping to come to unified "type" in common model
+    private final boolean isRequired;
 }
