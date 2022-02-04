@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.exceptions.fno;
+package be.ugent.idlab.knows.functions.agent.fno.exception;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>

@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.exceptions.fno;
+package be.ugent.idlab.knows.functions.agent.fno.exception;
 
 /**
  * Thrown when the description of the predicate used in an (RML) mapping file is not found

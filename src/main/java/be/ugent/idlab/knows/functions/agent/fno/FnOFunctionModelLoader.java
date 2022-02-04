@@ -1,7 +1,7 @@
-package be.ugent.idlab.knows.functions.agent;
+package be.ugent.idlab.knows.functions.agent.fno;
 
-import be.ugent.idlab.knows.functions.agent.exceptions.fno.*;
-import be.ugent.idlab.knows.functions.model.*;
+import be.ugent.idlab.knows.functions.agent.fno.exception.*;
+import be.ugent.idlab.knows.functions.agent.model.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RiotNotFoundException;
@@ -11,15 +11,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static be.ugent.idlab.knows.functions.model.NAMESPACES.*;
+import static be.ugent.idlab.knows.functions.agent.model.NAMESPACES.*;
 
 /**
  * <p>Copyright 2021 IDLab (Ghent University - imec)</p>
  *
  * @author Gerald Haesendonck
  */
-public class FunctionLoader {
-    private final static Logger logger = LoggerFactory.getLogger(FunctionLoader.class);
+public class FnOFunctionModelLoader {
+    private final static Logger logger = LoggerFactory.getLogger(FnOFunctionModelLoader.class);
     final Model functionDescriptionTriples = ModelFactory.createDefaultModel();
     final Map<String, Function> functionId2Functions = new HashMap<>();
     final Map<String, FunctionMapping> functionId2functionMappings = new HashMap<>();

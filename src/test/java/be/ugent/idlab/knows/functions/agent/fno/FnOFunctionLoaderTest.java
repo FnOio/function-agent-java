@@ -1,6 +1,5 @@
-package be.ugent.idlab.knows.functions.agent;
+package be.ugent.idlab.knows.functions.agent.fno;
 
-import be.ugent.idlab.knows.functions.agent.FunctionLoader;
 import org.junit.Test;
 
 /**
@@ -8,11 +7,11 @@ import org.junit.Test;
  *
  * @author Gerald Haesendonck
  */
-public class FunctionLoaderTest {
+public class FnOFunctionLoaderTest {
 
     @Test
     public void testLoad() {
-        FunctionLoader functionLoader = new FunctionLoader();
+        FnOFunctionModelLoader functionLoader = new FnOFunctionModelLoader();
         functionLoader.load("src/test/resources/internalTestFunctions.ttl");
     }
 }

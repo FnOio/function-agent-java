@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.exceptions.fno;
+package be.ugent.idlab.knows.functions.agent.fno.exception;
 
 /**
  * Thrown when a method mapping has no fnom:method-name.

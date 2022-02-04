@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.exceptions.fno;
+package be.ugent.idlab.knows.functions.agent.fno.exception;
 
 /**
  * Thrown when the description of an implementation lacks in an FnO document.

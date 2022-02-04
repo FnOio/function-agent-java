@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.model;
+package be.ugent.idlab.knows.functions.agent.model;
 
 import lombok.Data;
 
