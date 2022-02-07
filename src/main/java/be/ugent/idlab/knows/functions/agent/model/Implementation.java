@@ -9,7 +9,6 @@ import lombok.Data;
  */
 @Data
 public class Implementation {
-    private final String implementationUri;
     private final String className;
-    private final String downloadPage;
+    private final String location;
 }

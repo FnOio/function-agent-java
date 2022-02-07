@@ -6,7 +6,7 @@ package be.ugent.idlab.knows.functions.agent.model;
  * @author Gerald Haesendonck
  */
 public enum NAMESPACES {
-    DCTERMS("http://purl.org/dc/terms"),
+    DCTERMS("http://purl.org/dc/terms/"),
     DOAP("http://usefulinc.com/ns/doap#"),
     FNO("https://w3id.org/function/ontology#"),
     FNOI("https://w3id.org/function/vocabulary/implementation#"),

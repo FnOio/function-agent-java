@@ -6,6 +6,7 @@
 @prefix ex:      <http://example.org/> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xs:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix lib:      <http://example.com/library#> .
 
 #############
 # FUNCTIONS #
@@ -16,17 +17,10 @@ ex:sum a fno:Function ;
   rdfs:label "Sum of two integers" ;
   dcterms:description "Returns the sum of two given integers" ;
   fno:expects ( ex:int1 ex:int2 ) ;
-  fno:returns ( ex:intOut ) .
-
-#####################
-# FUNCTION MAPPINGS #
-#####################
-
-ex:sumMapping a fnoi:Mapping ;
-  fno:function ex:sum ;
-  fno:implementation ex:internalTestFunctions ;
-  fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "sum" ] .
-
+  fno:returns ( ex:intOut ) ;
+  lib:providedBy [ # lib:localLibrary "UtilFunctions.jar" ;
+                   lib:class        "be.ugent.idlab.knows.InternalTestFunctions" ;
+                   lib:method       "sum" ] .
 
 ##############
 # PARAMETERS #
@@ -56,11 +50,3 @@ ex:intOut a fno:Output ;
     rdfs:label "integer output" ;
     fno:predicate ex:o_int ;
     fno:type xs:integer .
-
-###########
-# CLASSES #
-###########
-
-ex:internalTestFunctions a fnoi:javaClass ;
-  #doap:download-page "./src/test/resources/aaabimfunctions/AaabimFunctions.jar" ;
-  fnoi:class-name "be.ugent.idlab.knows.InternalTestFunctions" .

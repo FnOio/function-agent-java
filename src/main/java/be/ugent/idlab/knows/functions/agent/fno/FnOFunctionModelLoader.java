@@ -4,8 +4,6 @@ import be.ugent.idlab.knows.functions.agent.fno.exception.*;
 import be.ugent.idlab.knows.functions.agent.model.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RiotNotFoundException;
-import org.apache.jena.shared.PropertyNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,27 +18,63 @@ import static be.ugent.idlab.knows.functions.agent.model.NAMESPACES.*;
  */
 public class FnOFunctionModelLoader {
     private final static Logger logger = LoggerFactory.getLogger(FnOFunctionModelLoader.class);
-    final Model functionDescriptionTriples = ModelFactory.createDefaultModel();
-    final Map<String, Function> functionId2Functions = new HashMap<>();
-    final Map<String, FunctionMapping> functionId2functionMappings = new HashMap<>();
+    private final Model functionDescriptionTriples = ModelFactory.createDefaultModel();
+    private final Map<String, Function> functionId2Functions = new HashMap<>();
+    private final Map<String, FunctionMapping> functionId2functionMappings = new HashMap<>();
+    private final Collection<Function> parsedFunctions = new HashSet<>();
 
     // some properties used throughout the parsing process
-    final Property typeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
+    private final Property typeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
 
-    public void load(final String fnoDoc) {
+    public FnOFunctionModelLoader(final String fnoDoc) {
+        parse(fnoDoc);
+    }
+
+    /**
+     * Returns all parsed functions, or an empty collection if parsing fails.
+     * @return  All parsed functions.
+     */
+    public Collection<Function> getFunctions() {
+        return parsedFunctions;
+    }
+
+    /**
+     * Parse all functions found in an FnO document. If something goes wrong, no functions are kept.
+     * @param fnoDoc    The Function Ontology document containing function descriptions.
+     */
+    private void parse(final String fnoDoc) {
         logger.info("Loading function descriptions from {}", fnoDoc);
         try {
             RDFDataMgr.read(functionDescriptionTriples, fnoDoc);
             parseFunctionMappings();
             parseFunctions();
-            // TODO: map mappings to functions
-            // TODO implement deprecated 'lib' stuff
-        } catch (RiotNotFoundException rnf) {
-            logger.error("Reading function descriptions from {} failed.", fnoDoc, rnf);
-        } catch (PropertyNotFoundException | UnsupportedOperationException | FnOException e) {
-            logger.error("Parsing function descriptions from {} failed.", fnoDoc, e);
+            mapFunctionMappingsToFunctions();
+        } catch (Throwable rnf) {
+            logger.error("Parsing function descriptions from {} failed.", fnoDoc, rnf);
+        } finally {
+            // free up some resources
+            functionDescriptionTriples.close();
+            functionId2Functions.clear();
+            functionId2functionMappings.clear();
         }
 
+    }
+
+    /**
+     * Put parsed function mapping objects into the corresponding function object.
+     * @throws FunctionMappingNotFoundException No function mapping is found for a certain function.
+     */
+    private void mapFunctionMappingsToFunctions() throws FunctionMappingNotFoundException {
+        for (String functionId : functionId2Functions.keySet()) {
+            logger.debug("Finding mapping for function {}", functionId);
+            if (functionId2functionMappings.containsKey(functionId)) {
+                final Function function = functionId2Functions.get(functionId);
+                function.setFunctionMapping(functionId2functionMappings.get(functionId));
+                parsedFunctions.add(function);
+            } else {
+                throw new FunctionMappingNotFoundException("No '" + FNOI + "Mapping' found for function '" + functionId + '"');
+            }
+        }
     }
 
     /**
@@ -80,6 +114,8 @@ public class FnOFunctionModelLoader {
             Implementation implementation = parseImplementation(functionMappingResource);
             FunctionMapping functionMapping = new FunctionMapping(functionURI, methodMapping, implementation);
             functionId2functionMappings.put(functionURI, functionMapping);
+        } else {
+            logger.debug("Function mapping for {} already parsed", functionURI);
         }
     }
 
@@ -143,9 +179,9 @@ public class FnOFunctionModelLoader {
 
         // get the optional path to an implementation, e.g. a JAR file
         Property downloadPageProperty = ResourceFactory.createProperty(DOAP.toString(), "download-page");
-        final String pathName = getLiteralStr(implementationResource, downloadPageProperty.getURI()).orElse(null);
+        final String pathName = getLiteralStr(implementationResource, downloadPageProperty.getURI()).orElse("");
 
-        return new Implementation(implementationUri, className, pathName);
+        return new Implementation(className, pathName);
     }
 
     /**
@@ -185,8 +221,10 @@ public class FnOFunctionModelLoader {
             List<Parameter> returns = parseParameters(functionResource, false);
 
             // get description
-            // TODO: is this optional?
             String description = getLiteralStr(functionResource, DCTERMS + "description").orElse("");
+
+            // parse deprecated way of providing classes
+            parseLib(functionResource);
 
             Function function = new Function(functionURI, name, description, expects, returns);
             functionId2Functions.put(functionURI, function);
@@ -242,8 +280,53 @@ public class FnOFunctionModelLoader {
         ResourceFactory.createProperty(FNO + "required");
         boolean isRequired = getLiteralBoolean(parameterResource, FNO + "required").orElse(true);
 
-        return new Parameter(uri, name, predicateUri, typeUri, isRequired);
+        return new Parameter(name, predicateUri, typeUri, isRequired);
     }
+
+    /**
+     * Parses an implementation the deprecated way, using a http://example.com/library# predicate in a function mapping.
+     * This is only to be backward compatible.
+     * @param functionResource  The fno:Function to parse the parameters from.
+     * @throws FnOException     Something goes wrong parsing parameterResource.
+     *                          A subclass of FnOException specifies what exactly.
+     */
+    private void parseLib(final Resource functionResource) throws FnOException {
+        Optional<Resource> libResourceOption = getObjectResource(functionResource, LIB + "providedBy");
+        final String functionUri = functionResource.getURI();
+        if (functionId2functionMappings.containsKey(functionUri)) {
+            logger.debug("Function mapping for {} already parsed", functionUri);
+            return;
+        }
+
+        if (libResourceOption.isPresent()) {
+            logger.warn("Using {}providedBy is deprecated. Using the implementation vocabulary (https://fno.io/vocabulary/implementation/index-en.html) is recommended", LIB);
+
+            final Resource libResource = libResourceOption.get();
+
+            // get jar file name, if any
+            String location = getLiteralStr(libResource, LIB + "localLibrary").orElse("");
+
+            // get class
+            String className = getLiteralStr(libResource, LIB + "class")
+                    .orElseThrow(() -> new ClassNameDescriptionNotFoundException("No '" + LIB
+                    + "class' found for '" + libResource.getURI() + "' for function '" + functionUri + "'"));
+
+            // get method
+            String method = getLiteralStr(libResource, LIB + "method")
+                    .orElseThrow(() -> new MethodMappingNotFoundException("No '" + LIB
+                            + "method' found for '" + libResource.getURI() + "' for function '" + functionUri + "'"));
+
+            final MethodMapping methodMapping = new MethodMapping(FNOM + "StringMethodMapping", method);
+            final Implementation implementation = new Implementation(className, location);
+            final FunctionMapping functionMapping = new FunctionMapping(functionUri, methodMapping, implementation);
+            functionId2functionMappings.put(functionUri, functionMapping);
+        }
+    }
+
+
+    /////////////////////////////////////////////////////////
+    // Jena helper functions. Might move to separate class //
+    /////////////////////////////////////////////////////////
 
     /**
      * Returns the object as a literal for a given subject and predicate, if any such triple exists.

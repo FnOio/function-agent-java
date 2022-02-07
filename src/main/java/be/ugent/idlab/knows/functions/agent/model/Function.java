@@ -13,17 +13,20 @@ import java.util.List;
 public class Function {
 
     // a unique identifier for the function
-    final String id;
+    private final String id;
 
     // a name for this function
-    final String name;
+    private final String name;
 
     // a description for this function
-    final String description;
+    private final String description;
 
     // a list of function arguments
-    final List<Parameter> argumentParameters;
+    private final List<Parameter> argumentParameters;
 
     // a list of returned arguments. This should be only 1 in Java
-    final List<Parameter> returnParameters;
+    private final List<Parameter> returnParameters;
+
+    // a function mapping containing a method name mapping and an implementation
+    private FunctionMapping functionMapping;
 }
