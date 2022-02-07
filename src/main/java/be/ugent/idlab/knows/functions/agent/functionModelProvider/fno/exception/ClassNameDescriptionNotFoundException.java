@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.fno.exception;
+package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception;
 
 /**
  * Thrown when the class name description is not found in the implementation description.

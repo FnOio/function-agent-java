@@ -1,5 +1,7 @@
 package be.ugent.idlab.knows.functions.agent.fno;
 
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.model.*;
 import org.junit.Test;
 
@@ -14,23 +16,23 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Gerald Haesendonck
  */
-public class FnOFunctionLoaderTest {
+public class FnOFunctionProviderTest {
 
     @Test
     public void testLoad() {
-        FnOFunctionModelLoader functionLoader = new FnOFunctionModelLoader("src/test/resources/internalTestFunctions.ttl");
+        FunctionModelProvider functionLoader = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
         checkSuccessFunctions(functionLoader.getFunctions());
     }
 
     @Test
     public void testLoadDeprecated() {
-        FnOFunctionModelLoader functionLoader = new FnOFunctionModelLoader("src/test/resources/internalTestFunctions_old.ttl");
+        FunctionModelProvider functionLoader = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions_old.ttl");
         checkSuccessFunctions(functionLoader.getFunctions());
     }
 
     @Test
     public void testFnoDocNotFound() {
-        FnOFunctionModelLoader functionLoader = new FnOFunctionModelLoader("src/test/resources/doesnotexist.ttl");
+        FnOFunctionModelProvider functionLoader = new FnOFunctionModelProvider("src/test/resources/doesnotexist.ttl");
         Collection<Function> functions = functionLoader.getFunctions();
         assertTrue("No functions should be loaded when parsing document fails", functions.isEmpty());
     }

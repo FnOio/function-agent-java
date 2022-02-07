@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.fno.exception;
+package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception;
 
 /**
  * Thrown when the object (function resource) for predicate fno:function of a fnoi:Mapping is not found.

@@ -1,6 +1,7 @@
-package be.ugent.idlab.knows.functions.agent.fno;
+package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno;
 
-import be.ugent.idlab.knows.functions.agent.fno.exception.*;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.*;
 import be.ugent.idlab.knows.functions.agent.model.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
@@ -12,12 +13,15 @@ import java.util.*;
 import static be.ugent.idlab.knows.functions.agent.model.NAMESPACES.*;
 
 /**
+ * A {@link FunctionModelProvider} for functions described using the Function Ontology (<a href="https://fno.io/">FnO</a>).
+ * One instance holds functions found in one FnO document.
+ *
  * <p>Copyright 2021 IDLab (Ghent University - imec)</p>
  *
  * @author Gerald Haesendonck
  */
-public class FnOFunctionModelLoader {
-    private final static Logger logger = LoggerFactory.getLogger(FnOFunctionModelLoader.class);
+public class FnOFunctionModelProvider implements FunctionModelProvider {
+    private final static Logger logger = LoggerFactory.getLogger(FnOFunctionModelProvider.class);
     private final Model functionDescriptionTriples = ModelFactory.createDefaultModel();
     private final Map<String, Function> functionId2Functions = new HashMap<>();
     private final Map<String, FunctionMapping> functionId2functionMappings = new HashMap<>();
@@ -26,7 +30,12 @@ public class FnOFunctionModelLoader {
     // some properties used throughout the parsing process
     private final Property typeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
 
-    public FnOFunctionModelLoader(final String fnoDoc) {
+    /**
+     * Creates an instance of {@link FnOFunctionModelProvider}, holding all functions found in the given FnO document.
+     * If parsing fails, no functions will be returned by {@link FunctionModelProvider#getFunctions()}.
+     * @param fnoDoc    A document in RDF describing functions using the Function Ontology (FnO).
+     */
+    public FnOFunctionModelProvider(final String fnoDoc) {
         parse(fnoDoc);
     }
 
