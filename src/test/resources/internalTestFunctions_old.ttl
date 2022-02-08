@@ -19,7 +19,7 @@ ex:sum a fno:Function ;
   fno:expects ( ex:int1 ex:int2 ) ;
   fno:returns ( ex:intOut ) ;
   lib:providedBy [ # lib:localLibrary "UtilFunctions.jar" ;
-                   lib:class        "be.ugent.idlab.knows.InternalTestFunctions" ;
+                   lib:class        "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions" ;
                    lib:method       "sum" ] .
 
 ##############

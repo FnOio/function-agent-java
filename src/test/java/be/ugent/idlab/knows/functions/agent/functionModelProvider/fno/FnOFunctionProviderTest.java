@@ -1,7 +1,6 @@
-package be.ugent.idlab.knows.functions.agent.fno;
+package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno;
 
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.model.*;
 import org.junit.Test;
 
@@ -20,14 +19,14 @@ public class FnOFunctionProviderTest {
 
     @Test
     public void testLoad() {
-        FunctionModelProvider functionLoader = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
-        checkSuccessFunctions(functionLoader.getFunctions());
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
+        checkSuccessFunctions(functionProvider.getFunctions());
     }
 
     @Test
     public void testLoadDeprecated() {
-        FunctionModelProvider functionLoader = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions_old.ttl");
-        checkSuccessFunctions(functionLoader.getFunctions());
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions_old.ttl");
+        checkSuccessFunctions(functionProvider.getFunctions());
     }
 
     @Test
@@ -74,7 +73,7 @@ public class FnOFunctionProviderTest {
         assertEquals("Wrong method type", "https://w3id.org/function/vocabulary/mapping#StringMethodMapping", methodMapping.getType());
 
         Implementation implementation = mapping.getImplementation();
-        assertEquals("Wrong implementation class name", "be.ugent.idlab.knows.InternalTestFunctions", implementation.getClassName());
+        assertEquals("Wrong implementation class name", "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions", implementation.getClassName());
         assertEquals("Implementation: location should be empty.","", implementation.getLocation());
     }
 }

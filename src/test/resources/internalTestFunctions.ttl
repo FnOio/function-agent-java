@@ -63,4 +63,4 @@ ex:intOut a fno:Output ;
 
 ex:internalTestFunctions a fnoi:javaClass ;
   #doap:download-page "./src/test/resources/aaabimfunctions/AaabimFunctions.jar" ;
-  fnoi:class-name "be.ugent.idlab.knows.InternalTestFunctions" .
+  fnoi:class-name "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions" .
