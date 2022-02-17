@@ -1,5 +1,6 @@
 package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno;
 
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.model.*;
 import org.junit.Test;
@@ -52,7 +53,8 @@ public class FnOFunctionProviderTest {
             Parameter parameter = inputParameters.get(pi);
             assertEquals("Wrong parameter " + i + " name ", "integer " + i, parameter.getName());
             assertEquals("Wrong parameter " + i + " predicateUri ", "http://example.org/p_int" + i, parameter.getPredicateUri());
-            assertEquals("Wrong parameter " + i + " type ", "http://www.w3.org/2001/XMLSchema#integer", parameter.getTypeUri());
+            DataTypeConverter<?> typeConverter = parameter.getTypeConverter();
+            assertEquals("Wrong type converter class", Integer.class, typeConverter.getTypeClasses());
             assertTrue("Required should be true for parameter " + i , parameter.isRequired());
         }
 
@@ -61,7 +63,8 @@ public class FnOFunctionProviderTest {
         Parameter returnParameter = function.getReturnParameters().get(0);
         assertEquals("Wrong return parameter name ", "integer output", returnParameter.getName());
         assertEquals("Wrong return parameter predicateUri ", "http://example.org/o_int", returnParameter.getPredicateUri());
-        assertEquals("Wrong return parameter type ", "http://www.w3.org/2001/XMLSchema#integer", returnParameter.getTypeUri());
+        DataTypeConverter<?> typeConverter = returnParameter.getTypeConverter();
+        assertEquals("Wrong type converter class", Integer.class, typeConverter.getTypeClasses());
         assertTrue("Required should be true for return parameter", returnParameter.isRequired());
 
         // check mapping

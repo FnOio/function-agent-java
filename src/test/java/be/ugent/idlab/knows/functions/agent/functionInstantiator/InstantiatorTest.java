@@ -7,7 +7,12 @@ import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctio
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -17,12 +22,25 @@ import java.util.Collection;
 public class InstantiatorTest {
 
     @Test
-    public void testClassOnClasspath() throws InstantiationException {
+    public void testClassOnClasspath() throws InstantiationException, InvocationTargetException, IllegalAccessException {
         // load function descriptions
         FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
         Collection<Function> functions = functionProvider.getFunctions();
         Instantiator instantiator = new Instantiator(functions);
 
-        instantiator.getWhatever("http://example.org/sum");
+        Method sum = instantiator.getMethod("http://example.org/sum");
+        Object result = sum.invoke(null, 5, 8);
+        assertTrue(result instanceof Integer);
+        Integer resultValue = (Integer) result;
+        assertEquals("5 + 8 should be 13", 13, resultValue.intValue());
+    }
+
+    @Test
+    public void testLoadSumWithNonPrimitives() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Class<?> clazz = Class.forName("be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions");
+        Method method = clazz.getMethod("sum", int.class, int.class);
+        Object result = method.invoke(null, Integer.valueOf(1), Integer.valueOf(3));
+        Class<?>[] pgenericParameterTypes = method.getParameterTypes();
+        System.out.println();
     }
 }

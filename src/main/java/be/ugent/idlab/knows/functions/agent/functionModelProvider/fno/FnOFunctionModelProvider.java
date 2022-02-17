@@ -1,5 +1,6 @@
 package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno;
 
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.*;
 import be.ugent.idlab.knows.functions.agent.model.*;
@@ -288,8 +289,9 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         // This is actually not used at the moment and supposed to be true.
         ResourceFactory.createProperty(FNO + "required");
         boolean isRequired = getLiteralBoolean(parameterResource, FNO + "required").orElse(true);
+        final DataTypeConverter<?> typeConverter = FnODataTypeConverterProvider.getDataTypeConverter(typeUri);
 
-        return new Parameter(name, predicateUri, typeUri, isRequired);
+        return new Parameter(name, predicateUri, typeConverter, isRequired);
     }
 
     /**
