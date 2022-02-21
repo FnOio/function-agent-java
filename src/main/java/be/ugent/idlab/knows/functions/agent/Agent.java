@@ -1,5 +1,8 @@
 package be.ugent.idlab.knows.functions.agent;
 
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 /**
@@ -8,10 +11,11 @@ import java.util.Map;
  * @author Gerald Haesendonck
  */
 public interface Agent {
+
     /**
-     *
-     * @param functionTerm
-     * @param args
+     * Executes the function with a given id and given parameters.
+     * @param functionId    The unique identifier of a function.
+     * @param parameterId2Value  A map parameterId -> value. (For FnO, the parameter id is the 'predicate' of the parameter.)
      */
-    Object execute(final String functionTerm, final Map<String, Object> args);
+    Object execute(final String functionId, final Map<String, Object> parameterId2Value) throws InstantiationException, InvocationTargetException, IllegalAccessException;
 }

@@ -9,10 +9,9 @@ import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -25,7 +24,7 @@ public class InstantiatorTest {
     public void testClassOnClasspath() throws InstantiationException, InvocationTargetException, IllegalAccessException {
         // load function descriptions
         FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
-        Collection<Function> functions = functionProvider.getFunctions();
+        Map<String, Function> functions = functionProvider.getFunctions();
         Instantiator instantiator = new Instantiator(functions);
 
         Method sum = instantiator.getMethod("http://example.org/sum");
@@ -40,7 +39,8 @@ public class InstantiatorTest {
         Class<?> clazz = Class.forName("be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions");
         Method method = clazz.getMethod("sum", int.class, int.class);
         Object result = method.invoke(null, Integer.valueOf(1), Integer.valueOf(3));
-        Class<?>[] pgenericParameterTypes = method.getParameterTypes();
-        System.out.println();
+        assertEquals("1 + 3 should be 4", 4, result);
+        Class<?>[] genericParameterTypes = method.getParameterTypes();
+        assertArrayEquals(new Class<?>[]{int.class, int.class}, genericParameterTypes);
     }
 }

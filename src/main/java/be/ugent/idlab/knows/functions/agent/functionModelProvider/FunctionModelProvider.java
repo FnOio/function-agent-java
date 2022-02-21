@@ -2,7 +2,7 @@ package be.ugent.idlab.knows.functions.agent.functionModelProvider;
 
 import be.ugent.idlab.knows.functions.agent.model.Function;
 
-import java.util.Collection;
+import java.util.Map;
 
 /**
  * A FunctionModelProvider is responsible for providing an internal function model,
@@ -15,7 +15,7 @@ import java.util.Collection;
 public interface FunctionModelProvider {
     /**
      * Functions known to the function model provider.
-     * @return  A collection of functions known to the function model provider.
+     * @return  A map of function ID to function known to the function model provider.
      */
-    Collection<Function> getFunctions();
+    Map<String, Function> getFunctions();
 }

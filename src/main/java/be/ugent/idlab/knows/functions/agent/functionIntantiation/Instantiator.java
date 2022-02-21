@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,15 +25,15 @@ import java.util.Map;
 public class Instantiator {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private final Map<String, Function> id2functionMap = new HashMap<>();
+    private final Map<String, Function> id2functionMap;
     // todo keep map id -> loaded method?
 
     /**
      * Creates a new instance of an Initiator.
-     * @param functions The function descriptions used to find for possible implementations.
+     * @param functions The function descriptions used to find for possible implementations in the form of a map function ID -> Function.
      */
-    public Instantiator(Collection<Function> functions) {
-        functions.forEach(function -> id2functionMap.put(function.getId(), function));
+    public Instantiator(Map<String, Function> functions) {
+        id2functionMap = functions;
     }
 
     /**

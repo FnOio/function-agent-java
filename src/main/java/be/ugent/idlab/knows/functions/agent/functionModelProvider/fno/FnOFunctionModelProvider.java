@@ -26,7 +26,6 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     private final Model functionDescriptionTriples = ModelFactory.createDefaultModel();
     private final Map<String, Function> functionId2Functions = new HashMap<>();
     private final Map<String, FunctionMapping> functionId2functionMappings = new HashMap<>();
-    private final Collection<Function> parsedFunctions = new HashSet<>();
 
     // some properties used throughout the parsing process
     private final Property typeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
@@ -44,8 +43,8 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * Returns all parsed functions, or an empty collection if parsing fails.
      * @return  All parsed functions.
      */
-    public Collection<Function> getFunctions() {
-        return parsedFunctions;
+    public Map<String, Function> getFunctions() {
+        return functionId2Functions;
     }
 
     /**
@@ -64,7 +63,6 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         } finally {
             // free up some resources
             functionDescriptionTriples.close();
-            functionId2Functions.clear();
             functionId2functionMappings.clear();
         }
 
@@ -80,7 +78,6 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
             if (functionId2functionMappings.containsKey(functionId)) {
                 final Function function = functionId2Functions.get(functionId);
                 function.setFunctionMapping(functionId2functionMappings.get(functionId));
-                parsedFunctions.add(function);
             } else {
                 throw new FunctionMappingNotFoundException("No '" + FNOI + "Mapping' found for function '" + functionId + '"');
             }

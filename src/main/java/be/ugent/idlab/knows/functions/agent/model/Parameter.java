@@ -10,8 +10,8 @@ import lombok.Data;
  */
 @Data
 public class Parameter {
-    private final String name;
-    private final String predicateUri;  // TODO: make optional? makes only sense in an RDF context like RML, no?
+    private final String name;  // TODO do we need this?
+    private final String id;    // for FnO this is the predicateUri;
     private final DataTypeConverter<?> typeConverter;
     private final boolean isRequired;
 }

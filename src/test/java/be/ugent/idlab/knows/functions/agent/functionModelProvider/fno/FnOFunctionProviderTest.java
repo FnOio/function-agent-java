@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -21,19 +22,19 @@ public class FnOFunctionProviderTest {
     @Test
     public void testLoad() {
         FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
-        checkSuccessFunctions(functionProvider.getFunctions());
+        checkSuccessFunctions(functionProvider.getFunctions().values());
     }
 
     @Test
     public void testLoadDeprecated() {
         FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions_old.ttl");
-        checkSuccessFunctions(functionProvider.getFunctions());
+        checkSuccessFunctions(functionProvider.getFunctions().values());
     }
 
     @Test
     public void testFnoDocNotFound() {
         FnOFunctionModelProvider functionLoader = new FnOFunctionModelProvider("src/test/resources/doesnotexist.ttl");
-        Collection<Function> functions = functionLoader.getFunctions();
+        Map<String, Function> functions = functionLoader.getFunctions();
         assertTrue("No functions should be loaded when parsing document fails", functions.isEmpty());
     }
 
@@ -52,7 +53,7 @@ public class FnOFunctionProviderTest {
             int i = pi + 1;
             Parameter parameter = inputParameters.get(pi);
             assertEquals("Wrong parameter " + i + " name ", "integer " + i, parameter.getName());
-            assertEquals("Wrong parameter " + i + " predicateUri ", "http://example.org/p_int" + i, parameter.getPredicateUri());
+            assertEquals("Wrong parameter " + i + " id ", "http://example.org/p_int" + i, parameter.getId());
             DataTypeConverter<?> typeConverter = parameter.getTypeConverter();
             assertEquals("Wrong type converter class", Integer.class, typeConverter.getTypeClasses().get(0));
             assertTrue("Required should be true for parameter " + i , parameter.isRequired());
@@ -62,7 +63,7 @@ public class FnOFunctionProviderTest {
         assertEquals("Wrong number of return parameters", 1, function.getReturnParameters().size());
         Parameter returnParameter = function.getReturnParameters().get(0);
         assertEquals("Wrong return parameter name ", "integer output", returnParameter.getName());
-        assertEquals("Wrong return parameter predicateUri ", "http://example.org/o_int", returnParameter.getPredicateUri());
+        assertEquals("Wrong return parameter id ", "http://example.org/o_int", returnParameter.getId());
         DataTypeConverter<?> typeConverter = returnParameter.getTypeConverter();
         assertEquals("Wrong type converter class", Integer.class, typeConverter.getTypeClasses().get(0));
         assertTrue("Required should be true for return parameter", returnParameter.isRequired());
