@@ -2,7 +2,6 @@ package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 
 import java.lang.reflect.InvocationTargetException;
@@ -17,11 +16,11 @@ import java.util.Map;
  * @author Gerald Haesendonck
  */
 public class AgentImpl implements Agent {
-    private final FunctionModelProvider functionModelProvider;
+    private final Map<String, Function> functionId2Function;
     private final Instantiator instantiator;
 
-    public AgentImpl(final FunctionModelProvider functionModelProvider, final Instantiator instantiator) {
-        this.functionModelProvider = functionModelProvider;
+    public AgentImpl(final Map<String, Function> functionId2Function, final Instantiator instantiator) {
+        this.functionId2Function = functionId2Function;
         this.instantiator = instantiator;
     }
 
@@ -33,7 +32,7 @@ public class AgentImpl implements Agent {
 
         // "fill in" the argument parameters
         final List<Object> valuesInOrder = new ArrayList<>(parameterId2Value.size());
-        final Function function = functionModelProvider.getFunctions().get(functionId);
+        final Function function = functionId2Function.get(functionId);
         function.getArgumentParameters().forEach(parameter -> {
             Object untypedValue = parameterId2Value.get(parameter.getId());
             Object convertedValue = parameter.getTypeConverter().convert(untypedValue);

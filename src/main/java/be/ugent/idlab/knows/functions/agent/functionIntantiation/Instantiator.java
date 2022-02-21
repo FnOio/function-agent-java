@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +27,9 @@ public class Instantiator {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final Map<String, Function> id2functionMap;
-    // todo keep map id -> loaded method?
+
+    // a 'cache' of Methods associated with function ids.
+    private final Map<String, Method> id2MethodMap = new HashMap<>();
 
     /**
      * Creates a new instance of an Initiator.
@@ -44,6 +47,10 @@ public class Instantiator {
      */
     public Method getMethod(final String functionId) throws InstantiationException {
         logger.debug("Getting instantiation for {}", functionId);
+        if (id2MethodMap.containsKey(functionId)) {
+            logger.debug("Method for {} found in cache.", functionId);
+            return id2MethodMap.get(functionId);
+        }
         if (id2functionMap.containsKey(functionId)) {
             final Function function = id2functionMap.get(functionId);
             final FunctionMapping mapping = function.getFunctionMapping();
@@ -63,6 +70,7 @@ public class Instantiator {
             final List<Parameter> parameters = function.getArgumentParameters();
             Method method = getMethod(clazz, methodName, parameters, function.getReturnParameters().get(0));
             logger.debug("Found method {}", method.getName());
+            id2MethodMap.put(functionId, method);
             return method;
         } else {
             throw new FunctionNotFoundException("No function found with id " + functionId);

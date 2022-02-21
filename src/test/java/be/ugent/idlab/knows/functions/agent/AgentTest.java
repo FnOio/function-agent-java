@@ -31,8 +31,17 @@ public class AgentTest {
         Instantiator instantiator = new Instantiator(functions);
 
         // Construct an Agent
-        Agent agent = new AgentImpl(functionProvider, instantiator);
+        Agent agent = new AgentImpl(functions, instantiator);
+        execute(agent);
+    }
 
+    @Test
+    public void testWithFactory() throws InvocationTargetException, InstantiationException, IllegalAccessException {
+        Agent agent = AgentFactory.createFromFnO("src/test/resources/internalTestFunctions.ttl");
+        execute(agent);
+    }
+
+    private void execute(final Agent agent) throws InvocationTargetException, InstantiationException, IllegalAccessException {
         // prepare the parameters for the function
         Map<String, Object> parameterId2Value = new HashMap<>();
         parameterId2Value.put("http://example.org/p_int1", "5");
