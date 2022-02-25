@@ -4,6 +4,7 @@ import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import org.junit.Test;
 
@@ -21,7 +22,7 @@ import static org.junit.Assert.*;
 public class InstantiatorTest {
 
     @Test
-    public void testClassOnClasspath() throws InstantiationException, InvocationTargetException, IllegalAccessException {
+    public void testClassOnClasspath() throws InstantiationException, InvocationTargetException, IllegalAccessException, FnOException {
         // load function descriptions
         FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
         Map<String, Function> functions = functionProvider.getFunctions();

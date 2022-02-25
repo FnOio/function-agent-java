@@ -1,21 +1,17 @@
 package be.ugent.idlab.knows.functions.agent.dataType;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
  *
  * @author Gerald Haesendonck
  */
-public class StringConverter implements DataTypeConverter<String> {
-    @Override
-    public String convert(Object value) {
-        return value.toString();
+public class StringConverter extends DataTypeConverter<String> {
+    public StringConverter() {
+        super(String.class);
     }
 
     @Override
-    public List<Class<?>> getTypeClasses() {
-        return Arrays.asList(String.class, CharSequence.class);
+    public String convert(Object value) {
+        return value.toString();
     }
 }

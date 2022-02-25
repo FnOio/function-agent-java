@@ -3,6 +3,7 @@ package be.ugent.idlab.knows.functions.agent;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 
 import java.util.HashMap;
@@ -20,7 +21,7 @@ public class AgentFactory {
      * @param pathToFnoDoc  One or more FnO documents describing functions.
      * @return              An agent capable of executing the functions as described in the FnO document(s).
      */
-    public static Agent createFromFnO(final String... pathToFnoDoc) {
+    public static Agent createFromFnO(final String... pathToFnoDoc) throws FnOException {
 
         // parse all FnO documents
         final Map<String, Function> functionId2Function = new HashMap<>();

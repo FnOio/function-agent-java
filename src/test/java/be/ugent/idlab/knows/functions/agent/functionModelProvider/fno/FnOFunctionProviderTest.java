@@ -2,15 +2,14 @@ package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.model.*;
 import org.junit.Test;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -20,22 +19,22 @@ import static org.junit.Assert.assertTrue;
 public class FnOFunctionProviderTest {
 
     @Test
-    public void testLoad() {
+    public void testLoad() throws FnOException {
         FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
         checkSuccessFunctions(functionProvider.getFunctions().values());
     }
 
     @Test
-    public void testLoadDeprecated() {
+    public void testLoadDeprecated() throws FnOException {
         FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions_old.ttl");
         checkSuccessFunctions(functionProvider.getFunctions().values());
     }
 
     @Test
-    public void testFnoDocNotFound() {
-        FnOFunctionModelProvider functionLoader = new FnOFunctionModelProvider("src/test/resources/doesnotexist.ttl");
-        Map<String, Function> functions = functionLoader.getFunctions();
-        assertTrue("No functions should be loaded when parsing document fails", functions.isEmpty());
+    public void testFnoDocNotFound() throws FnOException {
+        assertThrows("Constructing an FnOFunctionModelProvider from an unexisting file should fail.", Throwable.class, () -> {
+            new FnOFunctionModelProvider("src/test/resources/doesnotexist.ttl");
+        });
     }
 
     private void checkSuccessFunctions(final Collection<Function> functions) {
@@ -55,7 +54,7 @@ public class FnOFunctionProviderTest {
             assertEquals("Wrong parameter " + i + " name ", "integer " + i, parameter.getName());
             assertEquals("Wrong parameter " + i + " id ", "http://example.org/p_int" + i, parameter.getId());
             DataTypeConverter<?> typeConverter = parameter.getTypeConverter();
-            assertEquals("Wrong type converter class", Integer.class, typeConverter.getTypeClasses().get(0));
+            assertTrue("Wrong type converter class", typeConverter.isSubTypeOf(Integer.class));
             assertTrue("Required should be true for parameter " + i , parameter.isRequired());
         }
 
@@ -65,7 +64,7 @@ public class FnOFunctionProviderTest {
         assertEquals("Wrong return parameter name ", "integer output", returnParameter.getName());
         assertEquals("Wrong return parameter id ", "http://example.org/o_int", returnParameter.getId());
         DataTypeConverter<?> typeConverter = returnParameter.getTypeConverter();
-        assertEquals("Wrong type converter class", Integer.class, typeConverter.getTypeClasses().get(0));
+        assertTrue("Wrong type converter class", typeConverter.isSuperTypeOf(Integer.class));
         assertTrue("Required should be true for return parameter", returnParameter.isRequired());
 
         // check mapping

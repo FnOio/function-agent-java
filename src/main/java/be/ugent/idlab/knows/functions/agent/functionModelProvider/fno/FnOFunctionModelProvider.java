@@ -35,7 +35,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * If parsing fails, no functions will be returned by {@link FunctionModelProvider#getFunctions()}.
      * @param fnoDocPath    A document in RDF describing functions using the Function Ontology (FnO).
      */
-    public FnOFunctionModelProvider(final String fnoDocPath) {
+    public FnOFunctionModelProvider(final String fnoDocPath) throws FnOException {
         parse(fnoDocPath);
     }
 
@@ -51,7 +51,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * Parse all functions found in an FnO document. If something goes wrong, no functions are kept.
      * @param fnoDocPath    The Function Ontology document containing function descriptions.
      */
-    private void parse(final String fnoDocPath) {
+    private void parse(final String fnoDocPath) throws FnOException {
         // TODO: fnoDocPath can also be a URI
         logger.info("Loading function descriptions from {}", fnoDocPath);
         try {
@@ -59,8 +59,8 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
             parseFunctionMappings();
             parseFunctions();
             mapFunctionMappingsToFunctions();
-        } catch (Throwable rnf) {
-            logger.error("Parsing function descriptions from {} failed.", fnoDocPath, rnf);
+        //} catch (Throwable rnf) {
+          //  logger.error("Parsing function descriptions from {} failed.", fnoDocPath, rnf);
         } finally {
             // free up some resources
             functionDescriptionTriples.close();

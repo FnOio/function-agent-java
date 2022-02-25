@@ -1,15 +1,19 @@
 package be.ugent.idlab.knows.functions.agent.dataType;
 
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * A implementation of DataTypeConverter converts any object holding some value to an instance of type T.
+ *
+ * A subclass of DataTypeConverter converts any object holding some value to an instance of type T.
  *
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
  *
  * @author Gerald Haesendonck
  */
-public interface DataTypeConverter<T> {
+public abstract class DataTypeConverter<T> {
+    private final Class<T> typeClass;
 
     /**
      * Converts a given value object to a value of type T.
@@ -18,13 +22,84 @@ public interface DataTypeConverter<T> {
      * @param value The value that needs to be converted to a value of data type T.
      * @return      An object of type T representing the given value.
      */
-    T convert(final Object value);
+    public abstract T convert(final Object value) throws DataTypeConverterException;
 
-    /**
-     * Get compatible type classes to T, i.e. types that are valid for the returned object when invoking {@link DataTypeConverter#convert(Object)}
-     * E.g., when <code>T</code> is <code>Integer</code>, this method might return a list (Integer, int) since <code>int</code> is compatible
-     * with <code>Integer</code>.
-     * @return  A list of compatible type classes.
-     */
-    List<Class<?>> getTypeClasses();
+    protected DataTypeConverter(final Class<T> typeClass) {
+        this.typeClass = typeClass;
+    }
+
+    public boolean isSubTypeOf(final Class<?> clazz) {
+        Set<Class<?>> superclasses = getSuperTypesOf(typeClass);
+        return superclasses.contains(clazz);
+    }
+
+    public boolean isSuperTypeOf(final Class<?> clazz) {
+        Set<Class<?>> superclasses = getSuperTypesOf(clazz);
+        return superclasses.contains(typeClass);
+    }
+
+    private static Set<Class<?>> getSuperTypesOf(final Class<?> clazz) {
+
+        if (clazz == null) {
+            return Collections.emptySet();
+        }
+
+        final Set<Class<?>> superTypes = new HashSet<>(2);
+
+        // add the given class
+        superTypes.add(clazz);
+
+        // convert Numbers to their primitive counterpart and vice versa
+        switch (clazz.getSimpleName()) {
+            case "Short":
+                superTypes.add(short.class);
+                break;
+            case "short":
+                superTypes.add(Short.class);
+                break;
+            case "Integer":
+                superTypes.add(int.class);
+                break;
+            case "int":
+                superTypes.add(Integer.class);
+                break;
+            case "Long":
+                superTypes.add(long.class);
+                break;
+            case "long":
+                superTypes.add(Long.class);
+                break;
+            case "Float":
+                superTypes.add(float.class);
+                break;
+            case "float":
+                superTypes.add(Float.class);
+                break;
+            case "Double":
+                superTypes.add(double.class);
+                break;
+            case "double":
+                superTypes.add(Double.class);
+                break;
+            case "Byte":
+                superTypes.add(byte.class);
+                break;
+            case "byte":
+                superTypes.add(Byte.class);
+        }
+
+        // add superclass if any
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass != null) {
+            superTypes.addAll(getSuperTypesOf(superclass));
+        }
+
+        // add interfaces being implemented if any
+        Class<?>[] interfaces = clazz.getInterfaces();
+        for (Class<?> anInterface : interfaces) {
+            superTypes.addAll(getSuperTypesOf(anInterface));
+        }
+
+        return superTypes;
+    }
 }

@@ -132,18 +132,22 @@ public class Instantiator {
                 Class<?>[] methodParameterTypes = declaredMethod.getParameterTypes();
                 for (int i = 0; i < methodParameterTypes.length; i++) {
                     Class<?> methodParameterType = methodParameterTypes[i];
-                    List<Class<?>> expectedParameterTypes = expectedParameters.get(i).getTypeConverter().getTypeClasses();
-                    if (!expectedParameterTypes.contains(methodParameterType)) {
+                    if (!expectedParameters.get(i).getTypeConverter().isSubTypeOf(methodParameterType)) {
                         qualifies = false;
                         break;
                     }
+
+                    /*List<Class<?>> expectedParameterTypes = expectedParameters.get(i).getTypeConverter().getTypeClasses();
+                    if (!expectedParameterTypes.contains(methodParameterType)) {
+                        qualifies = false;
+                        break;
+                    }*/
                 }
             }
             if (qualifies) {
                 logger.debug("Found method by name and expected arguments. Checking return type...");
                 Class<?> methodReturnType = declaredMethod.getReturnType();
-                List<Class<?>> expectedParameterTypes = expectedReturnParameter.getTypeConverter().getTypeClasses();
-                if (expectedParameterTypes.contains(methodReturnType)) {
+                if (expectedReturnParameter.getTypeConverter().isSuperTypeOf(methodReturnType)) {
                     logger.debug("Found method!");
                     return declaredMethod;
                 }

@@ -1,13 +1,13 @@
 package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 public class AgentTest {
 
     @Test
-    public void testEverythingGoesWell() throws InvocationTargetException, InstantiationException, IllegalAccessException {
+    public void testEverythingGoesWell() throws Exception {
 
         // first initialize a functionModelProvider
         FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
@@ -36,12 +36,19 @@ public class AgentTest {
     }
 
     @Test
-    public void testWithFactory() throws InvocationTargetException, InstantiationException, IllegalAccessException {
+    public void testWithFactory() throws Exception {
         Agent agent = AgentFactory.createFromFnO("src/test/resources/internalTestFunctions.ttl");
         execute(agent);
     }
 
-    private void execute(final Agent agent) throws InvocationTargetException, InstantiationException, IllegalAccessException {
+    @Ignore
+    public void testGrelJarOnClassPath() throws FnOException {
+       Agent agent = AgentFactory.createFromFnO("src/test/resources/functions_grel.ttl");
+        System.out.println();
+       // TODO actual test
+    }
+
+    private void execute(final Agent agent) throws Exception {
         // prepare the parameters for the function
         Map<String, Object> parameterId2Value = new HashMap<>();
         parameterId2Value.put("http://example.org/p_int1", "5");
