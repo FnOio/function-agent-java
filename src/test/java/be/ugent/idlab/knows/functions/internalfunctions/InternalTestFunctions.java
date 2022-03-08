@@ -15,7 +15,7 @@ public class InternalTestFunctions {
      * @param b my lucky number
      * @return  our lucky number (a + b)
      */
-    public static int sum(int a, int b) {
+    public static long sum(long a, long b) {
         return a + b;
     }
 }

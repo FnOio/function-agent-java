@@ -1,6 +1,7 @@
 package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.*;
 import be.ugent.idlab.knows.functions.agent.model.*;
@@ -26,6 +27,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     private final Model functionDescriptionTriples = ModelFactory.createDefaultModel();
     private final Map<String, Function> functionId2Functions = new HashMap<>();
     private final Map<String, FunctionMapping> functionId2functionMappings = new HashMap<>();
+    private final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
 
     // some properties used throughout the parsing process
     private final Property typeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
@@ -287,7 +289,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         // This is actually not used at the moment and supposed to be true.
         ResourceFactory.createProperty(FNO + "required");
         boolean isRequired = getLiteralBoolean(parameterResource, FNO + "required").orElse(true);
-        final DataTypeConverter<?> typeConverter = FnODataTypeConverterProvider.getDataTypeConverter(typeUri);
+        final DataTypeConverter<?> typeConverter = dataTypeConverterProvider.getDataTypeConverter(typeUri);
 
         return new Parameter(name, predicateUri, typeConverter, isRequired);
     }

@@ -1,6 +1,5 @@
 package be.ugent.idlab.knows.functions.agent.dataType;
 
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnODataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.UnsupportedDataTypeException;
 import org.junit.Test;
 
@@ -18,10 +17,11 @@ import static org.junit.Assert.assertTrue;
  * @author Gerald Haesendonck
  */
 public class DataTypeConverterTest {
+    private final DataTypeConverterProvider converterProvider = new DataTypeConverterProvider();
 
     @Test
     public void testRDFListConverterFromList() throws UnsupportedDataTypeException, DataTypeConverterException {
-        DataTypeConverter<?> listConverter = FnODataTypeConverterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
+        DataTypeConverter<?> listConverter = converterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
         List<String> testList = List.of("One", "Two", "Three");
         Object result = listConverter.convert(testList);
         assertEquals("Lists are not the same", testList, result);
@@ -29,7 +29,7 @@ public class DataTypeConverterTest {
 
     @Test
     public void testRDFListConverterFromArray() throws UnsupportedDataTypeException, DataTypeConverterException {
-        DataTypeConverter<?> listConverter = FnODataTypeConverterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
+        DataTypeConverter<?> listConverter = converterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
         String[] testArray = new String[]{"One", "Two", "Three"};
         Object result = listConverter.convert(testArray);
         List<String> testList = List.of("One", "Two", "Three");

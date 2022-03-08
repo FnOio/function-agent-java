@@ -56,6 +56,6 @@ public class AgentTest {
 
         // execute the function
         Object result = agent.execute("http://example.org/sum", parameterId2Value);
-        assertEquals("5 + 1 should be 6", 6, result);
+        assertEquals("5 + 1 should be 6", 6L, result);
     }
 }

@@ -54,7 +54,7 @@ public class FnOFunctionProviderTest {
             assertEquals("Wrong parameter " + i + " name ", "integer " + i, parameter.getName());
             assertEquals("Wrong parameter " + i + " id ", "http://example.org/p_int" + i, parameter.getId());
             DataTypeConverter<?> typeConverter = parameter.getTypeConverter();
-            assertTrue("Wrong type converter class", typeConverter.isSubTypeOf(Integer.class));
+            assertTrue("Wrong type converter class", typeConverter.isSubTypeOf(Long.class));
             assertTrue("Required should be true for parameter " + i , parameter.isRequired());
         }
 
@@ -64,7 +64,7 @@ public class FnOFunctionProviderTest {
         assertEquals("Wrong return parameter name ", "integer output", returnParameter.getName());
         assertEquals("Wrong return parameter id ", "http://example.org/o_int", returnParameter.getId());
         DataTypeConverter<?> typeConverter = returnParameter.getTypeConverter();
-        assertTrue("Wrong type converter class", typeConverter.isSuperTypeOf(Integer.class));
+        assertTrue("Wrong type converter class", typeConverter.isSuperTypeOf(Long.class));
         assertTrue("Required should be true for return parameter", returnParameter.isRequired());
 
         // check mapping

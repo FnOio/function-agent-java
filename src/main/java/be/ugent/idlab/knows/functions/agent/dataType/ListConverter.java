@@ -8,8 +8,8 @@ import java.util.List;
  *
  * @author Gerald Haesendonck
  */
-public class RDFListConverter extends DataTypeConverter<List> {
-    public RDFListConverter() {
+public class ListConverter extends DataTypeConverter<List> {
+    public ListConverter() {
         super(List.class);
     }
 
