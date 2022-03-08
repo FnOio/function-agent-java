@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.io.StringWriter;
 import java.nio.Buffer;
 import java.nio.CharBuffer;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -22,7 +23,7 @@ public class DataTypeConverterTest {
     @Test
     public void testRDFListConverterFromList() throws UnsupportedDataTypeException, DataTypeConverterException {
         DataTypeConverter<?> listConverter = converterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
-        List<String> testList = List.of("One", "Two", "Three");
+        List<String> testList = Arrays.asList("One", "Two", "Three");
         Object result = listConverter.convert(testList);
         assertEquals("Lists are not the same", testList, result);
     }
@@ -32,23 +33,23 @@ public class DataTypeConverterTest {
         DataTypeConverter<?> listConverter = converterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
         String[] testArray = new String[]{"One", "Two", "Three"};
         Object result = listConverter.convert(testArray);
-        List<String> testList = List.of("One", "Two", "Three");
+        List<String> testList = Arrays.asList("One", "Two", "Three");
         assertEquals("Arrays are not the same", testList, result);
     }
 
     @Test
     public void testAbstractDataTypeConverter() {
-        DataTypeConverter<CharBuffer> at = new DataTypeConverter<>(CharBuffer.class) {
+        DataTypeConverter<CharBuffer> at = new DataTypeConverter<CharBuffer>(CharBuffer.class) {
             @Override
-            public CharBuffer convert(Object value) throws DataTypeConverterException {
+            public CharBuffer convert(Object value) {
                 return null;
             }
         };
         assertTrue("Buffer should be a superclass of CharBuffer", at.isSubTypeOf(Buffer.class));
 
-        DataTypeConverter<Appendable> ad = new DataTypeConverter<>(Appendable.class) {
+        DataTypeConverter<Appendable> ad = new DataTypeConverter<Appendable>(Appendable.class) {
             @Override
-            public Appendable convert(Object value) throws DataTypeConverterException {
+            public Appendable convert(Object value) {
                 return null;
             }
         };
