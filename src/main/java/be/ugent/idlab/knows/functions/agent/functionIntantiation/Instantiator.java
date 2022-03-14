@@ -126,9 +126,10 @@ public class Instantiator {
         logger.debug("Trying to find method with name {}", methodName);
         Method[] declaredMethods = clazz.getDeclaredMethods();
         for (Method declaredMethod : declaredMethods) {
-            boolean qualifies = true;
+            boolean qualifies = false;
             if (declaredMethod.getName().equals(methodName) && declaredMethod.getParameterCount() == expectedParameters.size()) {
                 // possible candidate
+                qualifies = true;
                 Class<?>[] methodParameterTypes = declaredMethod.getParameterTypes();
                 for (int i = 0; i < methodParameterTypes.length; i++) {
                     Class<?> methodParameterType = methodParameterTypes[i];

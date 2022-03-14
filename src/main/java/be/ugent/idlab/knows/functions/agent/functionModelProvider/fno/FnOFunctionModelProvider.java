@@ -5,11 +5,13 @@ import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.*;
 import be.ugent.idlab.knows.functions.agent.model.*;
+import be.ugent.idlab.knows.misc.FileFinder;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URL;
 import java.util.*;
 
 import static be.ugent.idlab.knows.functions.agent.model.NAMESPACES.*;
@@ -33,12 +35,13 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     private final Property typeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
 
     /**
-     * Creates an instance of {@link FnOFunctionModelProvider}, holding all functions found in the given FnO document.
+     * Creates an instance of {@link FnOFunctionModelProvider}, holding all functions found in the given FnO documents.
      * If parsing fails, no functions will be returned by {@link FunctionModelProvider#getFunctions()}.
-     * @param fnoDocPath    A document in RDF describing functions using the Function Ontology (FnO).
+     *
+     * @param fnoDocPaths    One or more documents in RDF describing functions using the Function Ontology (FnO).
      */
-    public FnOFunctionModelProvider(final String fnoDocPath) throws FnOException {
-        parse(fnoDocPath);
+    public FnOFunctionModelProvider(final String... fnoDocPaths) throws FnOException {
+        parse(fnoDocPaths);
     }
 
     /**
@@ -51,24 +54,34 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
 
     /**
      * Parse all functions found in an FnO document. If something goes wrong, no functions are kept.
-     * @param fnoDocPath    The Function Ontology document containing function descriptions.
+     * @param fnoDocPaths    The Function Ontology document containing function descriptions.
      */
-    private void parse(final String fnoDocPath) throws FnOException {
-        // TODO: fnoDocPath can also be a URI
-        logger.info("Loading function descriptions from {}", fnoDocPath);
+    private void parse(final String... fnoDocPaths) throws FnOException {
+
+        logger.info("Loading function descriptions from {}", fnoDocPaths);
         try {
-            RDFDataMgr.read(functionDescriptionTriples, fnoDocPath);
+            readRDFModel(fnoDocPaths);
             parseFunctionMappings();
             parseFunctions();
             mapFunctionMappingsToFunctions();
-        //} catch (Throwable rnf) {
-          //  logger.error("Parsing function descriptions from {} failed.", fnoDocPath, rnf);
         } finally {
             // free up some resources
             functionDescriptionTriples.close();
             functionId2functionMappings.clear();
         }
 
+    }
+
+    private void readRDFModel(final String... fnoDocPaths) throws FnODocNotFoundException {
+        for (String fnoDocPath : fnoDocPaths) {
+            logger.debug("Reading RDF model from {}", fnoDocPath);
+            URL fnoDocURL = FileFinder.findFile(fnoDocPath);
+            if (fnoDocURL != null) {
+                RDFDataMgr.read(functionDescriptionTriples, fnoDocPath);
+            } else {
+                throw new FnODocNotFoundException("Could not find FnO document at '" + fnoDocPath + "'");
+            }
+        }
     }
 
     /**
@@ -178,7 +191,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
                 .orElseThrow(() -> new ImplementationDescriptionNotFoundException("No implementation type found for implementation resource " + implementationUri));
 
         // check the implementation type. At this moment only java classes are supported.
-        final String supportedImplementationType = FNOI + "javaClass";
+        final String supportedImplementationType = FNOI + "JavaClass";
         if (!implementationType.equals(supportedImplementationType)) {
             throw new UnsupportedImplementationTypeException("Only implementation type '" + supportedImplementationType + "' supported. Found '" + implementationType + "'");
         }

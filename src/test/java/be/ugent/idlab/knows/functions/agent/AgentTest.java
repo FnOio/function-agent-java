@@ -3,15 +3,16 @@ package be.ugent.idlab.knows.functions.agent;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -41,11 +42,16 @@ public class AgentTest {
         execute(agent);
     }
 
-    @Ignore
-    public void testGrelJarOnClassPath() throws FnOException {
-       Agent agent = AgentFactory.createFromFnO("src/test/resources/functions_grel.ttl");
-        System.out.println();
-       // TODO actual test
+    @Test
+    public void testGrelJarOnClassPath() throws Exception {
+       Agent agent = AgentFactory.createFromFnO("src/test/resources/functions_grel.ttl", "grel_java_mapping.ttl");
+       executeGrel(agent);
+    }
+
+    @Test
+    public void testGrelJarOnClassPathRemoteFnODoc() throws Exception {
+        Agent agent = AgentFactory.createFromFnO("https://users.ugent.be/~bjdmeest/function/grel.ttl", "grel_java_mapping.ttl");
+        executeGrel(agent);
     }
 
     private void execute(final Agent agent) throws Exception {
@@ -57,5 +63,16 @@ public class AgentTest {
         // execute the function
         Object result = agent.execute("http://example.org/sum", parameterId2Value);
         assertEquals("5 + 1 should be 6", 6L, result);
+    }
+
+    private void executeGrel(final Agent agent) throws Exception {
+        List<Boolean> booleanParameters = Arrays.asList(false, true);
+        Map<String, Object> parameterId2Value = new HashMap<>();
+        parameterId2Value.put("http://users.ugent.be/~bjdmeest/function/grel.ttl#param_rep_b", booleanParameters);
+
+        // execute the function
+        Object result = agent.execute("http://users.ugent.be/~bjdmeest/function/grel.ttl#boolean_or", parameterId2Value);
+        assertTrue("false | true should be true", (Boolean)result);
+
     }
 }

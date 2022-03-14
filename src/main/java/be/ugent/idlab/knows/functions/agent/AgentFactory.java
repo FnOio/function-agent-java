@@ -6,7 +6,6 @@ import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctio
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -18,17 +17,14 @@ public class AgentFactory {
 
     /**
      * Creates an Agent executing functions described in one or more FnO documents.
-     * @param pathToFnoDoc  One or more FnO documents describing functions.
+     * @param pathToFnoDocs  One or more FnO documents describing functions.
      * @return              An agent capable of executing the functions as described in the FnO document(s).
      */
-    public static Agent createFromFnO(final String... pathToFnoDoc) throws FnOException {
+    public static Agent createFromFnO(final String... pathToFnoDocs) throws FnOException {
 
         // parse all FnO documents
-        final Map<String, Function> functionId2Function = new HashMap<>();
-        for (String fnoDoc : pathToFnoDoc) {
-            FunctionModelProvider functionModelProvider = new FnOFunctionModelProvider(fnoDoc);
-            functionId2Function.putAll(functionModelProvider.getFunctions());
-        }
+        FunctionModelProvider functionModelProvider = new FnOFunctionModelProvider(pathToFnoDocs);
+        final Map<String, Function> functionId2Function = functionModelProvider.getFunctions();
 
         // create an instantiator for these functions
         Instantiator instantiator = new Instantiator(functionId2Function);
