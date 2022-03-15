@@ -8,7 +8,7 @@ package be.ugent.idlab.knows.functions.agent.dataType;
 public class LongConverter extends DataTypeConverter<Long> {
 
     protected LongConverter() {
-        super(Long.class);
+        super(Long.class, TypeCategory.PRIMITIVE);
     }
 
     @Override

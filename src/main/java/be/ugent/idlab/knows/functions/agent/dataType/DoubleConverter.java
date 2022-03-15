@@ -7,7 +7,7 @@ package be.ugent.idlab.knows.functions.agent.dataType;
  */
 public class DoubleConverter extends DataTypeConverter<Double> {
     public DoubleConverter() {
-        super(Double.class);
+        super(Double.class, TypeCategory.PRIMITIVE);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package be.ugent.idlab.knows.functions.agent.dataType;
 
+import lombok.Getter;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +15,17 @@ import java.util.Set;
  * @author Gerald Haesendonck
  */
 public abstract class DataTypeConverter<T> {
+
+    public enum TypeCategory {
+        PRIMITIVE,
+        COLLECTION,
+        OBJECT
+    }
+
     private final Class<T> typeClass;
+
+    @Getter
+    private final TypeCategory typeCategory;
 
     /**
      * Converts a given value object to a value of type T.
@@ -24,8 +36,9 @@ public abstract class DataTypeConverter<T> {
      */
     public abstract T convert(final Object value) throws DataTypeConverterException;
 
-    protected DataTypeConverter(final Class<T> typeClass) {
+    protected DataTypeConverter(final Class<T> typeClass, TypeCategory typeCategory) {
         this.typeClass = typeClass;
+        this.typeCategory = typeCategory;
     }
 
     public boolean isSubTypeOf(final Class<?> clazz) {

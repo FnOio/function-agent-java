@@ -7,7 +7,7 @@ package be.ugent.idlab.knows.functions.agent.dataType;
  */
 public class IntegerConverter extends DataTypeConverter<Integer> {
     public IntegerConverter() {
-        super(Integer.class);
+        super(Integer.class, TypeCategory.PRIMITIVE);
     }
 
     @Override

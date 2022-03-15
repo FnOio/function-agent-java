@@ -7,7 +7,7 @@ package be.ugent.idlab.knows.functions.agent.dataType;
  */
 public class XSBooleanConverter extends DataTypeConverter<Boolean> {
     public XSBooleanConverter() {
-        super(Boolean.class);
+        super(Boolean.class, TypeCategory.PRIMITIVE);
     }
 
     @Override

@@ -13,7 +13,7 @@ public class DefaultDataTypeConverter extends DataTypeConverter<Object> {
     private final Logger logger = LoggerFactory.getLogger(DefaultDataTypeConverter.class);
 
     protected DefaultDataTypeConverter() {
-        super(Object.class);
+        super(Object.class, TypeCategory.OBJECT);
     }
 
     @Override

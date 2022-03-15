@@ -39,7 +39,7 @@ public class DataTypeConverterTest {
 
     @Test
     public void testAbstractDataTypeConverter() {
-        DataTypeConverter<CharBuffer> at = new DataTypeConverter<CharBuffer>(CharBuffer.class) {
+        DataTypeConverter<CharBuffer> at = new DataTypeConverter<CharBuffer>(CharBuffer.class, DataTypeConverter.TypeCategory.PRIMITIVE) {
             @Override
             public CharBuffer convert(Object value) {
                 return null;
@@ -47,7 +47,7 @@ public class DataTypeConverterTest {
         };
         assertTrue("Buffer should be a superclass of CharBuffer", at.isSubTypeOf(Buffer.class));
 
-        DataTypeConverter<Appendable> ad = new DataTypeConverter<Appendable>(Appendable.class) {
+        DataTypeConverter<Appendable> ad = new DataTypeConverter<Appendable>(Appendable.class, DataTypeConverter.TypeCategory.PRIMITIVE) {
             @Override
             public Appendable convert(Object value) {
                 return null;

@@ -1,18 +1,17 @@
 package be.ugent.idlab.knows.functions.agent;
 
-import java.util.Map;
-
 /**
  * <p>Copyright 2021 IDLab (Ghent University - imec)</p>
  *
  * @author Gerald Haesendonck
  */
 public interface Agent {
-
     /**
-     * Executes the function with a given id and given parameters.
+     * Executes the function with a given id and given arguments.
      * @param functionId    The unique identifier of a function.
-     * @param parameterId2Value  A map parameterId -> value. (For FnO, the parameter id is the 'predicate' of the parameter.)
+     * @param arguments     The arguments of the function.
+     * @return              The result of executing the function.
+     * @throws Exception    Something goes wrong looking up the function or executing it.
      */
-    Object execute(final String functionId, final Map<String, Object> parameterId2Value) throws Exception;
+    Object execute(final String functionId, final Arguments arguments) throws Exception;
 }

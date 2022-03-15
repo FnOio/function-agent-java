@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class ListConverter extends DataTypeConverter<List> {
     public ListConverter() {
-        super(List.class);
+        super(List.class, TypeCategory.COLLECTION);
     }
 
     @Override

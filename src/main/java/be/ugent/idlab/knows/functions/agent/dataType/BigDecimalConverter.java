@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 public class BigDecimalConverter extends DataTypeConverter<BigDecimal> {
 
     public BigDecimalConverter() {
-        super(BigDecimal.class);
+        super(BigDecimal.class, TypeCategory.PRIMITIVE);
     }
 
     @Override

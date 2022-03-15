@@ -12,6 +12,7 @@
     <url>https://fno.io/</url>
 
     <properties>
+        <commons.version>4.4</commons.version>
         <jena.version>3.17.0</jena.version>
         <slf4j.version>1.7.36</slf4j.version>
         <junit.version>4.13.2</junit.version>
@@ -41,12 +42,6 @@
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
-        <!-- provide a simple logging implementation for testing -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
 
         <!-- internal RDF handling -->
         <dependency>
@@ -63,6 +58,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${commons.version}</version>
+        </dependency>
+
         <!-- Unit test framework -->
         <dependency>
             <groupId>junit</groupId>
@@ -74,6 +75,14 @@
         <!---->
         <!-- TEST DEPENDENCIES-->
         <!---->
+
+        <!-- provide a simple logging implementation for testing -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Dependency on Grel functions java, just for testing -->
         <dependency>

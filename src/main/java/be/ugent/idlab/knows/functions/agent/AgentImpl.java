@@ -1,14 +1,13 @@
 package be.ugent.idlab.knows.functions.agent;
 
-import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterException;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -27,22 +26,29 @@ public class AgentImpl implements Agent {
     }
 
     @Override
-    public Object execute(final String functionId, final Map<String, Object> parameterId2Value) throws InstantiationException, InvocationTargetException, IllegalAccessException, DataTypeConverterException {
+    public Object execute(String functionId, Arguments arguments) throws Exception {
 
         // find a method with the given name
         final Method method = instantiator.getMethod(functionId);
 
-        // "fill in" the argument parameters
-        final List<Object> valuesInOrder = new ArrayList<>(parameterId2Value.size());
+        // find the corresponding function
         final Function function = functionId2Function.get(functionId);
-        for (Parameter parameter : function.getArgumentParameters()) {
-            Object untypedValue = parameterId2Value.get(parameter.getId());
-            Object convertedValue = parameter.getTypeConverter().convert(untypedValue);
-            valuesInOrder.add(convertedValue);
 
+        // "fill in" the argument parameters
+        final List<Object> valuesInOrder = new ArrayList<>(arguments.size());
+        for (Parameter argumentParameter : function.getArgumentParameters()) {
+            Collection<Object> valueCollection = arguments.get(argumentParameter.getId());
+            if (argumentParameter.getTypeConverter().getTypeCategory().equals(DataTypeConverter.TypeCategory.COLLECTION)) {
+                Object convertedValue = argumentParameter.getTypeConverter().convert(valueCollection);
+                valuesInOrder.add(convertedValue);
+            } else {
+                Object convertedValue = argumentParameter.getTypeConverter().convert(valueCollection.stream().findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Value expected for parameter '" + argumentParameter.getId() + "' in function '" + functionId + "'.")));
+                valuesInOrder.add(convertedValue);
+            }
         }
+
         // TODO: check if every parameter is used? OR pass null value?
-        // for now every expected parameter is expected to have a value.
 
         // now execute the method
         return method.invoke(null, valuesInOrder.toArray());
