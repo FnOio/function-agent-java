@@ -60,10 +60,6 @@ public class Instantiator {
             final String className = mapping.getImplementation().getClassName();
             Class<?> clazz = getClass(className, location);
             logger.debug("Found class {}", clazz);
-            Method[] methods = clazz.getDeclaredMethods();
-            for (Method method : methods) {
-                System.out.println(method.getName());
-            }
 
             // now get the method
             final String methodName = mapping.getMethodMapping().getMethodName();
@@ -137,12 +133,6 @@ public class Instantiator {
                         qualifies = false;
                         break;
                     }
-
-                    /*List<Class<?>> expectedParameterTypes = expectedParameters.get(i).getTypeConverter().getTypeClasses();
-                    if (!expectedParameterTypes.contains(methodParameterType)) {
-                        qualifies = false;
-                        break;
-                    }*/
                 }
             }
             if (qualifies) {
