@@ -99,6 +99,12 @@ public abstract class DataTypeConverter<T> {
                 break;
             case "byte":
                 superTypes.add(Byte.class);
+                break;
+            case "Boolean":
+                superTypes.add(boolean.class);
+                break;
+            case "boolean":
+                superTypes.add(Boolean.class);
         }
 
         // add superclass if any

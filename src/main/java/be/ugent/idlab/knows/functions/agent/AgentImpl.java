@@ -4,6 +4,8 @@ import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import java.util.Map;
  * @author Gerald Haesendonck
  */
 public class AgentImpl implements Agent {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final Map<String, Function> functionId2Function;
     private final Instantiator instantiator;
 
@@ -27,6 +30,7 @@ public class AgentImpl implements Agent {
 
     @Override
     public Object execute(String functionId, Arguments arguments) throws Exception {
+        logger.debug("Executing function '{}'", functionId);
 
         // find a method with the given name
         final Method method = instantiator.getMethod(functionId);
@@ -42,9 +46,14 @@ public class AgentImpl implements Agent {
                 Object convertedValue = argumentParameter.getTypeConverter().convert(valueCollection);
                 valuesInOrder.add(convertedValue);
             } else {
-                Object convertedValue = argumentParameter.getTypeConverter().convert(valueCollection.stream().findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("Value expected for parameter '" + argumentParameter.getId() + "' in function '" + functionId + "'.")));
-                valuesInOrder.add(convertedValue);
+                if (valueCollection.isEmpty()) {
+                    logger.debug("No value found for parameter '{}' in function {}. Considering it to be 'null'.", argumentParameter.getId(), functionId);
+                    valuesInOrder.add(null);
+                } else {
+                    Object convertedValue = argumentParameter.getTypeConverter().convert(valueCollection.stream().findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("Value expected for parameter '" + argumentParameter.getId() + "' in function '" + functionId + "'.")));
+                    valuesInOrder.add(convertedValue);
+                }
             }
         }
 
