@@ -4,8 +4,16 @@ import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.model.*;
+import be.ugent.idlab.knows.misc.FileFinder;
+import org.apache.jena.ext.com.google.common.io.CharSource;
+import org.apache.jena.ext.com.google.common.io.Files;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 
@@ -35,6 +43,18 @@ public class FnOFunctionProviderTest {
         assertThrows("Constructing an FnOFunctionModelProvider from an unexisting file should fail.", Throwable.class, () -> {
             new FnOFunctionModelProvider("src/test/resources/doesnotexist.ttl");
         });
+    }
+
+    @Test
+    public void testFnoDocumentAsDirectInput() throws URISyntaxException, IOException, FnOException {
+
+        // read internalTestFunctions.ttl as String
+        URL itUrl = FileFinder.findFile("internalTestFunctions.ttl");
+        CharSource fnoSource = Files.asCharSource(new File(itUrl.toURI()), StandardCharsets.UTF_8);
+
+        // pass it to the function model provider
+        FnOFunctionModelProvider functionProvider = new FnOFunctionModelProvider(fnoSource.read());
+        checkSuccessFunctions(functionProvider.getFunctions().values());
     }
 
     private void checkSuccessFunctions(final Collection<Function> functions) {

@@ -17,7 +17,8 @@ public class AgentFactory {
 
     /**
      * Creates an Agent executing functions described in one or more FnO documents.
-     * @param pathToFnoDocs  One or more FnO documents describing functions.
+     * @param pathToFnoDocs  One or more FnO documents describing functions. One fnoDocPath can be a path to a
+     *                       file, a URL to a file or a String containing FnO triples in Turtle format.
      * @return              An agent capable of executing the functions as described in the FnO document(s).
      */
     public static Agent createFromFnO(final String... pathToFnoDocs) throws FnOException {

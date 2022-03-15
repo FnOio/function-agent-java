@@ -7,10 +7,12 @@ import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.
 import be.ugent.idlab.knows.functions.agent.model.*;
 import be.ugent.idlab.knows.misc.FileFinder;
 import org.apache.jena.rdf.model.*;
+import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.StringReader;
 import java.net.URL;
 import java.util.*;
 
@@ -39,6 +41,8 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * If parsing fails, no functions will be returned by {@link FunctionModelProvider#getFunctions()}.
      *
      * @param fnoDocPaths    One or more documents in RDF describing functions using the Function Ontology (FnO).
+     *                       One fnoDocPath can be a path to a
+     *                       file, a URL to a file or a String containing FnO triples in Turtle format.
      */
     public FnOFunctionModelProvider(final String... fnoDocPaths) throws FnOException {
         parse(fnoDocPaths);
@@ -53,12 +57,13 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     }
 
     /**
-     * Parse all functions found in an FnO document. If something goes wrong, no functions are kept.
-     * @param fnoDocPaths    The Function Ontology document containing function descriptions.
+     * Parse all functions found in FnO documents. If something goes wrong, no functions are kept.
+     * @param fnoDocPaths    The Function Ontology documents containing function descriptions. One fnoDocPath can be a path to a
+     *                       file, a URL to a file or a String containing FnO triples in Turtle format.
      */
     private void parse(final String... fnoDocPaths) throws FnOException {
 
-        logger.info("Loading function descriptions from {}", fnoDocPaths);
+        logger.info("Loading function descriptions from {}", Arrays.toString(fnoDocPaths));
         try {
             readRDFModel(fnoDocPaths);
             parseFunctionMappings();
@@ -79,7 +84,13 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
             if (fnoDocURL != null) {
                 RDFDataMgr.read(functionDescriptionTriples, fnoDocPath);
             } else {
-                throw new FnODocNotFoundException("Could not find FnO document at '" + fnoDocPath + "'");
+                logger.warn("Could not find document; trying to interpret it as direct Turlte input.");
+                try {
+                    // TODO: at the moment only Turtle is supported
+                    RDFDataMgr.read(functionDescriptionTriples, new StringReader(fnoDocPath), "", Lang.TURTLE);
+                } catch (Throwable t) {
+                    throw new FnODocNotFoundException("Could not process FnO document: " + t.getMessage());
+                }
             }
         }
     }
