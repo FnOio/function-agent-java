@@ -7,10 +7,14 @@ import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.Metho
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.agent.model.FunctionMapping;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
+import be.ugent.idlab.knows.misc.FileFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,8 +94,21 @@ public class Instantiator {
         try {
             return Class.forName(className);
         } catch (java.lang.ClassNotFoundException e) {
-            // TODO: something with the location!!
-            logger.debug("Class {} not found by current class loader.", className);
+            logger.debug("Class '{}' not found by current class loader. Checking location '{}'", className, location);
+            final URL locationUrl = FileFinder.findFile(location);
+            if (locationUrl.toString().endsWith(".jar")) {
+                logger.debug("Trying to load '{}' for JAR file '{}'", className, location);
+                try (URLClassLoader cl = URLClassLoader.newInstance(new URL[]{locationUrl})) {
+                    return Class.forName(className, true, cl);
+                } catch (IOException ex) {
+                    logger.warn("An error occurred while trying to load JAR file at '" + locationUrl + '"', e);
+                } catch (java.lang.ClassNotFoundException ex) {
+                    logger.warn("class '" + className + "' not found in JAR ar location '" + locationUrl + '"', e);
+                }
+            } else {
+                logger.warn("Only JAR files are supported as location file type at the moment...");
+            }
+
             throw new ClassNotFoundException("No class found for " + className);
         }
     }
