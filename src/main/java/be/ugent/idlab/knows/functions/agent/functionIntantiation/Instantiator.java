@@ -141,6 +141,9 @@ public class Instantiator {
                 if (expectedReturnParameter.getTypeConverter().isSuperTypeOf(methodReturnType)) {
                     logger.debug("Found method!");
                     return declaredMethod;
+                } else {
+                    logger.warn("Return type '{}' of method '{}' does not match expeted return type '{}' (class '{}')",
+                            methodReturnType.getName(), declaredMethod.getName(), expectedReturnParameter.getTypeConverter().getTypeClass(), clazz.getName());
                 }
             }
         }

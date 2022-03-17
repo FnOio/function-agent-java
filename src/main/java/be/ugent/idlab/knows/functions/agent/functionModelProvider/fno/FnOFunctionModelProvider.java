@@ -82,6 +82,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
             logger.debug("Reading RDF model from {}", fnoDocPath);
             URL fnoDocURL = FileFinder.findFile(fnoDocPath);
             if (fnoDocURL != null) {
+                logger.debug("'{}' resolved to '{}'", fnoDocPath, fnoDocURL);
                 RDFDataMgr.read(functionDescriptionTriples, fnoDocPath);
             } else {
                 logger.warn("Could not find document; trying to interpret it as direct Turlte input.");
@@ -298,7 +299,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
 
         // get the name of the parameter
         String name = getLiteralStr(parameterResource, FNO + "name")
-                .orElseThrow(() -> new ParameterNameDescriptionNotFoundException("No '" + FNO + "name' found for parameter" + uri));
+                .orElseThrow(() -> new ParameterNameDescriptionNotFoundException("No '" + FNO + "name' found for parameter '" + uri + "'"));
 
         // get the type of the parameter
         String typeUri = getObjectURI(parameterResource, FNO + "type")

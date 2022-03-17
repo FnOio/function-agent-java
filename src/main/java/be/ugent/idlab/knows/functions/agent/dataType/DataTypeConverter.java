@@ -22,6 +22,7 @@ public abstract class DataTypeConverter<T> {
         OBJECT
     }
 
+    @Getter
     private final Class<T> typeClass;
 
     @Getter

@@ -57,8 +57,6 @@ public class AgentImpl implements Agent {
             }
         }
 
-        // TODO: check if every parameter is used? OR pass null value?
-
         // now execute the method
         return method.invoke(null, valuesInOrder.toArray());
     }
