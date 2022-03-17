@@ -68,6 +68,20 @@ public class AgentTest {
         System.out.println();
     }
 
+    @Test
+    public void testAaabimWithImportsFromJar() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("aaabim_java_mapping.ttl");
+
+        final String aaabimPrefix = "http://users.ugent.be/~tdlva/function/aaabim.ttl#";
+        final Arguments arguments = new Arguments().add(aaabimPrefix + "p_geohash", "u14dhw2phg54");
+
+        // execute the function
+        Object result = agent.execute(aaabimPrefix + "geoHashToLatitude", arguments);
+        assertTrue(result instanceof Double);
+        assertEquals(3.7135869450867176d, result);
+        System.out.println();
+    }
+
     private void execute(final Agent agent) throws Exception {
         // prepare the parameters for the function
         Arguments arguments = new Arguments()

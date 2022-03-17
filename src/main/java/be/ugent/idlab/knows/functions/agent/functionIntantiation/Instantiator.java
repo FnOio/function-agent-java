@@ -18,6 +18,8 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 /**
  * An Instantiator tries to find an implementation (Java Method for now) for any given {@link Function}.
@@ -34,6 +36,9 @@ public class Instantiator {
 
     // a 'cache' of Methods associated with function ids.
     private final Map<String, Method> id2MethodMap = new HashMap<>();
+
+    // a 'cache' of loaded classes
+    private final Map<String, Class<?>> className2ClassMap = new HashMap<>();
 
     /**
      * Creates a new instance of an Initiator.
@@ -90,21 +95,34 @@ public class Instantiator {
      */
     private Class<?> getClass(final String className, final String location) throws ClassNotFoundException {
         logger.debug("Trying to find a Class for {}", className);
+        // check if the class is in the cache
+        if (className2ClassMap.containsKey(className)) {
+            return className2ClassMap.get(className);
+        }
+
         // check if class is already loaded by the current class loader
         try {
-            return Class.forName(className);
+            Class<?> cls = Class.forName(className);
+            className2ClassMap.put(className, cls);
+            return cls;
         } catch (java.lang.ClassNotFoundException e) {
             logger.debug("Class '{}' not found by current class loader. Checking location '{}'", className, location);
             final URL locationUrl = FileFinder.findFile(location);
             if (locationUrl.toString().endsWith(".jar")) {
                 logger.debug("Trying to load '{}' for JAR file '{}'", className, location);
-                try (URLClassLoader cl = URLClassLoader.newInstance(new URL[]{locationUrl})) {
-                    return Class.forName(className, true, cl);
+
+                // get all classes from JAR file. This is necessary to be sure to have imports as well.
+                try {
+                    loadClassesFromJAR(locationUrl);
+                    if (className2ClassMap.containsKey(className)) {
+                        return className2ClassMap.get(className);
+                    } else {
+                        logger.warn("No class '{}' found in JAR file '{}'", className, locationUrl);
+                    }
                 } catch (IOException ex) {
-                    logger.warn("An error occurred while trying to load JAR file at '" + locationUrl + '"', e);
-                } catch (java.lang.ClassNotFoundException ex) {
-                    logger.warn("class '" + className + "' not found in JAR ar location '" + locationUrl + '"', e);
+                    logger.warn("An error occurred trying to load classes of JAR file '{}'", locationUrl, ex);
                 }
+
             } else {
                 logger.warn("Only JAR files are supported as location file type at the moment...");
             }
@@ -165,6 +183,31 @@ public class Instantiator {
             }
         }
         throw new MethodNotFoundException("No suitable method '" + methodName + "' with matching parameter types found in class '" + clazz.getName() + "'.");
+    }
+
+    private void loadClassesFromJAR(final URL jarFileUrl) throws IOException {
+        // TODO add jarfile cache?
+        JarFile jarFile = new JarFile(jarFileUrl.getFile());
+        try (URLClassLoader cl = URLClassLoader.newInstance(new URL[]{jarFileUrl})) {
+            jarFile
+                    .stream()
+                    .map(ZipEntry::getName)
+                    .filter(name -> name.endsWith(".class") && !name.contains("$"))
+                    .map(name -> name.substring(0, name.lastIndexOf('.')).replaceAll("/", "."))
+                    .forEach(className -> {
+                        logger.debug("JAR file '{}': found class name '{}'", jarFileUrl, className);
+                        if (!className2ClassMap.containsKey(className)) {
+                            try {
+                                Class<?> cls = Class.forName(className, true, cl);
+                                className2ClassMap.put(className, cls);
+                            } catch (java.lang.ClassNotFoundException e) {
+                                logger.warn("Class '{}' in JAR file '{}'", className, jarFileUrl, e);
+                            }
+                        } else {
+                            logger.debug("Class '{}' already in cache.", className);
+                        }
+                    });
+        }
     }
     
 }
