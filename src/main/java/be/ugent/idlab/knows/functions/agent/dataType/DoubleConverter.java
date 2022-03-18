@@ -11,7 +11,7 @@ public class DoubleConverter extends DataTypeConverter<Double> {
     }
 
     @Override
-    public Double convert(Object value) throws DataTypeConverterException {
+    public Double convert(Object value) {
         if (value instanceof Double) {
             return (Double)value;
         } else {

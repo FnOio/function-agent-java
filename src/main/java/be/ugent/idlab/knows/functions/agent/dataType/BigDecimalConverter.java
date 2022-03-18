@@ -14,7 +14,7 @@ public class BigDecimalConverter extends DataTypeConverter<BigDecimal> {
     }
 
     @Override
-    public BigDecimal convert(Object value) throws DataTypeConverterException {
+    public BigDecimal convert(Object value) {
         if (value instanceof BigDecimal) {
             return (BigDecimal) value;
         } else {

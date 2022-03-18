@@ -12,7 +12,7 @@ public class LongConverter extends DataTypeConverter<Long> {
     }
 
     @Override
-    public Long convert(Object value) throws DataTypeConverterException {
+    public Long convert(Object value) {
         if (value instanceof Long) {
             return  (Long)value;
         } else {

@@ -21,6 +21,7 @@ public class ListConverter extends DataTypeConverter<List> {
         if (value instanceof Object[]) {
             return Arrays.asList((Object[])value);
         }
+        // TODO: if String, parse as JSON list
         throw new DataTypeConverterException("Cannot convert object of type " + value.getClass().getName() + " to a List");
     }
 }

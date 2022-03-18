@@ -39,10 +39,9 @@ public class FnOFunctionProviderTest {
     }
 
     @Test
-    public void testFnoDocNotFound() throws FnOException {
-        assertThrows("Constructing an FnOFunctionModelProvider from an unexisting file should fail.", Throwable.class, () -> {
-            new FnOFunctionModelProvider("src/test/resources/doesnotexist.ttl");
-        });
+    public void testFnoDocNotFound() {
+        assertThrows("Constructing an FnOFunctionModelProvider from an unexisting file should fail.", Throwable.class,
+                () -> new FnOFunctionModelProvider("src/test/resources/doesnotexist.ttl"));
     }
 
     @Test

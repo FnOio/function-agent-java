@@ -11,7 +11,7 @@ public class IntegerConverter extends DataTypeConverter<Integer> {
     }
 
     @Override
-    public Integer convert(Object value) throws DataTypeConverterException {
+    public Integer convert(Object value) {
         if (value instanceof Integer) {
             return  (Integer)value;
         } else {

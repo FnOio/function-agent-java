@@ -17,7 +17,7 @@ public class DefaultDataTypeConverter extends DataTypeConverter<Object> {
     }
 
     @Override
-    public Object convert(Object value) throws DataTypeConverterException {
+    public Object convert(Object value) {
         logger.warn("No DataTypeConverter found for class '{}'; passing the object through", value.getClass().getName());
         return value;
     }

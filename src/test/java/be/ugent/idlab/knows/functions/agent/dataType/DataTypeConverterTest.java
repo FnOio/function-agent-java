@@ -1,6 +1,5 @@
 package be.ugent.idlab.knows.functions.agent.dataType;
 
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.UnsupportedDataTypeException;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -21,7 +20,7 @@ public class DataTypeConverterTest {
     private final DataTypeConverterProvider converterProvider = new DataTypeConverterProvider();
 
     @Test
-    public void testRDFListConverterFromList() throws UnsupportedDataTypeException, DataTypeConverterException {
+    public void testRDFListConverterFromList() throws DataTypeConverterException {
         DataTypeConverter<?> listConverter = converterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
         List<String> testList = Arrays.asList("One", "Two", "Three");
         Object result = listConverter.convert(testList);
@@ -29,7 +28,7 @@ public class DataTypeConverterTest {
     }
 
     @Test
-    public void testRDFListConverterFromArray() throws UnsupportedDataTypeException, DataTypeConverterException {
+    public void testRDFListConverterFromArray() throws DataTypeConverterException {
         DataTypeConverter<?> listConverter = converterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
         String[] testArray = new String[]{"One", "Two", "Three"};
         Object result = listConverter.convert(testArray);
