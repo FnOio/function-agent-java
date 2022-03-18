@@ -155,7 +155,7 @@ public class Instantiator {
      */
     private Method getMethod(final Class<?> clazz, final String methodName, final List<Parameter> expectedParameters, final Parameter expectedReturnParameter) throws MethodNotFoundException {
         logger.debug("Trying to find method with name {}", methodName);
-        Method[] declaredMethods = clazz.getDeclaredMethods();
+        Method[] declaredMethods = clazz.getMethods();
         for (Method declaredMethod : declaredMethods) {
             boolean qualifies = false;
             if (declaredMethod.getName().equals(methodName) && declaredMethod.getParameterCount() == expectedParameters.size()) {
@@ -208,6 +208,11 @@ public class Instantiator {
                         }
                     });
         }
+    }
+
+    private void completelyLoadClass(final Class<?> cls) {
+        // load superclasses
+
     }
     
 }
