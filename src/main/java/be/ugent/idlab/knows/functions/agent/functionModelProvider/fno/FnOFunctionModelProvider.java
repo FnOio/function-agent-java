@@ -16,7 +16,7 @@ import java.io.StringReader;
 import java.net.URL;
 import java.util.*;
 
-import static be.ugent.idlab.knows.functions.agent.model.NAMESPACES.*;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.*;
 
 /**
  * A {@link FunctionModelProvider} for functions described using the Function Ontology (<a href="https://fno.io/">FnO</a>).

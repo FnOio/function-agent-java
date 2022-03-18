@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.model;
+package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
