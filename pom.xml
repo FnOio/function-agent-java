@@ -86,9 +86,9 @@
 
         <!-- Dependency on Grel functions java, just for testing -->
         <dependency>
-            <groupId>com.github.ghsnd</groupId>
+            <groupId>com.github.fnoio</groupId>
             <artifactId>grel-functions-java</artifactId>
-            <version>75d1e9d</version>
+            <version>master-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

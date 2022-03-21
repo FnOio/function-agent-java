@@ -1,6 +1,7 @@
 package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.model.*;
@@ -25,23 +26,24 @@ import static org.junit.Assert.*;
  * @author Gerald Haesendonck
  */
 public class FnOFunctionProviderTest {
+    final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
 
     @Test
     public void testLoad() throws FnOException {
-        FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, "src/test/resources/internalTestFunctions.ttl");
         checkSuccessFunctions(functionProvider.getFunctions().values());
     }
 
     @Test
     public void testLoadDeprecated() throws FnOException {
-        FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions_old.ttl");
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, "src/test/resources/internalTestFunctions_old.ttl");
         checkSuccessFunctions(functionProvider.getFunctions().values());
     }
 
     @Test
     public void testFnoDocNotFound() {
         assertThrows("Constructing an FnOFunctionModelProvider from an unexisting file should fail.", Throwable.class,
-                () -> new FnOFunctionModelProvider("src/test/resources/doesnotexist.ttl"));
+                () -> new FnOFunctionModelProvider(dataTypeConverterProvider, "src/test/resources/doesnotexist.ttl"));
     }
 
     @Test
@@ -52,7 +54,7 @@ public class FnOFunctionProviderTest {
         CharSource fnoSource = Files.asCharSource(new File(itUrl.toURI()), StandardCharsets.UTF_8);
 
         // pass it to the function model provider
-        FnOFunctionModelProvider functionProvider = new FnOFunctionModelProvider(fnoSource.read());
+        FnOFunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, fnoSource.read());
         checkSuccessFunctions(functionProvider.getFunctions().values());
     }
 

@@ -1,5 +1,6 @@
 package be.ugent.idlab.knows.functions.agent;
 
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
@@ -9,8 +10,7 @@ import org.junit.Test;
 import java.time.Instant;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -21,13 +21,15 @@ public class AgentTest {
 
     @Test
     public void testEverythingGoesWell() throws Exception {
+        // first initialize a DataTaypeConverterProvider
+        final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
 
         // first initialize a functionModelProvider
-        FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, "src/test/resources/internalTestFunctions.ttl");
         Map<String, Function> functions = functionProvider.getFunctions();
 
         // construct an initiator using those functions
-        Instantiator instantiator = new Instantiator(functions);
+        Instantiator instantiator = new Instantiator(functions, dataTypeConverterProvider);
 
         // Construct an Agent
         Agent agent = new AgentImpl(functions, instantiator);
@@ -50,6 +52,20 @@ public class AgentTest {
     public void testGrelClassesOnClassPathRemoteFnODoc() throws Exception {
         Agent agent = AgentFactory.createFromFnO("https://users.ugent.be/~bjdmeest/function/grel.ttl", "grel_java_mapping.ttl");
         executeGrel(agent);
+    }
+
+    @Test
+    public void testBooleanConversionAsStringListGrel() throws Exception {
+        Agent agent = AgentFactory.createFromFnO("https://users.ugent.be/~bjdmeest/function/grel.ttl", "grel_java_mapping.ttl");
+
+        // prepare the parameters for the function
+        Arguments arguments = new Arguments()
+                .add("http://users.ugent.be/~bjdmeest/function/grel.ttl#param_rep_b", "false")
+                .add("http://users.ugent.be/~bjdmeest/function/grel.ttl#param_rep_b", "false");
+
+        // execute the function
+        Object result = agent.execute("http://users.ugent.be/~bjdmeest/function/grel.ttl#boolean_and", arguments);
+        assertFalse("\"false\" | \"false\" should be false", (Boolean)result);
     }
 
     @Test

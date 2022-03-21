@@ -1,5 +1,6 @@
 package be.ugent.idlab.knows.functions.agent.functionInstantiator;
 
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
@@ -23,10 +24,12 @@ public class InstantiatorTest {
 
     @Test
     public void testClassOnClasspath() throws InstantiationException, InvocationTargetException, IllegalAccessException, FnOException {
+        final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
+
         // load function descriptions
-        FunctionModelProvider functionProvider = new FnOFunctionModelProvider("src/test/resources/internalTestFunctions.ttl");
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, "src/test/resources/internalTestFunctions.ttl");
         Map<String, Function> functions = functionProvider.getFunctions();
-        Instantiator instantiator = new Instantiator(functions);
+        Instantiator instantiator = new Instantiator(functions, dataTypeConverterProvider);
 
         Method sum = instantiator.getMethod("http://example.org/sum");
         Object result = sum.invoke(null, 5, 8);

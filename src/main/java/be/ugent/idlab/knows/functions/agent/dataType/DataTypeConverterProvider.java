@@ -1,6 +1,7 @@
 package be.ugent.idlab.knows.functions.agent.dataType;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,12 +14,26 @@ public class DataTypeConverterProvider {
     private final Map<String, DataTypeConverter<?>> nameToConverter = new HashMap<>();
 
     public DataTypeConverterProvider() {
+        addJavaConverters();
         addXMLSchemaConverters();
         addRDFConverters();
     }
 
     public DataTypeConverter<?> getDataTypeConverter(final String type) {
         return nameToConverter.getOrDefault(type, new DefaultDataTypeConverter());
+    }
+
+    private void addJavaConverters() {
+        nameToConverter.put(Integer.class.getName(), new IntegerConverter());
+        nameToConverter.put(int.class.getName(), new IntegerConverter());
+        nameToConverter.put(Long.class.getName(), new LongConverter());
+        nameToConverter.put(long.class.getName(), new LongConverter());
+        nameToConverter.put(Double.class.getName(), new DoubleConverter());
+        nameToConverter.put(double.class.getName(), new DoubleConverter());
+        nameToConverter.put(Boolean.class.getName(), new BooleanConverter());
+        nameToConverter.put(boolean.class.getName(), new BooleanConverter());
+        nameToConverter.put(String.class.getName(), new StringConverter());
+        nameToConverter.put(List.class.getName(), new ListConverter());
     }
 
     private void addXMLSchemaConverters() {

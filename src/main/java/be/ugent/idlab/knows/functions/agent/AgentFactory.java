@@ -1,5 +1,6 @@
 package be.ugent.idlab.knows.functions.agent;
 
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
@@ -22,13 +23,15 @@ public class AgentFactory {
      * @return              An agent capable of executing the functions as described in the FnO document(s).
      */
     public static Agent createFromFnO(final String... pathToFnoDocs) throws FnOException {
+        // initialise a DataTypeConverterProvider
+        final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
 
         // parse all FnO documents
-        FunctionModelProvider functionModelProvider = new FnOFunctionModelProvider(pathToFnoDocs);
+        FunctionModelProvider functionModelProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, pathToFnoDocs);
         final Map<String, Function> functionId2Function = functionModelProvider.getFunctions();
 
         // create an instantiator for these functions
-        Instantiator instantiator = new Instantiator(functionId2Function);
+        Instantiator instantiator = new Instantiator(functionId2Function, dataTypeConverterProvider);
 
         // now return the Agent implementation
         return new AgentImpl(functionId2Function, instantiator);

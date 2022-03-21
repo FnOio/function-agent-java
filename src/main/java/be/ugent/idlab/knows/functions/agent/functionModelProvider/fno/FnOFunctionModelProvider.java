@@ -31,7 +31,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     private final Model functionDescriptionTriples = ModelFactory.createDefaultModel();
     private final Map<String, Function> functionId2Functions = new HashMap<>();
     private final Map<String, FunctionMapping> functionId2functionMappings = new HashMap<>();
-    private final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
+    private final DataTypeConverterProvider dataTypeConverterProvider;
 
     // some properties used throughout the parsing process
     private final Property typeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
@@ -44,7 +44,8 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      *                       One fnoDocPath can be a path to a
      *                       file, a URL to a file or a String containing FnO triples in Turtle format.
      */
-    public FnOFunctionModelProvider(final String... fnoDocPaths) throws FnOException {
+    public FnOFunctionModelProvider(final DataTypeConverterProvider dataTypeConverterProvider, final String... fnoDocPaths) throws FnOException {
+        this.dataTypeConverterProvider = dataTypeConverterProvider;
         parse(fnoDocPaths);
     }
 

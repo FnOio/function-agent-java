@@ -1,5 +1,8 @@
 package be.ugent.idlab.knows.functions.agent.functionIntantiation;
 
+import be.ugent.idlab.knows.functions.agent.dataType.CollectionConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.ClassNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
@@ -13,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
@@ -40,12 +45,16 @@ public class Instantiator {
     // a 'cache' of loaded classes
     private final Map<String, Class<?>> className2ClassMap = new HashMap<>();
 
+    private final DataTypeConverterProvider dataTypeConverterProvider;
+
     /**
      * Creates a new instance of an Initiator.
      * @param functions The function descriptions used to find for possible implementations in the form of a map function ID -> Function.
+     * @param dataTypeConverterProvider
      */
-    public Instantiator(Map<String, Function> functions) {
+    public Instantiator(final Map<String, Function> functions, final DataTypeConverterProvider dataTypeConverterProvider) {
         id2functionMap = functions;
+        this.dataTypeConverterProvider = dataTypeConverterProvider;
     }
 
     /**
@@ -73,10 +82,15 @@ public class Instantiator {
             // now get the method
             final String methodName = mapping.getMethodMapping().getMethodName();
             final List<Parameter> parameters = function.getArgumentParameters();
-            Method method = getMethod(clazz, methodName, parameters, function.getReturnParameters().get(0));
-            logger.debug("Found method {}", method.getName());
-            id2MethodMap.put(functionId, method);
-            return method;
+            Method method = null;
+            try {
+                method = getMethod(clazz, methodName, parameters, function.getReturnParameters().get(0));
+                logger.debug("Found method {}", method.getName());
+                id2MethodMap.put(functionId, method);
+                return method;
+            } catch (java.lang.ClassNotFoundException e) {
+                throw new ClassNotFoundException(e.getMessage());
+            }
         } else {
             throw new FunctionNotFoundException("No function found with id " + functionId);
         }
@@ -153,15 +167,38 @@ public class Instantiator {
      * @param expectedReturnParameter   The expected return parameter type of the method
      * @return A method matching the name and parameter types.
      */
-    private Method getMethod(final Class<?> clazz, final String methodName, final List<Parameter> expectedParameters, final Parameter expectedReturnParameter) throws MethodNotFoundException {
+    private Method getMethod(final Class<?> clazz, final String methodName, final List<Parameter> expectedParameters, final Parameter expectedReturnParameter) throws MethodNotFoundException, java.lang.ClassNotFoundException {
         logger.debug("Trying to find method with name {}", methodName);
-        Method[] declaredMethods = clazz.getMethods();
-        for (Method declaredMethod : declaredMethods) {
+        Method[] methods = clazz.getMethods();
+        for (Method method : methods) {
             boolean qualifies = false;
-            if (declaredMethod.getName().equals(methodName) && declaredMethod.getParameterCount() == expectedParameters.size()) {
+            if (method.getName().equals(methodName) && method.getParameterCount() == expectedParameters.size()) {
                 // possible candidate
                 qualifies = true;
-                Class<?>[] methodParameterTypes = declaredMethod.getParameterTypes();
+
+                // get generic parameter types to refine converters of collections
+                Type[] parameterTypes = method.getGenericParameterTypes();
+                for (int i = 0; i < parameterTypes.length; i++) {
+                    Type parameterType = parameterTypes[i];
+                    Class<?> methodParameterClass = method.getParameterTypes()[i];
+                    DataTypeConverter<?> dataTypeConverter = expectedParameters.get(i).getTypeConverter();
+                    if (dataTypeConverter.isSubTypeOf(methodParameterClass)) {
+                        // TODO: not only collections can have argument parameters
+                        if (parameterType instanceof ParameterizedType && dataTypeConverter.getTypeCategory().equals(DataTypeConverter.TypeCategory.COLLECTION)) {
+                            // we found a match. Now check if we need converters for type arguments of the class,
+                            // e.g List<Boolean>: we potentiay din't know about the 'Boolean' argument type yet
+                            ParameterizedType pType = (ParameterizedType) parameterType;
+                            Type[] typeArgs = pType.getActualTypeArguments();
+                            DataTypeConverter<?> argumentDataTypeConverter = dataTypeConverterProvider.getDataTypeConverter(typeArgs[0].getTypeName());
+                            CollectionConverter<?> cDataTypeConverter = (CollectionConverter<?>) dataTypeConverter;
+                            cDataTypeConverter.setArgumentTypeConverter(argumentDataTypeConverter);
+                        }
+                    } else {
+                        qualifies = false;
+                        break;
+                    }
+                }
+                Class<?>[] methodParameterTypes = method.getParameterTypes();
                 for (int i = 0; i < methodParameterTypes.length; i++) {
                     Class<?> methodParameterType = methodParameterTypes[i];
                     if (!expectedParameters.get(i).getTypeConverter().isSubTypeOf(methodParameterType)) {
@@ -172,13 +209,13 @@ public class Instantiator {
             }
             if (qualifies) {
                 logger.debug("Found method by name and expected arguments. Checking return type...");
-                Class<?> methodReturnType = declaredMethod.getReturnType();
+                Class<?> methodReturnType = method.getReturnType();
                 if (expectedReturnParameter.getTypeConverter().isSuperTypeOf(methodReturnType)) {
                     logger.debug("Found method!");
-                    return declaredMethod;
+                    return method;
                 } else {
                     logger.warn("Return type '{}' of method '{}' does not match expeted return type '{}' (class '{}')",
-                            methodReturnType.getName(), declaredMethod.getName(), expectedReturnParameter.getTypeConverter().getTypeClass(), clazz.getName());
+                            methodReturnType.getName(), method.getName(), expectedReturnParameter.getTypeConverter().getTypeClass(), clazz.getName());
                 }
             }
         }
@@ -208,11 +245,6 @@ public class Instantiator {
                         }
                     });
         }
-    }
-
-    private void completelyLoadClass(final Class<?> cls) {
-        // load superclasses
-
     }
     
 }
