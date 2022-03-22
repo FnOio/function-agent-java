@@ -55,4 +55,17 @@ public class Arguments {
         return nameToValueMap.keySet();
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder str = new StringBuilder();
+        nameToValueMap.entries().forEach(entry -> {
+            str
+                    .append("('")
+                    .append(entry.getKey())
+                    .append("' -> '")
+                    .append(entry.getValue().toString())
+                    .append("')");
+        });
+        return str.toString();
+    }
 }

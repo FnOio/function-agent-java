@@ -30,7 +30,9 @@ public class AgentImpl implements Agent {
 
     @Override
     public Object execute(String functionId, Arguments arguments) throws Exception {
-        logger.debug("Executing function '{}'", functionId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Executing function '{}' with arguments '{}'", functionId, arguments.toString());
+        }
 
         // find a method with the given name
         final Method method = instantiator.getMethod(functionId);
