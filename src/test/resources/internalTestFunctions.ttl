@@ -1,5 +1,4 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix doap:    <http://usefulinc.com/ns/doap#> .
 @prefix fno:     <https://w3id.org/function/ontology#> .
 @prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
 @prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
@@ -62,5 +61,4 @@ ex:intOut a fno:Output ;
 ###########
 
 ex:internalTestFunctions a fnoi:JavaClass ;
-  #doap:download-page "./src/test/resources/aaabimfunctions/AaabimFunctions.jar" ;
   fnoi:class-name "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions" .
