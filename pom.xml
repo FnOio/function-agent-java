@@ -17,6 +17,7 @@
         <slf4j.version>1.7.36</slf4j.version>
         <junit.version>4.13.2</junit.version>
         <lombok.version>1.18.22</lombok.version>
+        <grel.java.version>v0.7.3</grel.java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- we stick to Java 8 because this library is integrated in RMLMapper (https://github.com/RMLio/rmlmapper-java) -->
@@ -90,7 +91,7 @@
         <dependency>
             <groupId>com.github.fnoio</groupId>
             <artifactId>grel-functions-java</artifactId>
-            <version>v0.7.2</version>
+            <version>${grel.java.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

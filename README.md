@@ -78,7 +78,7 @@ ex:intOut a fno:Output ;
 
 # Method mapping: maps the function to an actual implementation
 
-ex:sumMapping a fnoi:Mapping ;
+ex:sumMapping a fno:Mapping ;
   fno:function ex:sum ;                             # The function being mapped
   fno:implementation ex:internalTestFunctions ;     # A description of the implementation; see below
   fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "sum" ] . # The method "sum" implements the ex:sum function 

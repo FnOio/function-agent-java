@@ -108,20 +108,20 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
                 final Function function = functionId2Functions.get(functionId);
                 function.setFunctionMapping(functionId2functionMappings.get(functionId));
             } else {
-                throw new FunctionMappingNotFoundException("No '" + FNOI + "Mapping' found for function '" + functionId + '"');
+                throw new FunctionMappingNotFoundException("No '" + FNO + "Mapping' found for function '" + functionId + '"');
             }
         }
     }
 
     /**
-     * Searches the FnO document for fnoi:Mapping resources and converts them to FunctionMapping objects
+     * Searches the FnO document for fno:Mapping resources and converts them to FunctionMapping objects
      * in the internal Function Model
      * @throws FnOException Something goes wrong parsing the method mapping.
      *                      A subclass of FnOException specifies what exactly.
      */
     private void parseFunctionMappings() throws FnOException {
         logger.debug("Parsing function mappings");
-        Resource functionMappingObject = ResourceFactory.createResource(FNOI + "Mapping");
+        Resource functionMappingObject = ResourceFactory.createResource(FNO + "Mapping");
         ResIterator mappings = functionDescriptionTriples.listSubjectsWithProperty(typeProperty, functionMappingObject);
         while (mappings.hasNext()) {
             parseFunctionMapping(mappings.nextResource());
@@ -129,7 +129,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     }
 
     /**
-     * Converts a function mapping (fnoi:Mapping) to a FunctionMapping object in the internal Function model and kept in
+     * Converts a function mapping (fno:Mapping) to a FunctionMapping object in the internal Function model and kept in
      * an internal cache.
      * @param functionMappingResource   The function mapping resource
      * @throws FnOException             Something goes wrong parsing the method mapping.
@@ -140,7 +140,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
 
         // get the URI of the function resource this mapping belongs to
         String functionURI = getObjectURI(functionMappingResource, FNO + "function")
-                .orElseThrow(() -> new FunctionNotFoundException("No function resource found for fnoi:Mapping '" +
+                .orElseThrow(() -> new FunctionNotFoundException("No function resource found for fno:Mapping '" +
                         functionMappingResource.getURI() + "'"));
 
         if (!functionId2functionMappings.containsKey(functionURI)) {
@@ -156,9 +156,9 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     }
 
     /**
-     * Converts the method mapping (fno:methodMapping) resource of a given function mapping (fnoi:Mapping)
+     * Converts the method mapping (fno:methodMapping) resource of a given function mapping (fno:Mapping)
      * to a MethodMapping objevt in the internal function model.
-     * @param functionMappingResource   The fnoi:Mapping resource to get the method mapping from.
+     * @param functionMappingResource   The fno:Mapping resource to get the method mapping from.
      * @return                          The MethodMapping object for the corresponding fno:methodMapping
      * @throws FnOException             Something goes wrong parsing the method mapping.
      *                                  A subclass of FnOException specifies what exactly.
@@ -168,23 +168,23 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
 
         // get the method mapping
         Resource methodMappingResource = getObjectResource(functionMappingResource, FNO + "methodMapping")
-                .orElseThrow(() -> new MethodMappingNotFoundException("No '" + FNO + "methodMapping' found for fnoi:Mapping '" +
+                .orElseThrow(() -> new MethodMappingNotFoundException("No '" + FNO + "methodMapping' found for fno:Mapping '" +
                         functionMappingResource.getURI() + "'"));
 
         String methodMappingType = getObjectURI(methodMappingResource, typeProperty.getURI())
-                .orElseThrow(() -> new MethodMappingTypeNotFoundException("No type of method mapping found for fnoi:Mapping '" +
+                .orElseThrow(() -> new MethodMappingTypeNotFoundException("No type of method mapping found for fno:Mapping '" +
                         functionMappingResource.getURI() + "'"));
 
         String methodName = getLiteralStr(methodMappingResource, FNOM + "method-name")
-                .orElseThrow(() -> new MethodNameNotFoundException("No '" + FNOM + "method-name' found for fnoi:Mapping '" +
+                .orElseThrow(() -> new MethodNameNotFoundException("No '" + FNOM + "method-name' found for fno:Mapping '" +
                         functionMappingResource.getURI() + "' "));
 
         return new MethodMapping(methodMappingType, methodName);
     }
 
     /**
-     * Converts the implementation of a given fnoi:Mapping to an Implementation in the internal function model.
-     * @param functionMappingResource The fnoi:Mapping to find an implementation for.
+     * Converts the implementation of a given fno:Mapping to an Implementation in the internal function model.
+     * @param functionMappingResource The fno:Mapping to find an implementation for.
      * @return                        An implementation of a function.
      * @throws FnOException           Something goes wrong parsing the implementation.
      *                                A subclass of FnOException specifies what exactly.
