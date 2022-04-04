@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Changed
+- Let GitLab CI use JDK 8 instead of JDK 11, because that's the lowest supported Java version.
+
 ## [0.0.2] - 2022-03-29
 
 ### Changed
