@@ -41,7 +41,7 @@ public class DataTypeConverterProvider {
         nameToConverter.put("http://www.w3.org/2001/XMLSchema#int", new IntegerConverter());
         nameToConverter.put("http://www.w3.org/2001/XMLSchema#long", new LongConverter());
         nameToConverter.put("http://www.w3.org/2001/XMLSchema#double", new DoubleConverter());
-        nameToConverter.put("http://www.w3.org/2001/XMLSchema#decimal", new BigDecimalConverter());
+        nameToConverter.put("http://www.w3.org/2001/XMLSchema#decimal", new NumberConverter());
         nameToConverter.put("http://www.w3.org/2001/XMLSchema#boolean", new XSBooleanConverter());
         nameToConverter.put("http://www.w3.org/2001/XMLSchema#string", new StringConverter());
 
