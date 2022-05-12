@@ -60,4 +60,25 @@ public class DataTypeConverterTest {
         DataTypeConverter<Integer> ic = new IntegerConverter();
         assertTrue(ic.isSubTypeOf(int.class));
     }
+
+    @Test
+    public void testListArraySubType() {
+        DataTypeConverter<?> listConverter = converterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
+        assertTrue(listConverter.isSubTypeOf(Integer[].class));
+    }
+
+    @Test
+    public void testListArraySuperType() {
+        DataTypeConverter<?> listConverter = converterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
+        assertTrue(listConverter.isSuperTypeOf(Integer[].class));
+    }
+
+    @Test
+    public void testArrayConverter() throws DataTypeConverterException {
+        ArrayConverter arrayConverter = new ArrayConverter();
+        arrayConverter.setArgumentTypeConverter(new IntegerConverter());
+        Object[] convertedValues = arrayConverter.convert(new Integer[]{1, 5});
+        System.out.println("convertedValues = " + convertedValues.getClass().getTypeName());
+        assertEquals("java.lang.Integer[]", convertedValues.getClass().getTypeName());
+    }
 }

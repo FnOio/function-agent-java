@@ -1,5 +1,6 @@
 package be.ugent.idlab.knows.functions.agent.functionIntantiation;
 
+import be.ugent.idlab.knows.functions.agent.dataType.ArrayConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.CollectionConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
@@ -175,6 +176,7 @@ public class Instantiator {
             if (method.getName().equals(methodName) && method.getParameterCount() == expectedParameters.size()) {
                 // possible candidate
                 qualifies = true;
+                logger.debug("Found method with matching name {} and matching parameter count ({})", methodName, expectedParameters.size());
 
                 // get generic parameter types to refine converters of collections
                 Type[] parameterTypes = method.getGenericParameterTypes();
@@ -183,16 +185,30 @@ public class Instantiator {
                     Class<?> methodParameterClass = method.getParameterTypes()[i];
                     DataTypeConverter<?> dataTypeConverter = expectedParameters.get(i).getTypeConverter();
                     if (dataTypeConverter.isSubTypeOf(methodParameterClass)) {
-                        // TODO: not only collections can have argument parameters
-                        if (parameterType instanceof ParameterizedType && dataTypeConverter.getTypeCategory().equals(DataTypeConverter.TypeCategory.COLLECTION)) {
-                            // we found a match. Now check if we need converters for type arguments of the class,
-                            // e.g List<Boolean>: we potentiay din't know about the 'Boolean' argument type yet
-                            ParameterizedType pType = (ParameterizedType) parameterType;
-                            Type[] typeArgs = pType.getActualTypeArguments();
-                            DataTypeConverter<?> argumentDataTypeConverter = dataTypeConverterProvider.getDataTypeConverter(typeArgs[0].getTypeName());
-                            CollectionConverter<?> cDataTypeConverter = (CollectionConverter<?>) dataTypeConverter;
-                            cDataTypeConverter.setArgumentTypeConverter(argumentDataTypeConverter);
+                        if (dataTypeConverter.getTypeCategory().equals(DataTypeConverter.TypeCategory.COLLECTION)) {
+                            String typeName;
+                            if (parameterType instanceof ParameterizedType) {
+                                // we found a Java collection. Now check if we need converters for type arguments of the class,
+                                // e.g List<Boolean>: we potentiay din't know about the 'Boolean' argument type yet
+                                ParameterizedType pType = (ParameterizedType) parameterType;
+                                Type[] typeArgs = pType.getActualTypeArguments();
+                                typeName = typeArgs[0].getTypeName();
+                                DataTypeConverter<?> argumentDataTypeConverter = dataTypeConverterProvider.getDataTypeConverter(typeArgs[0].getTypeName());
+                                ((CollectionConverter<?>) dataTypeConverter).setArgumentTypeConverter(argumentDataTypeConverter);
+                            } else if (methodParameterClass.isArray()){
+                                // We found a Java array. Now check if we need converters for type arguments of the class,
+                                // e.g Boolean[]: we potentiay din't know about the 'Boolean' argument type yet
+                                // change the ListConverter by an ArrayConverter
+                                Class<?> componentType = methodParameterClass.getComponentType();
+                                ArrayConverter arrayConverter = new ArrayConverter();
+                                arrayConverter.setArgumentTypeConverter(dataTypeConverterProvider.getDataTypeConverter(componentType.getTypeName()));
+                                expectedParameters.get(i).setTypeConverter(arrayConverter);
+                            } else {
+                                throw new MethodNotFoundException("No suitable data type converter found for class '" + clazz.getName() + "', method '" + methodName + "', parameter '"
+                                        + expectedParameters.get(i).getName() + "' which should be of type '" + parameterType.getTypeName() + "'.");
+                            }
                         }
+
                     } else {
                         qualifies = false;
                         break;

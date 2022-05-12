@@ -98,6 +98,24 @@ public class AgentTest {
         System.out.println();
     }
 
+    /**
+     * Tests if a function that takes an RDF List as parameter in the descriptions works with
+     * an implementation that has a method that takes a Java array as input parameter.
+     */
+    @Test
+    public void testListFnO_ArrayImplementation() throws Exception {
+        Agent agent = AgentFactory.createFromFnO("src/test/resources/functions_grel.ttl", "grel_java_mapping.ttl");
+
+        // prepare the parameter: a list of ints to take the sum of
+        Arguments arguments = new Arguments()
+                .add("http://users.ugent.be/~bjdmeest/function/grel.ttl#p_array_a", 1)
+                .add("http://users.ugent.be/~bjdmeest/function/grel.ttl#p_array_a", 4);
+
+        // Execute the array_sum function
+        Object result = agent.execute("http://users.ugent.be/~bjdmeest/function/grel.ttl#array_sum", arguments);
+        assertEquals("1 + 4 should be 5", 5, result);
+    }
+
     private void execute(final Agent agent) throws Exception {
         // prepare the parameters for the function
         Arguments arguments = new Arguments()

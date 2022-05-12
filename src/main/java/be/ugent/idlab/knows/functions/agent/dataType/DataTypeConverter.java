@@ -1,10 +1,10 @@
 package be.ugent.idlab.knows.functions.agent.dataType;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  *
@@ -22,8 +22,11 @@ public abstract class DataTypeConverter<T> {
         OBJECT
     }
 
+    protected final Set<Class<?>> superClasses;
+
     @Getter
-    private final Class<T> typeClass;
+    @Setter(AccessLevel.PROTECTED)
+    private Class<?> typeClass;
 
     @Getter
     private final TypeCategory typeCategory;
@@ -37,75 +40,101 @@ public abstract class DataTypeConverter<T> {
      */
     public abstract T convert(final Object value) throws DataTypeConverterException;
 
-    protected DataTypeConverter(final Class<T> typeClass, TypeCategory typeCategory) {
+
+    protected DataTypeConverter(final Class<T> typeClass, TypeCategory typeCategory, Class<?>... superClasses) {
         this.typeClass = typeClass;
         this.typeCategory = typeCategory;
-    }
-
-    public boolean isSubTypeOf(final Class<?> clazz) {
-        Set<Class<?>> superclasses = getSuperTypesOf(typeClass);
-        return superclasses.contains(clazz);
+        this.superClasses = new HashSet<>(Arrays.asList(superClasses));
     }
 
     public boolean isSuperTypeOf(final Class<?> clazz) {
-        Set<Class<?>> superclasses = getSuperTypesOf(clazz);
-        return superclasses.contains(typeClass);
+        Set<String> superclasses = getSuperTypesOf(clazz);
+        String className = typeClass.isArray()? "_array" : typeClass.getName();
+        return superclasses.contains(className);
     }
 
-    private static Set<Class<?>> getSuperTypesOf(final Class<?> clazz) {
+    public boolean isSubTypeOf(final Class<?> clazz) {
+        Set<String> superclasses = getSuperTypesOf(typeClass);
+        for (Class<?> superclass : this.superClasses) {
+            superclasses.addAll(getSuperTypesOf(superclass));
+        }
+        String className = clazz.isArray()? "_array" : clazz.getName();
+        return superclasses.contains(className);
+    }
+
+    private static Set<String> getSuperTypesOf(final Class<?> clazz) {
 
         if (clazz == null) {
             return Collections.emptySet();
         }
 
-        final Set<Class<?>> superTypes = new HashSet<>(2);
+        final Set<Class<?>> typesToCheck = new HashSet<>(2);
+        final Set<String> superTypes = new HashSet<>(2);
 
         // add the given class
-        superTypes.add(clazz);
+        String classTypeName = clazz.getTypeName();
 
         // convert Numbers to their primitive counterpart and vice versa
-        switch (clazz.getSimpleName()) {
-            case "Short":
-                superTypes.add(short.class);
+        switch (classTypeName) {
+            case "int":
+                typesToCheck.add(Integer.class);
+                break;
+            case "java.lang.Integer":
+                superTypes.add("int");
                 break;
             case "short":
-                superTypes.add(Short.class);
+                typesToCheck.add(Short.class);
                 break;
-            case "Integer":
-                superTypes.add(int.class);
-                break;
-            case "int":
-                superTypes.add(Integer.class);
-                break;
-            case "Long":
-                superTypes.add(long.class);
+            case "java.lang.Short":
+                superTypes.add("short");
                 break;
             case "long":
-                superTypes.add(Long.class);
+                typesToCheck.add(Long.class);
                 break;
-            case "Float":
-                superTypes.add(float.class);
+            case "java.lang.Long":
+                superTypes.add("long");
                 break;
-            case "float":
-                superTypes.add(Float.class);
+            case "java.lang.Float":
+                superTypes.add("float");
                 break;
-            case "Double":
-                superTypes.add(double.class);
+            case "float" :
+                typesToCheck.add(Float.class);
                 break;
             case "double":
-                superTypes.add(Double.class);
+                typesToCheck.add(Double.class);
                 break;
-            case "Byte":
-                superTypes.add(byte.class);
+            case "java.lang.Double":
+                superTypes.add("double");
                 break;
             case "byte":
-                superTypes.add(Byte.class);
+                typesToCheck.add(Byte.class);
                 break;
-            case "Boolean":
-                superTypes.add(boolean.class);
+            case "java.lang.Byte":
+                superTypes.add("byte");
                 break;
             case "boolean":
-                superTypes.add(Boolean.class);
+                typesToCheck.add(Boolean.class);
+                break;
+            case "java.lang.Boolean":
+                superTypes.add("boolean");
+                break;
+            case "java.lang.Character":
+                superTypes.add("char");
+                break;
+            case "char":
+                typesToCheck.add(Character.class);
+                break;
+            case "java.util.List":
+                superTypes.add("_array");   // there is no real array class name...
+                break;
+        }
+
+        // check if array
+        if (clazz.isArray()) {
+            superTypes.add("_array");
+            typesToCheck.add(List.class);
+        } else {
+            superTypes.add(classTypeName);
         }
 
         // add superclass if any
@@ -118,6 +147,11 @@ public abstract class DataTypeConverter<T> {
         Class<?>[] interfaces = clazz.getInterfaces();
         for (Class<?> anInterface : interfaces) {
             superTypes.addAll(getSuperTypesOf(anInterface));
+        }
+
+        // check compatible types
+        for (Class<?> typeToCheck : typesToCheck) {
+            superTypes.addAll(getSuperTypesOf(typeToCheck));
         }
 
         return superTypes;
