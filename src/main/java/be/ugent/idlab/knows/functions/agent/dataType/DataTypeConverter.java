@@ -4,7 +4,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -21,8 +24,6 @@ public abstract class DataTypeConverter<T> {
         COLLECTION,
         OBJECT
     }
-
-    protected final Set<Class<?>> superClasses;
 
     @Getter
     @Setter(AccessLevel.PROTECTED)
@@ -41,10 +42,9 @@ public abstract class DataTypeConverter<T> {
     public abstract T convert(final Object value) throws DataTypeConverterException;
 
 
-    protected DataTypeConverter(final Class<T> typeClass, TypeCategory typeCategory, Class<?>... superClasses) {
+    protected DataTypeConverter(final Class<T> typeClass, TypeCategory typeCategory) {
         this.typeClass = typeClass;
         this.typeCategory = typeCategory;
-        this.superClasses = new HashSet<>(Arrays.asList(superClasses));
     }
 
     public boolean isSuperTypeOf(final Class<?> clazz) {
@@ -55,9 +55,6 @@ public abstract class DataTypeConverter<T> {
 
     public boolean isSubTypeOf(final Class<?> clazz) {
         Set<String> superclasses = getSuperTypesOf(typeClass);
-        for (Class<?> superclass : this.superClasses) {
-            superclasses.addAll(getSuperTypesOf(superclass));
-        }
         String className = clazz.isArray()? "_array" : clazz.getName();
         return superclasses.contains(className);
     }
@@ -74,67 +71,114 @@ public abstract class DataTypeConverter<T> {
         // add the given class
         String classTypeName = clazz.getTypeName();
 
-        // convert Numbers to their primitive counterpart and vice versa
+        // convert Numbers to their primitive counterpart and vice versa. And add "supertypes"
         switch (classTypeName) {
-            case "int":
-                typesToCheck.add(Integer.class);
-                break;
-            case "java.lang.Integer":
-                superTypes.add("int");
-                break;
-            case "short":
-                typesToCheck.add(Short.class);
-                break;
-            case "java.lang.Short":
-                superTypes.add("short");
-                break;
-            case "long":
-                typesToCheck.add(Long.class);
-                break;
-            case "java.lang.Long":
-                superTypes.add("long");
-                break;
-            case "java.lang.Float":
-                superTypes.add("float");
-                break;
-            case "float" :
-                typesToCheck.add(Float.class);
-                break;
-            case "double":
-                typesToCheck.add(Double.class);
-                break;
-            case "java.lang.Double":
-                superTypes.add("double");
-                break;
-            case "byte":
-                typesToCheck.add(Byte.class);
-                break;
-            case "java.lang.Byte":
-                superTypes.add("byte");
-                break;
+            // types with no direct numeric supertype
             case "boolean":
-                typesToCheck.add(Boolean.class);
-                break;
             case "java.lang.Boolean":
                 superTypes.add("boolean");
-                break;
-            case "java.lang.Character":
-                superTypes.add("char");
+                superTypes.add("java.lang.Boolean");
                 break;
             case "char":
-                typesToCheck.add(Character.class);
+            case "java.lang.Character":
+                superTypes.add("char");
+                superTypes.add("java.lang.Character");
                 break;
             case "java.util.List":
+                superTypes.add("java.util.List");   // there is no real array class name...
                 superTypes.add("_array");   // there is no real array class name...
                 break;
+
+            // Types with numeric supertype
+            case "byte":
+            case "java.lang.Byte":
+                superTypes.add("byte");
+                superTypes.add("java.lang.Byte");
+
+            case "short":
+            case "java.lang.Short":
+                superTypes.add("short");
+                superTypes.add("java.lang.Short");
+
+            case "int":
+            case "java.lang.Integer":
+                superTypes.add("int");
+                superTypes.add("java.lang.Integer");
+                typesToCheck.add(float.class);
+
+            case "long":
+            case "java.lang.Long":
+                superTypes.add("long");
+                superTypes.add("java.lang.Long");
+                typesToCheck.add(double.class);
+                break;
+
+            default:
+                superTypes.add(classTypeName);
         }
+
+//        switch (classTypeName) {
+//            case "int":
+//                typesToCheck.add(Integer.class);
+//                typesToCheck.add(Long.class);
+//                break;
+//            case "java.lang.Integer":
+//                superTypes.add("int");
+//                break;
+//            case "short":
+//                typesToCheck.add(Short.class);
+//                typesToCheck.add(int.class);
+//                break;
+//            case "java.lang.Short":
+//                superTypes.add("short");
+//                break;
+//            case "long":
+//                typesToCheck.add(Long.class);
+//                break;
+//            case "java.lang.Long":
+//                superTypes.add("long");
+//                break;
+//            case "java.lang.Float":
+//                superTypes.add("float");
+//                break;
+//            case "float" :
+//                typesToCheck.add(Float.class);
+//                typesToCheck.add(Double.class);
+//                break;
+//            case "double":
+//                typesToCheck.add(Double.class);
+//                break;
+//            case "java.lang.Double":
+//                superTypes.add("double");
+//                break;
+//            case "byte":
+//                typesToCheck.add(Byte.class);
+//                typesToCheck.add(Short.class);
+//                break;
+//            case "java.lang.Byte":
+//                superTypes.add("byte");
+//                break;
+//            case "boolean":
+//                typesToCheck.add(Boolean.class);
+//                break;
+//            case "java.lang.Boolean":
+//                superTypes.add("boolean");
+//                break;
+//            case "java.lang.Character":
+//                superTypes.add("char");
+//                break;
+//            case "char":
+//                typesToCheck.add(Character.class);
+//                break;
+//            case "java.util.List":
+//                superTypes.add("_array");   // there is no real array class name...
+//                break;
+//        }
 
         // check if array
         if (clazz.isArray()) {
             superTypes.add("_array");
             typesToCheck.add(List.class);
-        } else {
-            superTypes.add(classTypeName);
         }
 
         // add superclass if any

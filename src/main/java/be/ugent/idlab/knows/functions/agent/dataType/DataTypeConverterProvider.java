@@ -24,10 +24,18 @@ public class DataTypeConverterProvider {
     }
 
     private void addJavaConverters() {
+        nameToConverter.put(Byte.class.getName(), new ByteConverter());
+        nameToConverter.put(byte.class.getName(), new ByteConverter());
+        nameToConverter.put(Character.class.getName(), new CharacterConverter());
+        nameToConverter.put(char.class.getName(), new CharacterConverter());
+        nameToConverter.put(Short.class.getName(), new ShortConverter());
+        nameToConverter.put(short.class.getName(), new ShortConverter());
         nameToConverter.put(Integer.class.getName(), new IntegerConverter());
         nameToConverter.put(int.class.getName(), new IntegerConverter());
         nameToConverter.put(Long.class.getName(), new LongConverter());
         nameToConverter.put(long.class.getName(), new LongConverter());
+        nameToConverter.put(Float.class.getName(), new FloatConverter());
+        nameToConverter.put(float.class.getName(), new FloatConverter());
         nameToConverter.put(Double.class.getName(), new DoubleConverter());
         nameToConverter.put(double.class.getName(), new DoubleConverter());
         nameToConverter.put(Boolean.class.getName(), new BooleanConverter());

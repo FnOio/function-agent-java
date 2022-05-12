@@ -38,13 +38,13 @@ public class AgentTest {
 
     @Test
     public void testWithFactory() throws Exception {
-        Agent agent = AgentFactory.createFromFnO("src/test/resources/internalTestFunctions.ttl");
+        Agent agent = AgentFactory.createFromFnO("internalTestFunctions.ttl");
         execute(agent);
     }
 
     @Test
     public void testGrelClassesOnClassPath() throws Exception {
-       Agent agent = AgentFactory.createFromFnO("src/test/resources/functions_grel.ttl", "grel_java_mapping.ttl");
+       Agent agent = AgentFactory.createFromFnO("functions_grel.ttl", "grel_java_mapping.ttl");
        executeGrel(agent);
     }
 
@@ -56,7 +56,7 @@ public class AgentTest {
 
     @Test
     public void testBooleanConversionAsStringListGrel() throws Exception {
-        Agent agent = AgentFactory.createFromFnO("https://users.ugent.be/~bjdmeest/function/grel.ttl", "grel_java_mapping.ttl");
+        Agent agent = AgentFactory.createFromFnO("functions_grel.ttl", "grel_java_mapping.ttl");
 
         // prepare the parameters for the function
         Arguments arguments = new Arguments()

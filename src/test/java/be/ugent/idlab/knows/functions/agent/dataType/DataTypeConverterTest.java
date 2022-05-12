@@ -8,8 +8,7 @@ import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -81,4 +80,36 @@ public class DataTypeConverterTest {
         System.out.println("convertedValues = " + convertedValues.getClass().getTypeName());
         assertEquals("java.lang.Integer[]", convertedValues.getClass().getTypeName());
     }
+
+    @Test
+    public void testBooleanSupertypes() {
+        DataTypeConverter<?> booleanConverter = converterProvider.getDataTypeConverter("boolean");
+        assertTrue(booleanConverter.isSubTypeOf(boolean.class));
+        assertFalse(booleanConverter.isSubTypeOf(int.class));
+    }
+
+    @Test
+    public void testCharacterSupertypes() {
+        DataTypeConverter<?> characterConverter = converterProvider.getDataTypeConverter("char");
+        assertTrue(characterConverter.isSuperTypeOf(char.class));
+        assertFalse(characterConverter.isSuperTypeOf(int.class));
+    }
+
+    @Test
+    public void testByteConverterCompatibility() {
+        DataTypeConverter<?> byteConverter = converterProvider.getDataTypeConverter("byte");
+        assertTrue(byteConverter.isSubTypeOf(Short.class));
+        assertFalse(byteConverter.isSuperTypeOf(Short.class));
+        assertTrue(byteConverter.isSubTypeOf(int.class));
+        assertFalse(byteConverter.isSuperTypeOf(Integer.class));
+    }
+
+    @Test
+    public void testShortConverterCompatibility() {
+       DataTypeConverter<?> shortConverter = converterProvider.getDataTypeConverter("short");
+       assertTrue(shortConverter.isSuperTypeOf(byte.class));
+       assertFalse(shortConverter.isSuperTypeOf(int.class));
+       assertTrue(shortConverter.isSubTypeOf(int.class));
+    }
+
 }
