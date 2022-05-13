@@ -24,10 +24,18 @@ public class DataTypeConverterProvider {
     }
 
     private void addJavaConverters() {
+        nameToConverter.put(Byte.class.getName(), new ByteConverter());
+        nameToConverter.put(byte.class.getName(), new ByteConverter());
+        nameToConverter.put(Character.class.getName(), new CharacterConverter());
+        nameToConverter.put(char.class.getName(), new CharacterConverter());
+        nameToConverter.put(Short.class.getName(), new ShortConverter());
+        nameToConverter.put(short.class.getName(), new ShortConverter());
         nameToConverter.put(Integer.class.getName(), new IntegerConverter());
         nameToConverter.put(int.class.getName(), new IntegerConverter());
         nameToConverter.put(Long.class.getName(), new LongConverter());
         nameToConverter.put(long.class.getName(), new LongConverter());
+        nameToConverter.put(Float.class.getName(), new FloatConverter());
+        nameToConverter.put(float.class.getName(), new FloatConverter());
         nameToConverter.put(Double.class.getName(), new DoubleConverter());
         nameToConverter.put(double.class.getName(), new DoubleConverter());
         nameToConverter.put(Boolean.class.getName(), new BooleanConverter());
@@ -41,7 +49,7 @@ public class DataTypeConverterProvider {
         nameToConverter.put("http://www.w3.org/2001/XMLSchema#int", new IntegerConverter());
         nameToConverter.put("http://www.w3.org/2001/XMLSchema#long", new LongConverter());
         nameToConverter.put("http://www.w3.org/2001/XMLSchema#double", new DoubleConverter());
-        nameToConverter.put("http://www.w3.org/2001/XMLSchema#decimal", new BigDecimalConverter());
+        nameToConverter.put("http://www.w3.org/2001/XMLSchema#decimal", new NumberConverter());
         nameToConverter.put("http://www.w3.org/2001/XMLSchema#boolean", new XSBooleanConverter());
         nameToConverter.put("http://www.w3.org/2001/XMLSchema#string", new StringConverter());
 

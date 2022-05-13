@@ -6,6 +6,8 @@ import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelP
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -15,6 +17,7 @@ import java.util.Map;
  * @author Gerald Haesendonck
  */
 public class AgentFactory {
+    private final static Logger logger = LoggerFactory.getLogger(AgentFactory.class);
 
     /**
      * Creates an Agent executing functions described in one or more FnO documents.
@@ -24,17 +27,26 @@ public class AgentFactory {
      */
     public static Agent createFromFnO(final String... pathToFnoDocs) throws FnOException {
         // initialise a DataTypeConverterProvider
+        logger.debug("Initialising DataTypeConverterProvider...");
         final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
+        logger.debug("DataTypeConverterProvider initialised!");
 
         // parse all FnO documents
+        logger.debug("Initialising FunctionModelProvider...");
         FunctionModelProvider functionModelProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, pathToFnoDocs);
+        logger.debug("FunctionModelProvider initialised!");
         final Map<String, Function> functionId2Function = functionModelProvider.getFunctions();
 
         // create an instantiator for these functions
+        logger.debug("Initialising Instantiator...");
         Instantiator instantiator = new Instantiator(functionId2Function, dataTypeConverterProvider);
+        logger.debug("Instantiator initialised!");
 
         // now return the Agent implementation
-        return new AgentImpl(functionId2Function, instantiator);
+        logger.debug("Initialising AgentImpl...");
+        final Agent agent = new AgentImpl(functionId2Function, instantiator);
+        logger.debug("AgentImpl initialised!");
+        return agent;
     }
 
 }

@@ -36,7 +36,7 @@ cache:
   script:
     - 'mvn $MAVEN_CLI_OPTS test'
 
-# Test merge requests using JDK11
-test:jdk11:
+# Test merge requests using JDK8
+test:jdk8:
   <<: *test
-  image: maven:3-jdk-11
+  image: maven:3-jdk-8

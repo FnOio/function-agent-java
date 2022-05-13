@@ -21,4 +21,16 @@ public class DefaultDataTypeConverter extends DataTypeConverter<Object> {
         logger.warn("No DataTypeConverter found for class '{}'; passing the object through", value.getClass().getName());
         return value;
     }
+
+    @Override
+    public boolean isSuperTypeOf(Class<?> clazz) {
+        logger.info("Omitting supertype check in DefaultTypeConverter");
+        return true;
+    }
+
+    @Override
+    public boolean isSubTypeOf(Class<?> clazz) {
+        logger.info("Omitting subtype check in DefaultTypeConverter");
+        return true;
+    }
 }
