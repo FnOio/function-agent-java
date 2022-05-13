@@ -7,16 +7,16 @@ import java.math.BigDecimal;
  *
  * @author Gerald Haesendonck
  */
-public class BigDecimalConverter extends DataTypeConverter<BigDecimal> {
+public class NumberConverter extends DataTypeConverter<Number> {
 
-    public BigDecimalConverter() {
-        super(BigDecimal.class, TypeCategory.PRIMITIVE);
+    public NumberConverter() {
+                super(Number.class, TypeCategory.PRIMITIVE);
     }
 
     @Override
-    public BigDecimal convert(Object value) {
-        if (value instanceof BigDecimal) {
-            return (BigDecimal) value;
+    public Number convert(Object value) {
+        if (value instanceof Number) {
+            return (Number) value;
         } else {
             return new BigDecimal(value.toString());
         }
