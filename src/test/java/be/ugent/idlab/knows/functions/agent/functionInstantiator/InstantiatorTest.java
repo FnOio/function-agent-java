@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -46,5 +48,20 @@ public class InstantiatorTest {
         assertEquals("1 + 3 should be 4", 4L, result);
         Class<?>[] genericParameterTypes = method.getParameterTypes();
         assertArrayEquals(new Class<?>[]{long.class, long.class}, genericParameterTypes);
+    }
+
+    @Test
+    public void testRawListParameter() throws FnOException, InstantiationException, InvocationTargetException, IllegalAccessException {
+        final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
+
+        // load function descriptions
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, "src/test/resources/internalTestFunctions.ttl");
+        Map<String, Function> functions = functionProvider.getFunctions();
+        Instantiator instantiator = new Instantiator(functions, dataTypeConverterProvider);
+
+        List anEmptyRawList = new ArrayList();
+        Method rawListLen = instantiator.getMethod("http://example.org/rawListLen");
+        Object result = rawListLen.invoke(null, anEmptyRawList);
+        assertEquals("An empty list should have size 0", 0L, result);
     }
 }

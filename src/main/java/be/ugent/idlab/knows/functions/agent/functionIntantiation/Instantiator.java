@@ -21,9 +21,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
@@ -186,16 +184,14 @@ public class Instantiator {
                     DataTypeConverter<?> dataTypeConverter = expectedParameters.get(i).getTypeConverter();
                     if (dataTypeConverter.isSubTypeOf(methodParameterClass)) {
                         if (dataTypeConverter.getTypeCategory().equals(DataTypeConverter.TypeCategory.COLLECTION)) {
-                            String typeName;
                             if (parameterType instanceof ParameterizedType) {
                                 // we found a Java collection. Now check if we need converters for type arguments of the class,
                                 // e.g List<Boolean>: we potentiay din't know about the 'Boolean' argument type yet
                                 ParameterizedType pType = (ParameterizedType) parameterType;
                                 Type[] typeArgs = pType.getActualTypeArguments();
-                                typeName = typeArgs[0].getTypeName();
                                 DataTypeConverter<?> argumentDataTypeConverter = dataTypeConverterProvider.getDataTypeConverter(typeArgs[0].getTypeName());
                                 ((CollectionConverter<?>) dataTypeConverter).setArgumentTypeConverter(argumentDataTypeConverter);
-                            } else if (methodParameterClass.isArray()){
+                            } else if (methodParameterClass.isArray()) {
                                 // We found a Java array. Now check if we need converters for type arguments of the class,
                                 // e.g Boolean[]: we potentiay din't know about the 'Boolean' argument type yet
                                 // change the ListConverter by an ArrayConverter
@@ -204,8 +200,12 @@ public class Instantiator {
                                 arrayConverter.setArgumentTypeConverter(dataTypeConverterProvider.getDataTypeConverter(componentType.getTypeName()));
                                 expectedParameters.get(i).setTypeConverter(arrayConverter);
                             } else {
-                                throw new MethodNotFoundException("No suitable data type converter found for class '" + clazz.getName() + "', method '" + methodName + "', parameter '"
-                                        + expectedParameters.get(i).getName() + "' which should be of type '" + parameterType.getTypeName() + "'.");
+                                // check if raw collection. If so, do nothing and use the DefaultDataTypeConverter. If not, we can't use the list converter.
+                                Class<?>[] interfaces = methodParameterClass.getInterfaces();
+                                if (!Arrays.asList(interfaces).contains(Collection.class)) {
+                                    throw new MethodNotFoundException("No suitable data type converter found for class '" + clazz.getName() + "', method '" + methodName + "', parameter '"
+                                            + expectedParameters.get(i).getName() + "' which should be of type '" + parameterType.getTypeName() + "'.");
+                                }
                             }
                         }
 

@@ -5,6 +5,7 @@
 @prefix ex:      <http://example.org/> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xs:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 #############
 # FUNCTIONS #
@@ -17,6 +18,13 @@ ex:sum a fno:Function ;
   fno:expects ( ex:int1 ex:int2 ) ;
   fno:returns ( ex:intOut ) .
 
+ex:rawListLen a fno:Function ;
+  fno:name "length of a raw list" ;
+  rdfs:label "length of a raw list" ;
+  dcterms:description "Returns the length of a raw list, i.e. without parameterized type" ;
+  fno:expects ( ex:rawList ) ;
+  fno:returns ( ex:intOut ) .
+
 #####################
 # FUNCTION MAPPINGS #
 #####################
@@ -25,6 +33,11 @@ ex:sumMapping a fno:Mapping ;
   fno:function ex:sum ;
   fno:implementation ex:internalTestFunctions ;
   fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "sum" ] .
+
+ex:rawListLenMapping a fno:Mapping ;
+  fno:function ex:rawListLen ;
+  fno:implementation ex:internalTestFunctions ;
+  fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "rawListLen" ] .
 
 
 ##############
@@ -43,6 +56,13 @@ ex:int2 a fno:Parameter ;
     rdfs:label "integer 2" ;
     fno:predicate ex:p_int2 ;
     fno:type xs:integer ;
+    fno:required "true"^^xs:boolean .
+
+ex:rawList a fno:Parameter ;
+    fno:name "a raw list" ;
+    rdfs:label "a raw list" ;
+    fno:predicate ex:p_rawList ;
+    fno:type rdf:List ;
     fno:required "true"^^xs:boolean .
 
 
