@@ -6,7 +6,8 @@
 @prefix ex:      <http://example.org/> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xs:      <http://www.w3.org/2001/XMLSchema#> .
-@prefix lib:      <http://example.com/library#> .
+@prefix lib:     <http://example.com/library#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 #############
 # FUNCTIONS #
@@ -21,6 +22,16 @@ ex:sum a fno:Function ;
   lib:providedBy [ # lib:localLibrary "UtilFunctions.jar" ;
                    lib:class        "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions" ;
                    lib:method       "sum" ] .
+
+ex:rawListLen a fno:Function ;
+  fno:name "length of a raw list" ;
+  rdfs:label "length of a raw list" ;
+  dcterms:description "Returns the length of a raw list, i.e. without parameterized type" ;
+  fno:expects ( ex:rawList ) ;
+  fno:returns ( ex:intOut ) ;
+  lib:providedBy [ # lib:localLibrary "UtilFunctions.jar" ;
+                   lib:class        "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions" ;
+                   lib:method       "rawListLen" ] .
 
 ##############
 # PARAMETERS #
@@ -40,6 +51,12 @@ ex:int2 a fno:Parameter ;
     fno:type xs:integer ;
     fno:required "true"^^xs:boolean .
 
+ex:rawList a fno:Parameter ;
+    fno:name "a raw list" ;
+    rdfs:label "a raw list" ;
+    fno:predicate ex:p_rawList ;
+    fno:type rdf:List ;
+    fno:required "true"^^xs:boolean .
 
 ###########
 # OUTPUTS #

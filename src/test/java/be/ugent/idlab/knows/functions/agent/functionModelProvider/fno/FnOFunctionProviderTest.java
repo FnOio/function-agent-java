@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -58,15 +60,23 @@ public class FnOFunctionProviderTest {
         checkSuccessFunctions(functionProvider.getFunctions().values());
     }
 
-    private void checkSuccessFunctions(final Collection<Function> functions) {
-        assertEquals("Number of functions parsed should be 1 ", 1, functions.size());
-        Function function = functions.iterator().next();
-        assertEquals("Wrong function id", "http://example.org/sum", function.getId());
-        assertEquals("Wrong function name", "Sum of two integers", function.getName());
-        assertEquals("Wrong function description", "Returns the sum of two given integers", function.getDescription());
+    private void checkSuccessFunctions(final Collection<Function> functionCollection) {
+        List<Function> functions = new ArrayList<>(functionCollection);
+        functions.sort(Comparator.comparing(Function::getId));
+
+        assertEquals("Number of functions parsed should be 2 ", 2, functions.size());
+        Function rawListLenFunction = functions.get(0);
+        assertEquals("Wrong function id", "http://example.org/rawListLen", rawListLenFunction.getId());
+        assertEquals("Wrong function name", "length of a raw list", rawListLenFunction.getName());
+        assertEquals("Wrong function description", "Returns the length of a raw list, i.e. without parameterized type", rawListLenFunction.getDescription());
+
+        Function sumFunction = functions.get(1);
+        assertEquals("Wrong function id", "http://example.org/sum", sumFunction.getId());
+        assertEquals("Wrong function name", "Sum of two integers", sumFunction.getName());
+        assertEquals("Wrong function description", "Returns the sum of two given integers", sumFunction.getDescription());
 
         // check input parameters
-        List<Parameter> inputParameters = function.getArgumentParameters();
+        List<Parameter> inputParameters = sumFunction.getArgumentParameters();
         assertEquals(2, inputParameters.size());
 
         for (int pi = 0; pi < inputParameters.size(); pi++) {
@@ -80,8 +90,8 @@ public class FnOFunctionProviderTest {
         }
 
         // check output parameters
-        assertEquals("Wrong number of return parameters", 1, function.getReturnParameters().size());
-        Parameter returnParameter = function.getReturnParameters().get(0);
+        assertEquals("Wrong number of return parameters", 1, sumFunction.getReturnParameters().size());
+        Parameter returnParameter = sumFunction.getReturnParameters().get(0);
         assertEquals("Wrong return parameter name ", "integer output", returnParameter.getName());
         assertEquals("Wrong return parameter id ", "http://example.org/o_int", returnParameter.getId());
         DataTypeConverter<?> typeConverter = returnParameter.getTypeConverter();
@@ -89,7 +99,7 @@ public class FnOFunctionProviderTest {
         assertTrue("Required should be true for return parameter", returnParameter.isRequired());
 
         // check mapping
-        FunctionMapping mapping = function.getFunctionMapping();
+        FunctionMapping mapping = sumFunction.getFunctionMapping();
         assertEquals("wrong function id for mapping", "http://example.org/sum", mapping.getFunctionId());
 
         MethodMapping methodMapping = mapping.getMethodMapping();
