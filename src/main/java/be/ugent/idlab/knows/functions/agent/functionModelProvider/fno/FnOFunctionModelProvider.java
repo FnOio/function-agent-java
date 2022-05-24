@@ -32,6 +32,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     private final Map<String, Function> functionId2Functions = new HashMap<>();
     private final Map<String, FunctionMapping> functionId2functionMappings = new HashMap<>();
     private final DataTypeConverterProvider dataTypeConverterProvider;
+    private final Map<String, String> location2otherLocationMap;
 
     // some properties used throughout the parsing process
     private final Property typeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
@@ -40,12 +41,28 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * Creates an instance of {@link FnOFunctionModelProvider}, holding all functions found in the given FnO documents.
      * If parsing fails, no functions will be returned by {@link FunctionModelProvider#getFunctions()}.
      *
+     * @param dataTypeConverterProvider     A provider for converting data types used in the FnO descriptions to Java data types.
      * @param fnoDocPaths    One or more documents in RDF describing functions using the Function Ontology (FnO).
      *                       One fnoDocPath can be a path to a
      *                       file, a URL to a file or a String containing FnO triples in Turtle format.
      */
     public FnOFunctionModelProvider(final DataTypeConverterProvider dataTypeConverterProvider, final String... fnoDocPaths) throws FnOException {
+        this(dataTypeConverterProvider, Collections.emptyMap(), fnoDocPaths);
+    }
+
+    /**
+     * Creates an instance of {@link FnOFunctionModelProvider}, holding all functions found in the given FnO documents.
+     * If parsing fails, no functions will be returned by {@link FunctionModelProvider#getFunctions()}.
+     *
+     * @param dataTypeConverterProvider     A provider for converting data types used in the FnO descriptions to Java data types.
+     * @param implementationLocationMapping   Overrides implmentation locations such as jar files as defined in the FnO doc with other locations.
+     * @param fnoDocPaths    One or more documents in RDF describing functions using the Function Ontology (FnO).
+     *                       One fnoDocPath can be a path to a
+     *                       file, a URL to a file or a String containing FnO triples in Turtle format.
+     */
+    public FnOFunctionModelProvider(final DataTypeConverterProvider dataTypeConverterProvider, final Map<String, String> implementationLocationMapping, final String... fnoDocPaths) throws FnOException {
         this.dataTypeConverterProvider = dataTypeConverterProvider;
+        this.location2otherLocationMap = implementationLocationMapping;
         parse(fnoDocPaths);
     }
 
@@ -84,7 +101,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
             URL fnoDocURL = FileFinder.findFile(fnoDocPath);
             if (fnoDocURL != null) {
                 logger.debug("'{}' resolved to '{}'", fnoDocPath, fnoDocURL);
-                RDFDataMgr.read(functionDescriptionTriples, fnoDocPath);
+                RDFDataMgr.read(functionDescriptionTriples, fnoDocPath, Lang.TURTLE);
             } else {
                 logger.warn("Could not find document; trying to interpret it as direct Turlte input.");
                 try {
@@ -215,9 +232,10 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
 
         // get the optional path to an implementation, e.g. a JAR file
         Property downloadPageProperty = ResourceFactory.createProperty(DOAP.toString(), "download-page");
-        final String pathName = getLiteralStr(implementationResource, downloadPageProperty.getURI()).orElse("");
+        final String location = getLiteralStr(implementationResource, downloadPageProperty.getURI()).orElse("");
+        final String mappedLocation = location2otherLocationMap.getOrDefault(location, location);
 
-        return new Implementation(className, pathName);
+        return new Implementation(className, mappedLocation);
     }
 
     /**
@@ -306,8 +324,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         String typeUri = getObjectURI(parameterResource, FNO + "type")
                 .orElseThrow(() -> new DataTypeNotFoundException("No data type description found for parameter '" + uri + '"'));
 
-        // get the predicate used in an RML mapping file mapping file.
-        // TODO: this is RML related; required?
+        // get the predicate as used in e.g. an RML mapping file.
         String predicateUri = getObjectURI(parameterResource, FNO + "predicate")
                 .orElseThrow(() -> new ParameterPredicateNotFoundException("No predicate description found for parameter '" + uri + "'"));
 
@@ -341,20 +358,21 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
             final Resource libResource = libResourceOption.get();
 
             // get jar file name, if any
-            String location = getLiteralStr(libResource, LIB + "localLibrary").orElse("");
+            final String location = getLiteralStr(libResource, LIB + "localLibrary").orElse("");
+            final String mappedLocation = location2otherLocationMap.getOrDefault(location, location);
 
             // get class
-            String className = getLiteralStr(libResource, LIB + "class")
+            final String className = getLiteralStr(libResource, LIB + "class")
                     .orElseThrow(() -> new ClassNameDescriptionNotFoundException("No '" + LIB
                     + "class' found for '" + libResource.getURI() + "' for function '" + functionUri + "'"));
 
             // get method
-            String method = getLiteralStr(libResource, LIB + "method")
+            final String method = getLiteralStr(libResource, LIB + "method")
                     .orElseThrow(() -> new MethodMappingNotFoundException("No '" + LIB
                             + "method' found for '" + libResource.getURI() + "' for function '" + functionUri + "'"));
 
             final MethodMapping methodMapping = new MethodMapping(FNOM + "StringMethodMapping", method);
-            final Implementation implementation = new Implementation(className, location);
+            final Implementation implementation = new Implementation(className, mappedLocation);
             final FunctionMapping functionMapping = new FunctionMapping(functionUri, methodMapping, implementation);
             functionId2functionMappings.put(functionUri, functionMapping);
         }

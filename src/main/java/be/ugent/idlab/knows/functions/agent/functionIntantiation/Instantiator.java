@@ -121,23 +121,18 @@ public class Instantiator {
         } catch (java.lang.ClassNotFoundException e) {
             logger.debug("Class '{}' not found by current class loader. Checking location '{}'", className, location);
             final URL locationUrl = FileFinder.findFile(location);
-            if (locationUrl.toString().endsWith(".jar")) {
-                logger.debug("Trying to load '{}' for JAR file '{}'", className, location);
+            logger.debug("Trying to load '{}' for JAR file '{}'", className, location);
 
-                // get all classes from JAR file. This is necessary to be sure to have imports as well.
-                try {
-                    loadClassesFromJAR(locationUrl);
-                    if (className2ClassMap.containsKey(className)) {
-                        return className2ClassMap.get(className);
-                    } else {
-                        logger.warn("No class '{}' found in JAR file '{}'", className, locationUrl);
-                    }
-                } catch (IOException ex) {
-                    logger.warn("An error occurred trying to load classes of JAR file '{}'", locationUrl, ex);
+            // get all classes from JAR file. This is necessary to be sure to have imports as well.
+            try {
+                loadClassesFromJAR(locationUrl);
+                if (className2ClassMap.containsKey(className)) {
+                    return className2ClassMap.get(className);
+                } else {
+                    logger.warn("No class '{}' found in JAR file '{}'", className, locationUrl);
                 }
-
-            } else {
-                logger.warn("Only JAR files are supported as location file type at the moment...");
+            } catch (IOException ex) {
+                logger.warn("An error occurred trying to load classes of file '{}'. Note that only JAR files are supported at the moment.", locationUrl, ex);
             }
 
             throw new ClassNotFoundException("No class found for " + className);
@@ -240,8 +235,11 @@ public class Instantiator {
 
     private void loadClassesFromJAR(final URL jarFileUrl) throws IOException {
         // TODO add jarfile cache?
-        JarFile jarFile = new JarFile(jarFileUrl.getFile());
-        try (URLClassLoader cl = URLClassLoader.newInstance(new URL[]{jarFileUrl})) {
+
+        try (
+                JarFile jarFile = new JarFile(jarFileUrl.getFile());
+                URLClassLoader cl = URLClassLoader.newInstance(new URL[]{jarFileUrl})) {
+
             jarFile
                     .stream()
                     .map(ZipEntry::getName)

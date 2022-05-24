@@ -15,10 +15,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -109,5 +106,35 @@ public class FnOFunctionProviderTest {
         Implementation implementation = mapping.getImplementation();
         assertEquals("Wrong implementation class name", "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions", implementation.getClassName());
         assertEquals("Implementation: location should be empty.","", implementation.getLocation());
+    }
+
+    @Test
+    public void testChangeLocation() throws FnOException {
+        // map the location of AaabimFunctions.jar to somewhere else
+        final String newLocation = "/some/other/path";
+        Map<String, String> mappedAaabimJarLocationMap = Collections.singletonMap("AaabimFunctions.jar", newLocation);
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, mappedAaabimJarLocationMap, "aaabim_java_mapping.ttl");
+
+        // now check
+        functionProvider.getFunctions().values().forEach(function -> {
+            String functionId = function.getId();
+            String location = function.getFunctionMapping().getImplementation().getLocation();
+            assertEquals("Wrong location of function '" + functionId + "'.", newLocation, location);
+        });
+    }
+
+    /**
+     * When the implementation location is not in the implementation location map, it should remain the same.
+     */
+    @Test
+    public void testChangeUnexistingLocation() throws FnOException {
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, "aaabim_java_mapping.ttl");
+
+        // now check
+        functionProvider.getFunctions().values().forEach(function -> {
+            String functionId = function.getId();
+            String location = function.getFunctionMapping().getImplementation().getLocation();
+            assertEquals("Wrong location of function '" + functionId + "'.", "AaabimFunctions.jar", location);
+        });
     }
 }
