@@ -2,6 +2,7 @@ package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.model.Function;
@@ -18,7 +19,7 @@ import static org.junit.Assert.*;
  * @author Gerald Haesendonck
  */
 public class AgentTest {
-
+    private static final String FNS = "http://example.com/functions#";
     @Test
     public void testEverythingGoesWell() throws Exception {
         // first initialize a DataTaypeConverterProvider
@@ -137,5 +138,108 @@ public class AgentTest {
         Object result = agent.execute("http://users.ugent.be/~bjdmeest/function/grel.ttl#boolean_or", arguments);
         assertTrue("false | true should be true", (Boolean)result);
 
+    }
+
+    @Test
+    public void testCompositeFunctionSum3() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("sum-composition.ttl", "generalFunctions.ttl");
+
+        Arguments arguments = new Arguments()
+                // fns:aParameter fns:bParameter fns:cParameter
+                .add(FNS+"a", "1")
+                .add(FNS+"b", "2")
+                .add(FNS+"c", "3");
+
+        Object result = agent.execute(FNS+"sum3", arguments);
+
+        assertEquals("1 + 2 + 3 should be 6", 6L, result);
+    }
+
+    @Test
+    public void testCompositeFunctionAdd10() throws Exception{
+        final Agent agent = AgentFactory.createFromFnO("add10.ttl");
+
+        Arguments arguments = new Arguments().add(FNS+"b10", "5");
+
+        Object result = agent.execute(FNS+"add10", arguments);
+        assertEquals("5 + 10 should be 15", 15L, result);
+    }
+
+    @Test
+    public void testCompositeFunctionComplexLinearDependencies() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "computation.ttl");
+
+        Arguments arguments = new Arguments()
+                .add("http://example.org/p_int1", 4)
+                .add("http://example.org/p_int2", 2)
+                .add("http://example.org/p_int3", 3)
+                .add("http://example.org/p_int4", 5);
+        Object result = agent.execute(FNS + "computation", arguments);
+        assertEquals("4*(2+3^5) should be 980", 980L, result);
+    }
+
+    @Test
+    public void testCompositeFunctionComplexNonLinearDependencies() throws Exception{
+        // calculate (a+b)² with the formula a² + 2ab + b²
+        final Agent agent = AgentFactory.createFromFnO("sum-composition.ttl", "squareOfSum.ttl", "generalFunctions.ttl");
+
+        Arguments arguments = new Arguments()
+                .add("http://example.org/p_int1", 4)
+                .add("http://example.org/p_int2", 5);
+
+        Object result = agent.execute(FNS+"squareOfSum", arguments);
+        assertEquals("(4+5)² should be ", 81L, result);
+    }
+
+    @Test
+    public void testIdentityFunctionNoImplemenation() throws Exception{
+        // the identity function implemented only as a composition
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "identityInteger.ttl");
+
+        Arguments arguments = new Arguments()
+                .add("http://example.org/p_int1", "1");
+        Object result = agent.execute(FNS+"identityInteger", arguments);
+        assertEquals("Identity function should return input", 1L, result);
+
+
+        arguments = new Arguments()
+                .add("http://example.org/p_int1", "2");
+        result = agent.execute(FNS+"identityInteger", arguments);
+        assertEquals("Identity function should return input", 2L, result);
+
+    }
+
+    @Test
+    public void testThrowExceptionForCyclicDependencies() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "identityInteger.ttl", "cyclic.ttl");
+        Arguments arguments = new Arguments()
+                .add("http://example.org/p_int1", "1");
+        assertThrows("expected an exception to be thrown", InstantiationException.class, () -> agent.execute(FNS + "cyclicFunction", arguments));
+    }
+
+    @Test
+    public void aliasTest() throws Exception{
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "aliasTest.ttl");
+        Arguments arguments = new Arguments()
+                .add("http://example.org/p_int1", 1)
+                .add("http://example.org/p_int2", 2);
+        Object result = agent.execute(FNS+"sumAlias", arguments);
+        assertEquals("alias should work as original function", 3L, result);
+    }
+
+    @Test
+    public void testThrowExceptionForNonExistingFunction() throws Exception{
+        final Agent agent = AgentFactory.createFromFnO("badFunction.ttl", "generalFunctions.ttl");
+        Arguments arguments = new Arguments()
+                .add("http://example.org/p_int1", 1);
+        assertThrows("expected an exception", InstantiationException.class, () -> agent.execute(FNS+"bad", arguments));
+    }
+
+    @Test
+    public void testThrowExceptionForNonExistingParameter() throws Exception{
+        final Agent agent = AgentFactory.createFromFnO("badParameter.ttl", "generalFunctions.ttl");
+        Arguments arguments = new Arguments()
+                .add("http://example.org/p_int1", 1);
+        assertThrows("expected an exception", InstantiationException.class, () -> agent.execute(FNS+"bad", arguments));
     }
 }

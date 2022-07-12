@@ -1,0 +1,158 @@
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xs:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex:      <http://example.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix fno:     <https://w3id.org/function/ontology#> .
+@prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
+@prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
+@prefix fns: <http://example.com/functions#> .
+@prefix fnoc: <https://w3id.org/function/vocabulary/composition#> .
+
+
+#############
+# FUNCTIONS #
+#############
+
+fns:squareOfSum a fno:Function;
+    fno:name "squareOfSum"^^xsd:string;
+    dcterms:description "makes the square of the sum of the 2 inputs"^^xsd:string;
+    rdfs:label "squareOfSum"@en;
+    fno:expects ( ex:int1 ex:int2 );
+    fno:returns ( ex:intOut ).
+
+
+################
+# COMPOSITIONS #
+################
+
+# Multiply a with a
+# use pow on b with 2
+# mult a with b
+# mult result of previous with 2
+# sum all together using the Sum3 composition
+
+fns:mult1 fnoc:applies ex:multiply .
+fns:mult2 fnoc:applies ex:multiply .
+fns:mult3 fnoc:applies ex:multiply .
+
+fns:squareOfSumComposition a fnoc:Composition ;
+    fnoc:composedOf [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:squareOfSum;
+            fnoc:functionParameter ex:int1
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:mult1;
+            fnoc:functionParameter ex:int1
+        ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:squareOfSum;
+            fnoc:functionParameter ex:int1
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:mult1;
+            fnoc:functionParameter ex:int2
+        ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:squareOfSum;
+            fnoc:functionParameter ex:int2
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction ex:pow;
+            fnoc:functionParameter ex:int1
+        ]
+    ],
+    [
+        fnoc:mapFromTerm 2;
+        fnoc:mapTo [
+            fnoc:constituentFunction ex:pow;
+            fnoc:functionParameter ex:int2
+        ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:squareOfSum;
+            fnoc:functionParameter ex:int1
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:mult2;
+            fnoc:functionParameter ex:int1
+        ]
+    ],
+     [
+         fnoc:mapFrom [
+             fnoc:constituentFunction fns:squareOfSum;
+             fnoc:functionParameter ex:int2
+         ];
+         fnoc:mapTo [
+             fnoc:constituentFunction fns:mult2;
+             fnoc:functionParameter ex:int2
+         ]
+     ],
+     [
+        fnoc:mapFromTerm 2;
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:mult3;
+            fnoc:functionParameter ex:int1
+        ]
+     ],
+     [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:mult2;
+            fnoc:functionOutput ex:intOut
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:mult3;
+            fnoc:functionParameter ex:int2
+        ]
+     ],
+     [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:mult1;
+            fnoc:functionOutput ex:intOut
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:sum3;
+            fnoc:functionParameter fns:aParameter;
+        ]
+     ],
+     [
+         fnoc:mapFrom [
+             fnoc:constituentFunction fns:mult3;
+             fnoc:functionOutput ex:intOut
+         ];
+         fnoc:mapTo [
+             fnoc:constituentFunction fns:sum3;
+             fnoc:functionParameter fns:bParameter;
+         ]
+      ],
+      [
+           fnoc:mapFrom [
+               fnoc:constituentFunction ex:pow;
+               fnoc:functionOutput ex:intOut
+           ];
+           fnoc:mapTo [
+               fnoc:constituentFunction fns:sum3;
+               fnoc:functionParameter fns:cParameter;
+           ]
+        ],
+     [
+        fnoc:mapFrom[
+            fnoc:constituentFunction fns:sum3;
+            fnoc:functionOutput fns:sumOutput
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:squareOfSum;
+            fnoc:functionOutput ex:intOut
+        ]
+     ]
+
+
+

@@ -137,4 +137,17 @@ public class FnOFunctionProviderTest {
             assertEquals("Wrong location of function '" + functionId + "'.", "AaabimFunctions.jar", location);
         });
     }
+
+    @Test
+    public void testCompositeFunctionFound() throws FnOException{
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, "sum-composition.ttl");
+        assertNotEquals("No functions were found", 0, functionProvider.getFunctions().size());
+    }
+
+    @Test
+    public void testCompositeFunctionWithLiteralFound() throws FnOException{
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, "add10.ttl");
+        assertNotEquals("no functions were found", 0, functionProvider.getFunctions().size());
+    }
+
 }

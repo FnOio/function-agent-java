@@ -11,6 +11,10 @@ then Function Agent can be called from A to execute functions of B.
 Describing functions can be done with the Function Ontology ([FnO.io](https://fno.io/)),
 or by providing another function model.
 
+
+If a function is a composition and has an implementation, the implementation will be used.
+If a function is a composition, only the functions whose results are needed for the output will be executed.
+
 ## Example
 
 Suppose you have this great library with a function you want to use in your code, 

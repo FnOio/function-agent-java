@@ -1,0 +1,69 @@
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xs:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex:      <http://example.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix fno:     <https://w3id.org/function/ontology#> .
+@prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
+@prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
+@prefix fns: <http://example.com/functions#> .
+@prefix fnoc: <https://w3id.org/function/vocabulary/composition#> .
+
+#############
+# FUNCTIONS #
+#############
+
+fns:cyclicFunction a fno:Function;
+    fno:name "cyclicFunction"^^xsd:string;
+    dcterms:description "a test function to detect cyclic composition dependencies"^^xsd:string;
+    fno:expects (ex:int1);
+    fno:returns (ex:intOut).
+
+
+################
+# COMPOSITIONS #
+################
+
+fns:cyclicComposition a fnoc:Composition;
+    fnoc:composedOf [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:cyclicFunction;
+            fnoc:functionParameter ex:int1
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction ex:sum;
+            fnoc:functionParameter ex:int1
+        ]
+    ],
+    [
+        fnoc:mapFrom[
+            fnoc:constituentFunction ex:sum;
+            fnoc:functionOutput ex:intOut
+        ];
+        fnoc:mapTo[
+            fnoc:constituentFunction fns:identityInteger;
+            fnoc:functionParameter ex:int1;
+        ]
+    ],
+    [
+        fnoc:mapFrom[
+            fnoc:constituentFunction fns:identityInteger;
+            fnoc:functionOutput ex:intOut
+        ];
+        fnoc:mapTo[
+            fnoc:constituentFunction ex:sum;
+            fnoc:functionParameter ex:int2
+        ]
+    ],
+    [
+        fnoc:mapFrom[
+            fnoc:constituentFunction ex:sum;
+            fnoc:functionOutput ex:intOut
+        ];
+        fnoc:mapTo[
+            fnoc:constituentFunction fns:cyclicFunction;
+            fnoc:functionOutput ex:intOut
+        ]
+    ]
