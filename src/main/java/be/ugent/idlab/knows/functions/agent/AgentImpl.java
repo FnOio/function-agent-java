@@ -8,10 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>Copyright 2021 IDLab (Ghent University - imec)</p>
@@ -36,6 +33,10 @@ public class AgentImpl implements Agent {
 
         // find the corresponding function
         final Function function = functionId2Function.get(functionId);
+
+        if(Objects.isNull(function)){
+            throw new RuntimeException("function not found");
+        }
 
         Method method = null;
         // get the method if the function is not a composition
