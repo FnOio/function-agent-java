@@ -242,4 +242,20 @@ public class AgentTest {
                 .add("http://example.org/p_int1", 1);
         assertThrows("expected an exception", InstantiationException.class, () -> agent.execute(FNS+"bad", arguments));
     }
+
+    @Test
+    public void testPartialFunctionApplication() throws Exception{
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "add10PartialApplication.ttl");
+        Arguments arguments = new Arguments().add("http://example.org/p_int2", 15);
+        Object result = agent.execute(FNS+"add10", arguments);
+        assertEquals("15 + 10 should be 25", 25L, result);
+    }
+
+    @Test
+    public void testPartialFunctionApplicationWithCompositions() throws Exception{
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "add10PartialApplicationWithComposition.ttl", "sum-composition.ttl");
+        Arguments arguments = new Arguments().add(FNS+"a", 15);
+        Object result = agent.execute(FNS+"add10", arguments);
+        assertEquals("15 + 10 should be 25", 25L, result);
+    }
 }
