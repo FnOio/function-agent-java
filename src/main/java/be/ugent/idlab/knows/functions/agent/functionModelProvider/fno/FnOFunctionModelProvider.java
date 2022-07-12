@@ -212,6 +212,9 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         Resource originalFunction = getObjectResource(resource, FNOC+"partiallyApplies")
                 .orElseThrow(() -> new FunctionNotFoundException("no function found to partially apply for " + functionId));
         Function original = functionId2Functions.get(originalFunction.getURI());
+        if(Objects.isNull(original)){
+            throw new FunctionNotFoundException("provided function " + originalFunction.getURI() +" not found");
+        }
         FunctionComposition composition = new FunctionComposition();
         composition.setFunctionId(functionId);
         List<Resource> mappings = getObjectResources(resource, FNOC+"parameterBinding");
@@ -224,6 +227,9 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
             Literal term = getLiteral(r, FNOC+"boundToTerm").orElseThrow(() -> new LiteralNotFoundException("no literal found for partial application for " + functionId));
             String parameterURI = getObjectURI(r, FNOC+"boundParameter").orElseThrow(() -> new ParameterNotFoundException("no parameter found for partial application for " + functionId));
             String parameterPredicate = parameterURItoPredicate.get(parameterURI);
+            if(parameterPredicate == null){
+                throw new ParameterNotFoundException("provided parameter " + parameterURI +" of function "+ originalFunction.getURI() + " not found");
+            }
             parametersToRemove.add(parameterPredicate);
             CompositionMappingPoint from = new CompositionMappingPoint("", term.getString(), false);
             from.setLiteral(true);
