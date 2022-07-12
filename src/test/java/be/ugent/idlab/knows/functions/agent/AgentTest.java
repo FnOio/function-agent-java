@@ -262,7 +262,7 @@ public class AgentTest {
     }
 
     @Test
-    public void testPartialApplicationThrowsExceptionNonExistingFunction() throws Exception{
+    public void testPartialApplicationThrowsExceptionNonExistingFunction() {
         assertThrows("expected an exception", FunctionNotFoundException.class, () ->AgentFactory.createFromFnO("generalFunctions.ttl", "badPartialApplicationFunction.ttl"));
     }
     @Test

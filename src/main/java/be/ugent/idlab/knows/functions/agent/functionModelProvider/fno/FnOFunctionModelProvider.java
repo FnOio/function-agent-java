@@ -197,6 +197,12 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         }
     }
 
+    /**
+     * Searches the FnO document for fnoc:PartiallyAppliedFunction resources and converts them to FunctionComposition objects
+     * in the internal Function Model
+     * @throws FnOException Something goes wrong parsing the function composition.
+     *                      A subclass of FnOException specifies what exactly.
+     */
     public void parsePartialApplications() throws FnOException{
         logger.debug("Parsing partial function applications");
         Resource partialApplicationObject = ResourceFactory.createProperty(FNOC+"PartiallyAppliedFunction");
@@ -209,14 +215,17 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     public void parsePartialApplication(final Resource resource) throws FnOException{
         logger.debug("parsing partial application for {}", resource.getURI());
         String functionId = resource.getURI();
+        // function that is partially applied
         Resource originalFunction = getObjectResource(resource, FNOC+"partiallyApplies")
                 .orElseThrow(() -> new FunctionNotFoundException("no function found to partially apply for " + functionId));
         Function original = functionId2Functions.get(originalFunction.getURI());
         if(Objects.isNull(original)){
             throw new FunctionNotFoundException("provided function " + originalFunction.getURI() +" not found");
         }
+        // make a new composition
         FunctionComposition composition = new FunctionComposition();
         composition.setFunctionId(functionId);
+        // get all parameters that are applied
         List<Resource> mappings = getObjectResources(resource, FNOC+"parameterBinding");
         if(mappings.isEmpty()){
             throw new PartialFunctionApplicationException("at least 1 function mapping is required");
