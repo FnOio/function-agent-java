@@ -34,11 +34,15 @@ public class AgentImpl implements Agent {
             logger.debug("Executing function '{}' with arguments '{}'", functionId, arguments.toString());
         }
 
-        // find a method with the given name
-        final Method method = instantiator.getMethod(functionId);
-
         // find the corresponding function
         final Function function = functionId2Function.get(functionId);
+
+        Method method = null;
+        // get the method if the function is not a composition
+        if(!function.isComposite()){
+            method = instantiator.getMethod(functionId);
+        }
+
 
         // "fill in" the argument parameters
         final List<Object> valuesInOrder = new ArrayList<>(arguments.size());
@@ -60,6 +64,10 @@ public class AgentImpl implements Agent {
         }
 
         // now execute the method
-        return method.invoke(null, valuesInOrder.toArray());
+        if(!function.isComposite()){
+            return method.invoke(null, valuesInOrder.toArray());
+        }
+        // if the function is a composition, there is no specific method associated with.
+        return instantiator.getCompositeMethod(functionId).apply(this, valuesInOrder.toArray());
     }
 }

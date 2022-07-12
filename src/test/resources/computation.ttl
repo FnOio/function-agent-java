@@ -1,0 +1,121 @@
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xs:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex:      <http://example.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix fno:     <https://w3id.org/function/ontology#> .
+@prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
+@prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
+@prefix fns: <http://example.com/functions#> .
+@prefix fnoc: <https://w3id.org/function/vocabulary/composition#> .
+
+#############
+# FUNCTIONS #
+#############
+
+fns:computation a fno:Function ;
+    fno:name "computation"^^xsd:string ;
+    dcterms:description "This function calculates a*(b+c^d)"^^xsd::string ;
+    fno:expects ( ex:int1 ex:int2 ex:int3 ex:int4) ;
+    fno:returns ( ex:intOut ) .
+
+##############
+# PARAMETERS #
+##############
+
+ex:int3 a fno:Parameter ;
+    fno:name "integer 3" ;
+    rdfs:label "integer 3" ;
+    fno:predicate ex:p_int3 ;
+    fno:type xs:integer ;
+    fno:required "true"^^xs:boolean .
+
+ex:int4 a fno:Parameter ;
+    fno:name "integer 4" ;
+    rdfs:label "integer 4" ;
+    fno:predicate ex:p_int4 ;
+    fno:type xs:integer ;
+    fno:required "true"^^xs:boolean .
+
+
+################
+# COMPOSITIONS #
+################
+
+fns:computationComposition a fnoc:Composition ;
+    fnoc:composedOf [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:computation;
+            fnoc:functionParameter ex:int1
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction ex:multiply;
+            fnoc:functionParameter ex:int1;
+        ]
+    ],
+    [
+          fnoc:mapFrom [
+              fnoc:constituentFunction fns:computation;
+              fnoc:functionParameter ex:int2
+          ];
+          fnoc:mapTo [
+              fnoc:constituentFunction ex:sum;
+              fnoc:functionParameter ex:int1;
+          ]
+    ],
+    [
+          fnoc:mapFrom [
+              fnoc:constituentFunction fns:computation;
+              fnoc:functionParameter ex:int3
+          ];
+          fnoc:mapTo [
+              fnoc:constituentFunction ex:pow;
+              fnoc:functionParameter ex:int1;
+          ]
+    ],
+    [
+          fnoc:mapFrom [
+              fnoc:constituentFunction fns:computation;
+              fnoc:functionParameter ex:int4
+          ];
+          fnoc:mapTo [
+              fnoc:constituentFunction ex:pow;
+              fnoc:functionParameter ex:int2;
+          ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction ex:pow;
+            fnoc:functionOutput ex:intOut
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction ex:sum;
+            fnoc:functionParameter ex:int2
+        ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction ex:sum;
+            fnoc:functionOutput ex:intOut
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction ex:multiply;
+            fnoc:functionParameter ex:int2
+        ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction ex:multiply;
+            fnoc:functionOutput ex:intOut
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:computation;
+            fnoc:functionOutput ex:intOut
+        ]
+    ]
+
+
+
+

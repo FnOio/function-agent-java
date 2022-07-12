@@ -1,0 +1,33 @@
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex:      <http://example.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fno:     <https://w3id.org/function/ontology#> .
+@prefix fns: <http://example.com/functions#> .
+@prefix fnoc: <https://w3id.org/function/vocabulary/composition#> .
+
+#############
+# FUNCTIONS #
+#############
+
+fns:identityInteger a fno:Function;
+    fno:name "identityInteger"^^xsd:string;
+    dcterms:description "this function returns the integer it gets"^^xsd::string;
+    fno:expects (ex:int1);
+    fno:returns (ex:intOut).
+
+################
+# COMPOSITIONS #
+################
+
+fns:identityIntegerComposition a fnoc:Composition;
+    fnoc:composedOf [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:identityInteger;
+            fnoc:functionParameter ex:int1
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:identityInteger;
+            fnoc:functionOutput ex:intOut
+        ]
+    ]

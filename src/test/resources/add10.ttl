@@ -1,0 +1,119 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://www.example.com#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix fno: <https://w3id.org/function/ontology#> .
+@prefix fnoi: <https://w3id.org/function/vocabulary/implementation#> .
+@prefix fnom: <https://w3id.org/function/vocabulary/mapping#> .
+@prefix fns: <http://example.com/functions#> .
+@prefix fnoc: <https://w3id.org/function/vocabulary/composition#> .
+
+#############
+# FUNCTIONS #
+#############
+
+fns:add10 a fno:Function ;
+    fno:name            "add10"^^xsd:string ;
+    dcterms:description "This function adds 10 to its integer parameter."^^xsd:string ;
+    fno:expects ( ex:intParameterB ) ;
+    fno:returns ( ex:sumOutput ) .
+
+ex:sum a fno:Function ;
+  fno:name "Sum of two integers" ;
+  rdfs:label "Sum of two integers" ;
+  dcterms:description "Returns the sum of two given integers" ;
+  fno:expects ( fns:aParameter fns:bParameter ) ;
+  fno:returns ( fns:sumOutput ) .
+
+#####################
+# FUNCTION MAPPINGS #
+#####################
+
+ex:sumMapping a fno:Mapping ;
+  fno:function ex:sum ;
+  fno:implementation ex:internalTestFunctions ;
+  fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "sum" ] .
+
+##############
+# PARAMETERS #
+##############
+
+ex:intParameterB a fno:Parameter;
+    fno:name "Input integer b" ;
+    rdfs:label "b"@en ;
+    fno:predicate fns:b10 ;
+    fno:type xsd:integer ;
+    fno:required "true"^^xsd:boolean .
+
+fns:aParameter rdf:type fno:Parameter ;
+    fno:name "Input integer a" ;
+    rdfs:label "a"@en ;
+    fno:predicate fns:a ;
+    fno:type xsd:integer ;
+    fno:required "true"^^xsd:boolean .
+
+fns:bParameter rdf:type fno:Parameter ;
+    fno:name "Input integer b" ;
+    rdfs:label "b"@en ;
+    fno:predicate fns:b ;
+    fno:type xsd:integer ;
+    fno:required "true"^^xsd:boolean .
+
+###########
+# OUTPUTS #
+###########
+
+fns:sumOutput rdf:type fno:Output;
+    fno:name "Output integer";
+    rdfs:label "Output integer";
+    fno:predicate fns:output ;
+    fno:type xsd:integer .
+
+ex:sumOutput a fno:Parameter;
+    fno:name "output parameter";
+    rdfs:label "o"@en;
+    fno:predicate fns:o;
+    fno:type xsd:integer;
+    fno:required "true"^^xsd:boolean.
+
+################
+# COMPOSITIONS #
+################
+
+fns:add10Composition a fnoc:Composition ;
+    fnoc:composedOf [
+        fnoc:mapFromTerm 10 ;
+        fnoc:mapTo [
+            fnoc:constituentFunction ex:sum ;
+            fnoc:functionParameter fns:aParameter
+        ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:add10 ;
+            fnoc:functionParameter ex:intParameterB
+        ] ;
+        fnoc:mapTo [
+            fnoc:constituentFunction ex:sum ;
+            fnoc:functionParameter fns:bParameter
+        ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction ex:sum ;
+            fnoc:functionOutput fns:sumOutput
+        ];
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:add10 ;
+            fnoc:functionOutput ex:sumOutput
+        ]
+    ] .
+
+###########
+# CLASSES #
+###########
+
+ex:internalTestFunctions a fnoi:JavaClass ;
+  fnoi:class-name "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions" .

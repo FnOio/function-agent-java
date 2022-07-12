@@ -31,9 +31,12 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     private final Model functionDescriptionTriples = ModelFactory.createDefaultModel();
     private final Map<String, Function> functionId2Functions = new HashMap<>();
     private final Map<String, FunctionMapping> functionId2functionMappings = new HashMap<>();
+
+    private final Map<String, FunctionComposition> functionId2functionCompositions = new HashMap<>();
     private final DataTypeConverterProvider dataTypeConverterProvider;
     private final Map<String, String> location2otherLocationMap;
 
+    private final Map<String, String> parameterURItoPredicate = new HashMap<>();
     // some properties used throughout the parsing process
     private final Property typeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
 
@@ -85,14 +88,18 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         try {
             readRDFModel(fnoDocPaths);
             parseFunctionMappings();
+            parseParameterPredicateMappings();
+            parseFunctionCompositions();
             parseFunctions();
-            mapFunctionMappingsToFunctions();
+            mapFunctionMappingsAndCompositionsToFunctions();
+            parseApplies();
         } finally {
             // free up some resources
             functionDescriptionTriples.close();
             functionId2functionMappings.clear();
+            functionId2functionCompositions.clear();
+            parameterURItoPredicate.clear();
         }
-
     }
 
     private void readRDFModel(final String... fnoDocPaths) throws FnODocNotFoundException {
@@ -118,14 +125,19 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * Put parsed function mapping objects into the corresponding function object.
      * @throws FunctionMappingNotFoundException No function mapping is found for a certain function.
      */
-    private void mapFunctionMappingsToFunctions() throws FunctionMappingNotFoundException {
+    private void mapFunctionMappingsAndCompositionsToFunctions() throws FunctionMappingNotFoundException {
         for (String functionId : functionId2Functions.keySet()) {
             logger.debug("Finding mapping for function {}", functionId);
             if (functionId2functionMappings.containsKey(functionId)) {
                 final Function function = functionId2Functions.get(functionId);
                 function.setFunctionMapping(functionId2functionMappings.get(functionId));
+            } else if (functionId2functionCompositions.containsKey(functionId)) {
+                logger.debug("Composition found for " + functionId);
+                final Function function = functionId2Functions.get(functionId);
+                function.setComposite(true);
+                function.setFunctionComposition(functionId2functionCompositions.get(functionId));
             } else {
-                throw new FunctionMappingNotFoundException("No '" + FNO + "Mapping' found for function '" + functionId + '"');
+                throw new FunctionMappingNotFoundException("No '" + FNO + "Mapping' or '"+FNOC+"Composition' found for function '" + functionId + '"');
             }
         }
     }
@@ -142,6 +154,44 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         ResIterator mappings = functionDescriptionTriples.listSubjectsWithProperty(typeProperty, functionMappingObject);
         while (mappings.hasNext()) {
             parseFunctionMapping(mappings.nextResource());
+        }
+    }
+
+    /**
+     * searches the FnO document for fno:predicate and puts them into a map to use later for mappings of function
+     * composition.
+     */
+    private void parseParameterPredicateMappings() {
+        logger.debug("Parsing parameter URI to predicate");
+        Property parameterPredicateObject = ResourceFactory.createProperty(FNO+"predicate");
+        ResIterator parameters = functionDescriptionTriples.listSubjectsWithProperty(parameterPredicateObject);
+        while(parameters.hasNext()){
+            parseParameterPredicateMapping(parameters.nextResource());
+        }
+    }
+
+    /**
+     * add a parameter predicate to the map.
+     * @param parameter the resource that represents a parameter.
+     */
+    private void parseParameterPredicateMapping(Resource parameter) {
+        String predicateURI = getObjectURI(parameter, FNO+"predicate").orElseThrow(() ->
+                new IllegalStateException("not possible to get an object without URI")); // can't happen
+        parameterURItoPredicate.put(parameter.getURI(), predicateURI);
+    }
+
+    /**
+     * Searches the FnO document for fnoc:Composition resources and converts them to FunctionComposition objects
+     * in the internal Function Model
+     * @throws FnOException Something goes wrong parsing the function composition.
+     *                      A subclass of FnOException specifies what exactly.
+     */
+    private void parseFunctionCompositions() throws FnOException{
+        logger.debug("Parsing function compositions");
+        Resource functionCompositionObject = ResourceFactory.createResource(FNOC+"Composition");
+        ResIterator mappings = functionDescriptionTriples.listSubjectsWithProperty(typeProperty, functionCompositionObject);
+        while (mappings.hasNext()){
+            parseFunctionComposition(mappings.nextResource());
         }
     }
 
@@ -170,6 +220,29 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         } else {
             logger.debug("Function mapping for {} already parsed", functionURI);
         }
+    }
+
+    /**
+     * Converts a function composition (fnoc:Composition) to a FunctionComposition object in the internal Function
+     * model and kept in an internal cache.
+     * @param functionCompositionResource   The function composition resource
+     * @throws FnOException             Something goes wrong parsing the function composition.
+     *                                  A subclass of FnOException specifies what exactly.
+     */
+    private void parseFunctionComposition(final Resource functionCompositionResource) throws FnOException{
+        logger.debug("Parsing function Composition {}", functionCompositionResource.getURI());
+        FunctionComposition composition = new FunctionComposition();
+        List<Resource> mappings = getObjectResources(functionCompositionResource, FNOC + "composedOf");
+        for(Resource r : mappings){
+            final CompositionMappingElement point = parseCompositionMapElement(r);
+            if(point.getTo().isOutput()){
+                composition.setFunctionId(point.getTo().getFunctionId());
+            }
+            if(!composition.addMapping(point)){
+                logger.debug("duplicate mapping rule found for {}", functionCompositionResource.getURI());
+            }
+        }
+        functionId2functionCompositions.put(composition.getFunctionId(), composition);
     }
 
     /**
@@ -236,6 +309,97 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         final String mappedLocation = location2otherLocationMap.getOrDefault(location, location);
 
         return new Implementation(className, mappedLocation);
+    }
+
+    /**
+     * Converts a Composition element (fnoc:composedOF) to a CompositionMappingElement object in the internal Function
+     * model.
+     * @param compositionMapElementResource   The function composition resource
+     * @throws FnOException             Something goes wrong parsing the composition element.
+     *                                  A subclass of FnOException specifies what exactly.
+     */
+    private CompositionMappingElement parseCompositionMapElement(final Resource compositionMapElementResource) throws FnOException{
+        final CompositionMappingPoint startingPoint = parseCompositionMapElementStartingpoint(compositionMapElementResource);
+        final CompositionMappingPoint endPoint = parseCompositionMapElementEndpoint(compositionMapElementResource);
+        return new CompositionMappingElement(startingPoint, endPoint);
+    }
+
+    /**
+     * Converts a Composition element starting point (fnoc:mapFrom or fnoc:mapFromTerm) to a CompositionMappingPoint
+     * object in the internal Function model.
+     * @param element   The function composition resource
+     * @throws FnOException             Something goes wrong parsing the composition element.
+     *                                  A subclass of FnOException specifies what exactly.
+     */
+    private CompositionMappingPoint parseCompositionMapElementStartingpoint(final Resource element) throws FnOException{
+
+        final Optional<Resource> startingPointResource = getObjectResource(element, FNOC+"mapFrom");
+        if(startingPointResource.isPresent()){ // fnoc:mapFrom found
+            final Resource startingPointFunction = getObjectResource(startingPointResource.get(), FNOC+"constituentFunction")
+                    .orElseThrow(() -> new FunctionCompositionException("No " + FNOC+"constituentFunction present in " + FNOC + "mapFrom"));
+            Optional<String> startingPointParameter = getObjectURI(startingPointResource.get(), FNOC+"functionParameter");
+            boolean isOutput = false;
+            if(!startingPointParameter.isPresent()){
+                startingPointParameter = getObjectURI(startingPointResource.get(), FNOC+"functionOutput");
+                isOutput = true;
+            }
+            String predicateURI = parameterURItoPredicate.get(startingPointParameter.orElseThrow(() -> new FunctionCompositionException("starting point: no output predicate found for mapping with constituent function " + startingPointFunction.getURI()){}));
+            return new CompositionMappingPoint(startingPointFunction.getURI(), predicateURI, isOutput);
+        }
+        else{ // try to find a fnoc:mapFromTerm
+            final Literal literal = getLiteral(element, FNOC+"mapFromTerm")
+                    .orElseThrow(() -> new FunctionCompositionException("No composition starting point found for " + element.getId()){});
+            CompositionMappingPoint cmp = new CompositionMappingPoint("", literal.getString(), false);
+            cmp.setLiteral(true);
+            return cmp;
+        }
+    }
+
+    /**
+     * Converts a Composition element end point (fnoc:mapTo) to a CompositionMappingPoint
+     * object in the internal Function model.
+     * @param element   The function composition resource
+     * @throws FnOException             Something goes wrong parsing the composition element.
+     *                                  A subclass of FnOException specifies what exactly.
+     */
+    private CompositionMappingPoint parseCompositionMapElementEndpoint(final Resource element) throws FnOException{
+        final Resource endPointResource = getObjectResource(element, FNOC+"mapTo")
+                .orElseThrow( () -> new FunctionCompositionException("No mapping end point found"){});
+        final String id = getObjectURI(endPointResource, FNOC+"constituentFunction")
+                .orElseThrow( () -> new FunctionCompositionException("No Constituent function found for endpoint"){});
+        Optional<String> parameterId = getObjectURI(endPointResource, FNOC+"functionParameter");
+        boolean isOutput = false;
+        if(!parameterId.isPresent()){
+            parameterId = getObjectURI(endPointResource, FNOC+"functionOutput");
+            isOutput = true;
+        }
+        String predicateURI = parameterURItoPredicate.get(parameterId.orElseThrow( () -> new FunctionCompositionException("mapping end point: no parameter found for constituent function "+id){}));
+        return new CompositionMappingPoint(id, predicateURI, isOutput);
+    }
+    /**
+     * Searches the FnO document for fnoc:applies resources and adds them to the function list as aliases
+     */
+    private void parseApplies() {
+        logger.debug("PARSING fnoc:applies");
+        logger.debug(functionId2Functions.toString());
+        final Map<String, String> appliesMap = new HashMap<>();
+        Property appliesObject = ResourceFactory.createProperty(FNOC + "applies");
+        ResIterator applies = functionDescriptionTriples.listSubjectsWithProperty(appliesObject);
+        while (applies.hasNext()){
+            final Resource alias = applies.nextResource();
+            final String original = getObjectURI(alias, FNOC+"applies")
+                    .orElseThrow(() -> new IllegalStateException("illegal state, there should be object with applies")); // can't happen
+            appliesMap.put(alias.getURI(), original);
+        }
+        for(String first : appliesMap.keySet()){
+            if(!functionId2Functions.containsKey(first)) {
+                String key = first;
+                while(appliesMap.containsKey(key)){ // fnoc:applies on a fnoc:applies
+                    key = appliesMap.get(key);
+                }
+                functionId2Functions.put(first, functionId2Functions.get(key));
+            }
+        }
     }
 
     /**
@@ -449,6 +613,21 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         } else {
             return Optional.of(statement.getObject().asResource());
         }
+    }
+
+    /**
+     * Returns a list of resources, given a subject and a predicate
+     * @param subject       The subject of a triple
+     * @param predicateURI  The predicate of a triple
+     * @return              The list of objects belonging to this triple, or an empty list if none exist
+     */
+    private List<Resource> getObjectResources(final Resource subject, final String predicateURI){
+        Property property = ResourceFactory.createProperty(predicateURI);
+        StmtIterator it = subject.listProperties(property);
+        List<Resource> list = new ArrayList<>();
+        it.filterDrop(Objects::isNull);
+        it.forEach((Statement s)-> list.add(s.getObject().asResource()));
+        return list;
     }
 
     /**

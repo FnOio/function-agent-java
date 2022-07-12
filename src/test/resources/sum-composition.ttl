@@ -1,0 +1,119 @@
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xs:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex:      <http://example.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix fno:     <https://w3id.org/function/ontology#> .
+@prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
+@prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
+@prefix fns: <http://example.com/functions#> .
+@prefix fnoc: <https://w3id.org/function/vocabulary/composition#> .
+
+
+#############
+# FUNCTIONS #
+#############
+
+fns:sum3 rdf:type fno:Function ;
+    fno:name "Sum3"^^xsd::string ;
+    dcterms:description "Description of the sum3 function"@en ;
+    rdfs:label "sum3"@en ;
+    fno:expects ( fns:aParameter fns:bParameter fns:cParameter ) ;
+    fno:returns ( fns:sumOutput ) .
+
+
+##############
+# PARAMETERS #
+##############
+
+fns:aParameter rdf:type fno:Parameter ;
+    fno:name "Input integer a" ;
+    rdfs:label "a"@en ;
+    fno:predicate fns:a ;
+    fno:type xsd:integer ;
+    fno:required "true"^^xsd:boolean .
+
+fns:bParameter rdf:type fno:Parameter ;
+    fno:name "Input integer b" ;
+    rdfs:label "b"@en ;
+    fno:predicate fns:b ;
+    fno:type xsd:integer ;
+    fno:required "true"^^xsd:boolean .
+
+fns:cParameter rdf:type fno:Parameter ;
+    fno:name "Input integer c" ;
+    rdfs:label "c"@en ;
+    fno:predicate fns:c ;
+    fno:type xsd:integer ;
+    fno:required "true"^^xsd:boolean .
+
+###########
+# OUTPUTS #
+###########
+
+fns:sumOutput rdf:type fno:Output;
+    fno:name "Output integer";
+    rdfs:label "Output integer";
+    fno:predicate fns:output ;
+    fno:type xsd:integer .
+
+################
+# COMPOSITIONS #
+################
+
+fns:sum3_1 fnoc:applies ex:sum .
+fns:sum3_2 fnoc:applies ex:sum .
+
+fns:sum3Composition a fnoc:Composition ;
+    fnoc:composedOf [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:sum3;
+            fnoc:functionParameter fns:aParameter
+        ] ;
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:sum3_1;
+            fnoc:functionParameter ex:int1
+        ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:sum3;
+            fnoc:functionParameter fns:bParameter
+        ] ;
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:sum3_1;
+            fnoc:functionParameter ex:int2
+        ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:sum3_1;
+            fnoc:functionOutput ex:intOut
+        ] ;
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:sum3_2;
+            fnoc:functionParameter ex:int1
+        ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:sum3;
+            fnoc:functionParameter fns:cParameter
+        ] ;
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:sum3_2;
+            fnoc:functionParameter ex:int2
+        ]
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:sum3_2;
+            fnoc:functionOutput ex:intOut
+        ] ;
+        fnoc:mapTo [
+            fnoc:constituentFunction fns:sum3;
+            fnoc:functionOutput fns:sumOutput
+        ]
+    ] .

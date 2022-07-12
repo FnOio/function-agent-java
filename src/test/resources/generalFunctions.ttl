@@ -25,6 +25,20 @@ ex:rawListLen a fno:Function ;
   fno:expects ( ex:rawList ) ;
   fno:returns ( ex:intOut ) .
 
+ex:multiply a fno:Function;
+    fno:name "Product of two integers";
+    rdfs:label "Product of two integers";
+    dcterms:description "Returns the product of two given integers";
+    fno:expects (ex:int1 ex:int2);
+    fno:returns (ex:intOut).
+
+ex:pow a fno:Function ;
+    fno:name "power of 2 numbers";
+    rdfs:label "power of 2 numbers";
+    dcterms:description "returns the power of the 2 arguments";
+    fno:expects (ex:int1 ex:int2) ;
+    fno:returns (ex:intOut).
+
 
 #####################
 # FUNCTION MAPPINGS #
@@ -39,6 +53,16 @@ ex:rawListLenMapping a fno:Mapping ;
   fno:function ex:rawListLen ;
   fno:implementation ex:internalTestFunctions ;
   fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "rawListLen" ] .
+
+ex:multiplyMapping a fno:Mapping;
+    fno:function ex:multiply;
+    fno:implementation ex:internalTestFunctions;
+    fno:methodMapping [ a fnom:StringMethodMapping; fnom:method-name "multiply" ] .
+
+ex:powMapping a fno:Mapping;
+    fno:function ex:pow;
+    fno:implementation ex:internalTestFunctions;
+    fno:methodMapping [ a fnom:StringMethodMapping; fnom:method-name "pow" ] .
 
 ##############
 # PARAMETERS #

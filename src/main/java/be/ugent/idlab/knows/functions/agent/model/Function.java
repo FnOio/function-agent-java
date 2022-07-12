@@ -29,4 +29,7 @@ public class Function {
 
     // a function mapping containing a method name mapping and an implementation
     private FunctionMapping functionMapping;
+
+    private boolean isComposite = false;
+    private FunctionComposition functionComposition = null;
 }
