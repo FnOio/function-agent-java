@@ -218,6 +218,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         if(mappings.isEmpty()){
             throw new PartialFunctionApplicationException("at least 1 function mapping is required");
         }
+        // map all literals to parameters with compositions
         List<String> parametersToRemove = new ArrayList<>();
         for (Resource r : mappings) {
             Literal term = getLiteral(r, FNOC+"boundToTerm").orElseThrow(() -> new LiteralNotFoundException("no literal found for partial application for " + functionId));
@@ -230,27 +231,31 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
             CompositionMappingElement element = new CompositionMappingElement(from, to);
             composition.addMapping(element);
         }
+        // check if all used parameters exist
         List<Parameter> newParameters = original.getArgumentParameters();
         for (String s : parametersToRemove) {
             if(newParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, s))){
                 throw new PartialFunctionApplicationException("provided mapping parameter not found in original functions parameters: "+s);
             }
         }
+        // add remaining parameters to the composition to just pass values
         newParameters = newParameters.stream().filter(p -> !parametersToRemove.contains(p.getId())).collect(Collectors.toList());
-        for (Parameter p : original.getReturnParameters()) {
-            CompositionMappingPoint from = new CompositionMappingPoint(originalFunction.getURI(), p.getId(), true);
-            CompositionMappingPoint to = new CompositionMappingPoint(functionId, p.getId(), false);
-            CompositionMappingElement element = new CompositionMappingElement(from, to);
-            composition.addMapping(element);
-        }
         for (Parameter p : newParameters) {
             CompositionMappingPoint from = new CompositionMappingPoint(functionId, p.getId(), false);
             CompositionMappingPoint to = new CompositionMappingPoint(originalFunction.getURI(), p.getId(), false);
             CompositionMappingElement element = new CompositionMappingElement(from, to);
             composition.addMapping(element);
         }
+        // map all return parameters
+        for (Parameter p : original.getReturnParameters()) {
+            CompositionMappingPoint from = new CompositionMappingPoint(originalFunction.getURI(), p.getId(), true);
+            CompositionMappingPoint to = new CompositionMappingPoint(functionId, p.getId(), false);
+            CompositionMappingElement element = new CompositionMappingElement(from, to);
+            composition.addMapping(element);
+        }
+        // create new function
         Function partialFunction = new Function(functionId, original.getId(), original.getDescription(), newParameters, original.getReturnParameters());
-        // is later connected
+        // composition and function are connected later
         functionId2Functions.put(functionId, partialFunction);
         functionId2functionCompositions.put(functionId, composition);
     }
