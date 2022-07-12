@@ -92,8 +92,8 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
             parseParameterPredicateMappings();
             parseFunctionCompositions();
             parseFunctions();
-            parsePartialApplications();
             mapFunctionMappingsAndCompositionsToFunctions();
+            parsePartialApplications();
             parseApplies();
         } finally {
             // free up some resources
@@ -213,7 +213,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     }
 
     public void parsePartialApplication(final Resource resource) throws FnOException{
-        logger.debug("parsing partial application for {}", resource.getURI());
+        logger.debug("parsing partial application for function {}", resource.getURI());
         String functionId = resource.getURI();
         // function that is partially applied
         Resource originalFunction = getObjectResource(resource, FNOC+"partiallyApplies")
@@ -228,7 +228,9 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         // get all parameters that are applied
         List<Resource> mappings = getObjectResources(resource, FNOC+"parameterBinding");
         if(mappings.isEmpty()){
-            throw new PartialFunctionApplicationException("at least 1 function mapping is required");
+            logger.debug("No mapping found in partial function application, treating it as {}:applies", FNOC);
+            functionId2Functions.put(functionId, original);
+            return;
         }
         // map all literals to parameters with compositions
         List<String> parametersToRemove = new ArrayList<>();
@@ -270,9 +272,9 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         }
         // create new function
         Function partialFunction = new Function(functionId, original.getId(), original.getDescription(), newParameters, original.getReturnParameters());
-        // composition and function are connected later
         functionId2Functions.put(functionId, partialFunction);
-        functionId2functionCompositions.put(functionId, composition);
+        partialFunction.setComposite(true);
+        partialFunction.setFunctionComposition(composition);
     }
 
     /**

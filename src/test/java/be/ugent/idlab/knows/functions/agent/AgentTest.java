@@ -269,4 +269,12 @@ public class AgentTest {
     public void testPartialApplicationThrowsExceptionNonExistingParameter() {
         assertThrows("expected an exception", ParameterNotFoundException.class, () -> AgentFactory.createFromFnO("generalFunctions.ttl", "badPartialApplicationParameter.ttl"));
     }
+
+    @Test
+    public void testPartialApplicationWithoutMappingsIsApplies() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("partialApplicationNoMappings.ttl", "generalFunctions.ttl");
+        Arguments arguments = new Arguments().add("http://example.org/p_int1", 5).add("http://example.org/p_int2", 15);
+        Object result = agent.execute(FNS+"add10", arguments);
+        assertEquals("15 + 5 should be 20", 20L, result);
+    }
 }
