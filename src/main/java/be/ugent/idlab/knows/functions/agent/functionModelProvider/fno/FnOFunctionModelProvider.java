@@ -212,6 +212,13 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         }
     }
 
+    /**
+     * Converts a partial function applicatoin (fnoc:PartiallyAppliedFunction) to a FunctionComposition object in the internal Function
+     * model.
+     * @param resource   The partial function application resource
+     * @throws FnOException             Something goes wrong parsing the partial function application.
+     *                                  A subclass of FnOException specifies what exactly.
+     */
     public void parsePartialApplication(final Resource resource) throws FnOException{
         logger.debug("parsing partial application for function {}", resource.getURI());
         String functionId = resource.getURI();
