@@ -2,6 +2,7 @@ package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class AgentImpl implements Agent {
         final Function function = functionId2Function.get(functionId);
 
         if(Objects.isNull(function)){
-            throw new RuntimeException("Function with id " + functionId + " not found");
+            throw new FunctionNotFoundException("Function with id " + functionId + " not found");
         }
 
         Method method = null;
