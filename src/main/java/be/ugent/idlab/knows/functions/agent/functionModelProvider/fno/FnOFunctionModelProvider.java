@@ -213,7 +213,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     }
 
     /**
-     * Converts a partial function applicatoin (fnoc:PartiallyAppliedFunction) to a FunctionComposition object in the internal Function
+     * Converts a partial function application (fnoc:PartiallyAppliedFunction) to a FunctionComposition object in the internal Function
      * model.
      * @param resource   The partial function application resource
      * @throws FnOException             Something goes wrong parsing the partial function application.
@@ -336,7 +336,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
 
     /**
      * Converts the method mapping (fno:methodMapping) resource of a given function mapping (fno:Mapping)
-     * to a MethodMapping objevt in the internal function model.
+     * to a MethodMapping object in the internal function model.
      * @param functionMappingResource   The fno:Mapping resource to get the method mapping from.
      * @return                          The MethodMapping object for the corresponding fno:methodMapping
      * @throws FnOException             Something goes wrong parsing the method mapping.
@@ -469,8 +469,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * Searches the FnO document for fnoc:applies resources and adds them to the function list as aliases
      */
     private void parseApplies() {
-        logger.debug("PARSING fnoc:applies");
-        logger.debug(functionId2Functions.toString());
+        logger.debug("Parsing fnoc:applies");
         final Map<String, String> appliesMap = new HashMap<>();
         Property appliesObject = ResourceFactory.createProperty(FNOC + "applies");
         ResIterator applies = functionDescriptionTriples.listSubjectsWithProperty(appliesObject);
