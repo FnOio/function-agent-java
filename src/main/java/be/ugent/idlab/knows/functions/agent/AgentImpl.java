@@ -35,7 +35,7 @@ public class AgentImpl implements Agent {
         final Function function = functionId2Function.get(functionId);
 
         if(Objects.isNull(function)){
-            throw new RuntimeException("function not found");
+            throw new RuntimeException("Function with id " + functionId + " not found");
         }
 
         Method method = null;
