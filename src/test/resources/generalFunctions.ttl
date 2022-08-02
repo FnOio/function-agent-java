@@ -39,6 +39,12 @@ ex:pow a fno:Function ;
     fno:expects (ex:int1 ex:int2) ;
     fno:returns (ex:intOut).
 
+ex:writeToFile a fno:Function ;
+    fno:name "write to file";
+    rdfs:label "writes argument to file";
+    dcterms:description "returns 0 if success, writes argument to file";
+    fno:expects (ex:int1 ex:string );
+    fno:returns ( ex:int2).
 
 #####################
 # FUNCTION MAPPINGS #
@@ -63,6 +69,11 @@ ex:powMapping a fno:Mapping;
     fno:function ex:pow;
     fno:implementation ex:internalTestFunctions;
     fno:methodMapping [ a fnom:StringMethodMapping; fnom:method-name "pow" ] .
+
+ex:writeMapping a fno:Mapping;
+    fno:function ex:writeToFile;
+    fno:implementation ex:internalTestFunctions;
+    fno:methodMapping [a fnom:StringMethodMapping; fnom:method-name "writeToFile" ].
 
 ##############
 # PARAMETERS #
@@ -89,6 +100,12 @@ ex:rawList a fno:Parameter ;
     fno:type rdf:List ;
     fno:required "true"^^xs:boolean .
 
+ex:string a fno:Parameter;
+    fno:name "string parameter";
+    rdfs:label "a string parameter";
+    fno:predicate ex:p_string;
+    fno:type xs:string;
+    fno:required "true"^^xs:boolean.
 
 ###########
 # OUTPUTS #

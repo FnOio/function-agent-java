@@ -1,5 +1,10 @@
 package be.ugent.idlab.knows.functions.internalfunctions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -10,6 +15,8 @@ import java.util.List;
  * @author Gerald Haesendonck
  */
 public class InternalTestFunctions {
+
+    private static final Logger logger = LoggerFactory.getLogger(InternalTestFunctions.class);
 
     /**
      * Returns the sum of a and b
@@ -58,5 +65,16 @@ public class InternalTestFunctions {
             return pow(a * a, b / 2);
         }
         return a * pow(a * a, (b - 1) / 2);
+    }
+
+    public static Long writeToFile(Object o, String filename){
+        try (FileWriter fileWriter = new FileWriter(filename)){
+            fileWriter.write(o.toString());
+        }
+        catch (IOException ioException){
+            logger.error("error occurred while writing to file: {}", ioException.toString());
+            return 1L;
+        }
+        return 0L;
     }
 }

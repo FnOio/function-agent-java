@@ -30,7 +30,21 @@ public class AgentImpl implements Agent {
 
     @Override
     public Object execute(String functionId, Arguments arguments) throws Exception {
+        return execute(functionId, arguments, false);
+    }
+
+    /**
+     * executes the function with the given ID and arguments. Enabling debug mode will execute all elements of a
+     * Function Composition and not only the required ones for output.
+     * @param functionId the function ID
+     * @param arguments the arguments of the function
+     * @param debug debug mode to enable all execution
+     * @return the result of the function
+     * @throws Exception Something went wrong. A subclass will specify what with a message.
+     */
+    public Object execute(String functionId, Arguments arguments, boolean debug) throws Exception {
         if (logger.isDebugEnabled()) {
+            logger.debug("Execution debug mode: {}", debug);
             logger.debug("Executing function '{}' with arguments '{}'", functionId, arguments.toString());
         }
 
@@ -68,6 +82,6 @@ public class AgentImpl implements Agent {
             return method.invoke(null, valuesInOrder.toArray());
         }
         // if the function is a composition, there is no specific method associated with.
-        return instantiator.getCompositeMethod(functionId).apply(this, valuesInOrder.toArray());
+        return instantiator.getCompositeMethod(functionId, debug).apply(this, valuesInOrder.toArray());
     }
 }

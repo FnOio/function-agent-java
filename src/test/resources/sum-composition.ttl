@@ -116,4 +116,21 @@ fns:sum3Composition a fnoc:Composition ;
             fnoc:constituentFunction fns:sum3;
             fnoc:functionOutput fns:sumOutput
         ]
-    ] .
+    ],
+    [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:sum3_2;
+            fnoc:functionOutput ex:intOut
+        ];
+        fnoc:mapTo[
+            fnoc:constituentFunction ex:writeToFile;
+            fnoc:functionParameter ex:int1
+        ]
+    ],
+    [
+        fnoc:mapFromTerm "./test.txt";
+        fnoc:mapTo [
+            fnoc:constituentFunction ex:writeToFile;
+            fnoc:functionParameter ex:string
+        ]
+    ].
