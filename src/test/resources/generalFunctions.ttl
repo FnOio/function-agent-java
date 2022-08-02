@@ -46,6 +46,13 @@ ex:writeToFile a fno:Function ;
     fno:expects (ex:int1 ex:string );
     fno:returns ( ex:int2).
 
+ex:tee a fno:Function ;
+    fno:name "tee";
+    rdfs:label "tee";
+    dcterms:description "return the object it is given and writes it to a given file" ;
+    fno:expects (ex:int1 ex:string);
+    fno:returns (ex:intOut).
+
 #####################
 # FUNCTION MAPPINGS #
 #####################

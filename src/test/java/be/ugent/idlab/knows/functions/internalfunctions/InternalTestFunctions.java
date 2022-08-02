@@ -77,4 +77,9 @@ public class InternalTestFunctions {
         }
         return 0L;
     }
+
+    public static Object tee(Object object, String filename){
+        writeToFile(object, filename);
+        return object;
+    }
 }
