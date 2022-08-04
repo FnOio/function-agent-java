@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `FnoFunctionModelProvider`: Can now parse Partial Function Application.
 - `Agent`: Can execute Function Compositions.
 - `Agent`: Can execute Partial Function Application.
+- `Agent`: Has a debug mode.
+- `Instantiator`: In debug mode it will execute all nodes of a composition, otherwise only those necessary for the output (works non-recursive).
 
 ### Fixed
 - `Instantiator`: fixed Windows path resolving issues.
