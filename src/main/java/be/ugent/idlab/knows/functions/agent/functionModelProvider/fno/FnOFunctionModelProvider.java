@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.*;
 
@@ -92,6 +93,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
             parseFunctionCompositions();
             parseFunctions();
             mapFunctionMappingsAndCompositionsToFunctions();
+            parsePartialApplications();
             parseApplies();
         } finally {
             // free up some resources
@@ -196,6 +198,93 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     }
 
     /**
+     * Searches the FnO document for fnoc:PartiallyAppliedFunction resources and converts them to FunctionComposition objects
+     * in the internal Function Model
+     * @throws FnOException Something goes wrong parsing the function composition.
+     *                      A subclass of FnOException specifies what exactly.
+     */
+    public void parsePartialApplications() throws FnOException{
+        logger.debug("Parsing partial function applications");
+        Resource partialApplicationObject = ResourceFactory.createProperty(FNOC+"PartiallyAppliedFunction");
+        ResIterator applications = functionDescriptionTriples.listSubjectsWithProperty(typeProperty, partialApplicationObject);
+        while(applications.hasNext()){
+            parsePartialApplication(applications.nextResource());
+        }
+    }
+
+    /**
+     * Converts a partial function application (fnoc:PartiallyAppliedFunction) to a FunctionComposition object in the internal Function
+     * model.
+     * @param resource   The partial function application resource
+     * @throws FnOException             Something goes wrong parsing the partial function application.
+     *                                  A subclass of FnOException specifies what exactly.
+     */
+    public void parsePartialApplication(final Resource resource) throws FnOException{
+        logger.debug("parsing partial application for function {}", resource.getURI());
+        String functionId = resource.getURI();
+        // function that is partially applied
+        Resource originalFunction = getObjectResource(resource, FNOC+"partiallyApplies")
+                .orElseThrow(() -> new FunctionNotFoundException("no function found to partially apply in partial application with id: " + functionId));
+        Function original = functionId2Functions.get(originalFunction.getURI());
+        if(Objects.isNull(original)){
+            throw new FunctionNotFoundException("function to partially apply with id " + originalFunction.getURI() +" not found");
+        }
+        // make a new composition
+        FunctionComposition composition = new FunctionComposition();
+        composition.setFunctionId(functionId);
+        // get all parameters that are applied
+        List<Resource> mappings = getObjectResources(resource, FNOC+"parameterBinding");
+        if(mappings.isEmpty()){
+            logger.debug("No mapping found in partial function application, treating it as {}:applies", FNOC);
+            functionId2Functions.put(functionId, original);
+            return;
+        }
+        // map all literals to parameters with compositions
+        List<String> parametersToRemove = new ArrayList<>(); // parameters that will receive a value from the partial application
+        for (Resource r : mappings) {
+            Literal term = getLiteral(r, FNOC+"boundToTerm").orElseThrow(() -> new LiteralNotFoundException("No literal found for partial application for " + functionId));
+            String parameterURI = getObjectURI(r, FNOC+"boundParameter").orElseThrow(() -> new ParameterNotFoundException("No parameter found for partial application for " + functionId));
+            String parameterPredicate = parameterURItoPredicate.get(parameterURI);
+            if(parameterPredicate == null){
+                throw new ParameterNotFoundException("Predicate of provided parameter " + parameterURI +" of function "+ originalFunction.getURI() + " not found");
+            }
+            parametersToRemove.add(parameterPredicate);
+            CompositionMappingPoint from = new CompositionMappingPoint("", term.getString(), false);
+            from.setLiteral(true);
+            CompositionMappingPoint to = new CompositionMappingPoint(originalFunction.getURI(), parameterPredicate, false);
+            CompositionMappingElement element = new CompositionMappingElement(from, to);
+            composition.addMapping(element);
+        }
+        // check if all used parameters exist
+        List<Parameter> newParameters = original.getArgumentParameters();
+        for (String s : parametersToRemove) {
+            if(newParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, s))){
+                throw new PartialFunctionApplicationException("Provided parameter: " + s + " not found in original functions parameters.");
+            }
+        }
+        // add remaining parameters to the composition to just pass values
+        newParameters = newParameters.stream().filter(p -> !parametersToRemove.contains(p.getId())).collect(Collectors.toList());
+        for (Parameter p : newParameters) {
+            CompositionMappingPoint from = new CompositionMappingPoint(functionId, p.getId(), false);
+            CompositionMappingPoint to = new CompositionMappingPoint(originalFunction.getURI(), p.getId(), false);
+            CompositionMappingElement element = new CompositionMappingElement(from, to);
+            composition.addMapping(element);
+        }
+        // map all return parameters
+        for (Parameter p : original.getReturnParameters()) {
+            CompositionMappingPoint from = new CompositionMappingPoint(originalFunction.getURI(), p.getId(), true);
+            CompositionMappingPoint to = new CompositionMappingPoint(functionId, p.getId(), false);
+            CompositionMappingElement element = new CompositionMappingElement(from, to);
+            composition.addMapping(element);
+        }
+        // create new function
+        Function partialFunction = new Function(functionId, original.getId(), original.getDescription(), newParameters, original.getReturnParameters());
+        functionId2Functions.put(functionId, partialFunction);
+        partialFunction.setComposite(true);
+        partialFunction.setFunctionComposition(composition);
+    }
+
+    /**
      * Converts a function mapping (fno:Mapping) to a FunctionMapping object in the internal Function model and kept in
      * an internal cache.
      * @param functionMappingResource   The function mapping resource
@@ -247,7 +336,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
 
     /**
      * Converts the method mapping (fno:methodMapping) resource of a given function mapping (fno:Mapping)
-     * to a MethodMapping objevt in the internal function model.
+     * to a MethodMapping object in the internal function model.
      * @param functionMappingResource   The fno:Mapping resource to get the method mapping from.
      * @return                          The MethodMapping object for the corresponding fno:methodMapping
      * @throws FnOException             Something goes wrong parsing the method mapping.
@@ -380,7 +469,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * Searches the FnO document for fnoc:applies resources and adds them to the function list as aliases
      */
     private void parseApplies() {
-        logger.debug("PARSING fnoc:applies");
+        logger.debug("Parsing fnoc:applies");
         final Map<String, String> appliesMap = new HashMap<>();
         Property appliesObject = ResourceFactory.createProperty(FNOC + "applies");
         ResIterator applies = functionDescriptionTriples.listSubjectsWithProperty(appliesObject);

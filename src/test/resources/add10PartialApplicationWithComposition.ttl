@@ -1,0 +1,25 @@
+@prefix fns: <http://example.com/functions#> .
+@prefix fnoc: <https://w3id.org/function/vocabulary/composition#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fno:     <https://w3id.org/function/ontology#> .
+@prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
+@prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
+@prefix ex:      <http://example.org/> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xs:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+#############
+# FUNCTIONS #
+#############
+
+fns:add10 a fnoc:PartiallyAppliedFunction ;
+    fnoc:partiallyApplies fns:sum3;
+    fnoc:parameterBinding [
+        fnoc:boundToTerm 3;
+        fnoc:boundParameter fns:bParameter
+    ],
+    [
+        fnoc:boundToTerm 7;
+        fnoc:boundParameter fns:cParameter
+    ]
