@@ -32,11 +32,9 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     private final Model functionDescriptionTriples = ModelFactory.createDefaultModel();
     private final Map<String, Function> functionId2Functions = new HashMap<>();
     private final Map<String, FunctionMapping> functionId2functionMappings = new HashMap<>();
-
     private final Map<String, FunctionComposition> functionId2functionCompositions = new HashMap<>();
     private final DataTypeConverterProvider dataTypeConverterProvider;
     private final Map<String, String> location2otherLocationMap;
-
     private final Map<String, String> parameterURItoPredicate = new HashMap<>();
     // some properties used throughout the parsing process
     private final Property typeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
@@ -112,7 +110,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
                 logger.debug("'{}' resolved to '{}'", fnoDocPath, fnoDocURL);
                 RDFDataMgr.read(functionDescriptionTriples, fnoDocPath, Lang.TURTLE);
             } else {
-                logger.warn("Could not find document; trying to interpret it as direct Turlte input.");
+                logger.warn("Could not find document; trying to interpret it as direct Turtle input.");
                 try {
                     // TODO: at the moment only Turtle is supported
                     RDFDataMgr.read(functionDescriptionTriples, new StringReader(fnoDocPath), "", Lang.TURTLE);
@@ -139,7 +137,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
                 function.setComposite(true);
                 function.setFunctionComposition(functionId2functionCompositions.get(functionId));
             } else {
-                throw new FunctionMappingNotFoundException("No '" + FNO + "Mapping' or '"+FNOC+"Composition' found for function '" + functionId + '"');
+                throw new FunctionMappingNotFoundException("No '" + FNO + "Mapping' or '" + FNOC + "Composition' found for function '" + functionId + '"');
             }
         }
     }
@@ -177,8 +175,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * @param parameter the resource that represents a parameter.
      */
     private void parseParameterPredicateMapping(Resource parameter) {
-        String predicateURI = getObjectURI(parameter, FNO+"predicate").orElseThrow(() ->
-                new IllegalStateException("not possible to get an object without URI")); // can't happen
+        String predicateURI = getObjectURI(parameter, FNO+"predicate").get();
         parameterURItoPredicate.put(parameter.getURI(), predicateURI);
     }
 
@@ -226,7 +223,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         Resource originalFunction = getObjectResource(resource, FNOC+"partiallyApplies")
                 .orElseThrow(() -> new FunctionNotFoundException("no function found to partially apply in partial application with id: " + functionId));
         Function original = functionId2Functions.get(originalFunction.getURI());
-        if(Objects.isNull(original)){
+        if(original == null){
             throw new FunctionNotFoundException("function to partially apply with id " + originalFunction.getURI() +" not found");
         }
         // make a new composition
@@ -401,7 +398,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     }
 
     /**
-     * Converts a Composition element (fnoc:composedOF) to a CompositionMappingElement object in the internal Function
+     * Converts a Composition element (fnoc:composedOf) to a CompositionMappingElement object in the internal Function
      * model.
      * @param compositionMapElementResource   The function composition resource
      * @throws FnOException             Something goes wrong parsing the composition element.
@@ -475,8 +472,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         ResIterator applies = functionDescriptionTriples.listSubjectsWithProperty(appliesObject);
         while (applies.hasNext()){
             final Resource alias = applies.nextResource();
-            final String original = getObjectURI(alias, FNOC+"applies")
-                    .orElseThrow(() -> new IllegalStateException("illegal state, there should be object with applies")); // can't happen
+            final String original = getObjectURI(alias, FNOC+"applies").get();
             appliesMap.put(alias.getURI(), original);
         }
         for(String first : appliesMap.keySet()){
