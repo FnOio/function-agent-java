@@ -114,10 +114,15 @@ public class Instantiator {
             return id2CompositionLambdaMap.get(functionId);
         }
 
+        if(!id2functionMap.containsKey(functionId)){
+            throw new FunctionNotFoundException("No function found with id " + functionId);
+        }
+
         final Function function = id2functionMap.get(functionId);
 
         if(!function.isComposite()){
-            throw new NotACompositeFunctionException("the provided functionId is not a function composition");
+            throw new NotACompositeFunctionException("the provided functionId is not a function composition"); // strict
+            //return (Agent agent, Object[] args) -> this.getMethod(functionId).invoke(null, args); // can also be used
         }
 
         // get the composition
@@ -263,16 +268,18 @@ public class Instantiator {
     private void checkFunction(CompositionMappingPoint compositionMappingPoint) throws InstantiationException{
         Function fromFunction = id2functionMap.get(compositionMappingPoint.getFunctionId());
         if(Objects.isNull(fromFunction)){
-            throw new CompositionReferenceException("the used function "+compositionMappingPoint.getFunctionId() + " could not be found");
+            throw new CompositionReferenceException("the used function " + compositionMappingPoint.getFunctionId() + " could not be found");
         }
         List<Parameter> fromInputParameters = fromFunction.getArgumentParameters();
         List<Parameter> fromReturnParameters = fromFunction.getReturnParameters();
+        String parameterId = compositionMappingPoint.getParameterId();
+        // parameter not in input parameters or in return parameters
         if(
-                fromInputParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, compositionMappingPoint.getParameterId()))
+                fromInputParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, parameterId))
                         &&
-                        fromReturnParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, compositionMappingPoint.getParameterId()))
+                        fromReturnParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, parameterId))
         ){
-            throw new CompositionReferenceException("the used parameter "+compositionMappingPoint.getParameterId() + " of function " + compositionMappingPoint.getFunctionId() + " could not be found");
+            throw new CompositionReferenceException("the used parameter " + parameterId + " of function " + compositionMappingPoint.getFunctionId() + " could not be found");
 
         }
     }
