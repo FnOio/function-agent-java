@@ -319,6 +319,8 @@ public class AgentTest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(file.openStream()));
         String line = bufferedReader.readLine();
         assertEquals("print effect did not trigger", 12L, Integer.parseInt(line));
+    }
+    @Test
     public void testPartialFunctionApplication() throws Exception{
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "add10PartialApplication.ttl");
         Arguments arguments = new Arguments().add("http://example.org/p_int2", 15);
