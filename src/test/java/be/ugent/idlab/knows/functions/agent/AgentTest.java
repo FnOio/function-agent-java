@@ -302,5 +302,22 @@ public class AgentTest {
         assertEquals("(4+5)² should be ", 81L, result);
     }
 
+    @Test
+    public void testCompositeFunctionWithComplexSidePath() throws Exception {
+        final AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO("complex_side_path.ttl", "generalFunctions.ttl");
+        Arguments arguments = new Arguments()
+                // fns:aParameter fns:bParameter fns:cParameter
+                .add(FNS+"a", "1")
+                .add(FNS+"b", "2")
+                .add(FNS+"c", "3");
+        Object result = agent.execute(FNS+"complexSidePath", arguments, true);
+
+        assertEquals("1 + 2 + 3 should be 6", 6L, result);
+        URL file = FileFinder.findFile("test0.txt");
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(file.openStream()));
+        String line = bufferedReader.readLine();
+        assertEquals("print effect did not trigger", 12L, Integer.parseInt(line));
+    }
+
 
 }

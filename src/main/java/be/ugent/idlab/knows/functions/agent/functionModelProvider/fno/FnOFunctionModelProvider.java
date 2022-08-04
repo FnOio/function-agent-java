@@ -381,7 +381,6 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      */
     private void parseApplies() {
         logger.debug("PARSING fnoc:applies");
-        logger.debug(functionId2Functions.toString());
         final Map<String, String> appliesMap = new HashMap<>();
         Property appliesObject = ResourceFactory.createProperty(FNOC + "applies");
         ResIterator applies = functionDescriptionTriples.listSubjectsWithProperty(appliesObject);

@@ -82,6 +82,11 @@ ex:writeMapping a fno:Mapping;
     fno:implementation ex:internalTestFunctions;
     fno:methodMapping [a fnom:StringMethodMapping; fnom:method-name "writeToFile" ].
 
+ex:teeMapping a fno:Mapping;
+   fno:function ex:tee;
+   fno:implementation ex:internalTestFunctions;
+   fno:methodMapping [a fnom:StringMethodMapping; fnom:method-name "tee" ].
+
 ##############
 # PARAMETERS #
 ##############
