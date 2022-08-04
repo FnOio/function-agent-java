@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.2.0] - 2022-07-12
 ### Added
 - `FnoFunctionModelProvider`: Can now parse Function Composition.
+- `FnoFunctionModelProvider`: Can now parse Partial Function Application.
 - `Agent`: Can execute Function Compositions.
+- `Agent`: Can execute Partial Function Application.
 
 ### Fixed
 - `Instantiator`: fixed Windows path resolving issues.

@@ -5,6 +5,8 @@ import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.ParameterNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import org.junit.Test;
 
@@ -241,5 +243,38 @@ public class AgentTest {
         Arguments arguments = new Arguments()
                 .add("http://example.org/p_int1", 1);
         assertThrows("expected an exception", InstantiationException.class, () -> agent.execute(FNS+"bad", arguments));
+    }
+
+    @Test
+    public void testPartialFunctionApplication() throws Exception{
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "add10PartialApplication.ttl");
+        Arguments arguments = new Arguments().add("http://example.org/p_int2", 15);
+        Object result = agent.execute(FNS+"add10", arguments);
+        assertEquals("15 + 10 should be 25", 25L, result);
+    }
+
+    @Test
+    public void testPartialFunctionApplicationWithCompositions() throws Exception{
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "add10PartialApplicationWithComposition.ttl", "sum-composition.ttl");
+        Arguments arguments = new Arguments().add(FNS+"a", 15);
+        Object result = agent.execute(FNS+"add10", arguments);
+        assertEquals("15 + 10 should be 25", 25L, result);
+    }
+
+    @Test
+    public void testPartialApplicationThrowsExceptionNonExistingFunction() {
+        assertThrows("expected an exception", FunctionNotFoundException.class, () ->AgentFactory.createFromFnO("generalFunctions.ttl", "badPartialApplicationFunction.ttl"));
+    }
+    @Test
+    public void testPartialApplicationThrowsExceptionNonExistingParameter() {
+        assertThrows("expected an exception", ParameterNotFoundException.class, () -> AgentFactory.createFromFnO("generalFunctions.ttl", "badPartialApplicationParameter.ttl"));
+    }
+
+    @Test
+    public void testPartialApplicationWithoutMappingsIsApplies() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("partialApplicationNoMappings.ttl", "generalFunctions.ttl");
+        Arguments arguments = new Arguments().add("http://example.org/p_int1", 5).add("http://example.org/p_int2", 15);
+        Object result = agent.execute(FNS+"add10", arguments);
+        assertEquals("15 + 5 should be 20", 20L, result);
     }
 }

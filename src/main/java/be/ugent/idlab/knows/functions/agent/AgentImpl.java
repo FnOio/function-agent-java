@@ -2,16 +2,14 @@ package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>Copyright 2021 IDLab (Ghent University - imec)</p>
@@ -36,6 +34,10 @@ public class AgentImpl implements Agent {
 
         // find the corresponding function
         final Function function = functionId2Function.get(functionId);
+
+        if(Objects.isNull(function)){
+            throw new FunctionNotFoundException("Function with id " + functionId + " not found");
+        }
 
         Method method = null;
         // get the method if the function is not a composition
