@@ -50,7 +50,7 @@ public class AgentImpl implements Agent {
         final List<Object> valuesInOrder = new ArrayList<>(arguments.size());
         for (Parameter argumentParameter : function.getArgumentParameters()) {
             Collection<Object> valueCollection = arguments.get(argumentParameter.getId());
-            if (argumentParameter.getTypeConverter().getTypeCategory().equals(DataTypeConverter.TypeCategory.COLLECTION)) {
+            if (argumentParameter.getTypeConverter().getTypeCategory() == DataTypeConverter.TypeCategory.COLLECTION) {
                 Object convertedValue = argumentParameter.getTypeConverter().convert(valueCollection);
                 valuesInOrder.add(convertedValue);
             } else {
