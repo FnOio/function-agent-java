@@ -249,7 +249,7 @@ public class AgentTest {
 
     @Test
     public void testCompositeFunctionSum3WithDebug() throws Exception {
-        final AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO("sum-composition.ttl", "generalFunctions.ttl");
+        final Agent agent = AgentFactory.createFromFnO("sum-composition.ttl", "generalFunctions.ttl");
         Arguments arguments = new Arguments()
                 // fns:aParameter fns:bParameter fns:cParameter
                 .add(FNS+"a", "1")
@@ -268,7 +268,7 @@ public class AgentTest {
 
     @Test
     public void testCompositeFunctionAdd10WithDebug() throws Exception{
-        final AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO("add10.ttl");
+        final Agent agent = AgentFactory.createFromFnO("add10.ttl");
 
         Arguments arguments = new Arguments().add(FNS+"b10", "5");
 
@@ -278,7 +278,7 @@ public class AgentTest {
 
     @Test
     public void testCompositeFunctionComplexLinearDependenciesWithDebug() throws Exception {
-        final AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO("generalFunctions.ttl", "computation.ttl");
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "computation.ttl");
 
         Arguments arguments = new Arguments()
                 .add("http://example.org/p_int1", 4)
@@ -292,7 +292,7 @@ public class AgentTest {
     @Test
     public void testCompositeFunctionComplexNonLinearDependenciesWithDebug() throws Exception{
         // calculate (a+b)² with the formula a² + 2ab + b²
-        final AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO("sum-composition.ttl", "squareOfSum.ttl", "generalFunctions.ttl");
+        final Agent agent = AgentFactory.createFromFnO("sum-composition.ttl", "squareOfSum.ttl", "generalFunctions.ttl");
 
         Arguments arguments = new Arguments()
                 .add("http://example.org/p_int1", 4)
@@ -304,13 +304,13 @@ public class AgentTest {
 
     @Test
     public void testCompositeFunctionWithComplexSidePath() throws Exception {
-        final AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO("complex_side_path.ttl", "generalFunctions.ttl");
+        final Agent agent = AgentFactory.createFromFnO("complex_side_path.ttl", "generalFunctions.ttl");
         Arguments arguments = new Arguments()
                 // fns:aParameter fns:bParameter fns:cParameter
-                .add(FNS+"a", "1")
-                .add(FNS+"b", "2")
-                .add(FNS+"c", "3");
-        Object result = agent.execute(FNS+"complexSidePath", arguments, true);
+                .add(FNS + "a", "1")
+                .add(FNS + "b", "2")
+                .add(FNS + "c", "3");
+        Object result = agent.execute(FNS + "complexSidePath", arguments, true);
 
         assertEquals("1 + 2 + 3 should be 6", 6L, result);
         URL file = FileFinder.findFile("test0.txt");
@@ -318,6 +318,4 @@ public class AgentTest {
         String line = bufferedReader.readLine();
         assertEquals("print effect did not trigger", 12L, Integer.parseInt(line));
     }
-
-
 }

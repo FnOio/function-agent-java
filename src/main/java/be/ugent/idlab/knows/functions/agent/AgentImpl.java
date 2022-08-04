@@ -42,6 +42,7 @@ public class AgentImpl implements Agent {
      * @return the result of the function
      * @throws Exception Something went wrong. A subclass will specify what with a message.
      */
+    @Override
     public Object execute(String functionId, Arguments arguments, boolean debug) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug("Execution debug mode: {}", debug);
