@@ -12,16 +12,12 @@
 @prefix fnoc: <https://w3id.org/function/vocabulary/composition#> .
 
 
-#############
-# FUNCTIONS #
-#############
-
-fns:sum3 rdf:type fno:Function ;
-    fno:name "Sum3"^^xsd::string ;
-    dcterms:description "Description of the sum3 function"@en ;
-    rdfs:label "sum3"@en ;
+fns:complexSidePath a fno:Function ;
+    fno:name "complexSidePath"^^xsd::string ;
+    dcterms:description "a function composition with a complex side path: takes 3 inputs, returns the sum of those inputs, and writes 2*x away" ;
+    rdfs:label "complexSidePath" ;
     fno:expects ( fns:aParameter fns:bParameter fns:cParameter ) ;
-    fno:returns ( fns:sumOutput ) .
+    fno:returns (fns:sumOutput) .
 
 
 ##############
@@ -59,17 +55,21 @@ fns:sumOutput rdf:type fno:Output;
     fno:predicate fns:output ;
     fno:type xsd:integer .
 
+
 ################
 # COMPOSITIONS #
 ################
 
 fns:sum3_1 fnoc:applies ex:sum .
 fns:sum3_2 fnoc:applies ex:sum .
+fns:sum3_3 fnoc:applies ex:sum.
+fns:add10_1 fnoc:applies fns:add10.
+fns:add10_2 fnoc:applies fns:add10.
 
 fns:sum3Composition a fnoc:Composition ;
     fnoc:composedOf [
         fnoc:mapFrom [
-            fnoc:constituentFunction fns:sum3;
+            fnoc:constituentFunction fns:complexSidePath;
             fnoc:functionParameter fns:aParameter
         ] ;
         fnoc:mapTo [
@@ -79,7 +79,7 @@ fns:sum3Composition a fnoc:Composition ;
     ],
     [
         fnoc:mapFrom [
-            fnoc:constituentFunction fns:sum3;
+            fnoc:constituentFunction fns:complexSidePath;
             fnoc:functionParameter fns:bParameter
         ] ;
         fnoc:mapTo [
@@ -99,7 +99,7 @@ fns:sum3Composition a fnoc:Composition ;
     ],
     [
         fnoc:mapFrom [
-            fnoc:constituentFunction fns:sum3;
+            fnoc:constituentFunction fns:complexSidePath;
             fnoc:functionParameter fns:cParameter
         ] ;
         fnoc:mapTo [
@@ -113,24 +113,44 @@ fns:sum3Composition a fnoc:Composition ;
             fnoc:functionOutput ex:intOut
         ] ;
         fnoc:mapTo [
-            fnoc:constituentFunction fns:sum3;
+            fnoc:constituentFunction fns:complexSidePath;
             fnoc:functionOutput fns:sumOutput
         ]
     ],
     [
         fnoc:mapFrom [
             fnoc:constituentFunction fns:sum3_2;
+            fnoc:functionOutput ex:intOut;
+        ] ;
+        fnoc:mapTo [
+                    fnoc:constituentFunction fns:sum3_3;
+                    fnoc:functionParameter ex:int1
+                ]
+    ],
+     [
+         fnoc:mapFrom [
+             fnoc:constituentFunction fns:sum3_2;
+             fnoc:functionOutput ex:intOut;
+         ] ;
+         fnoc:mapTo [
+                     fnoc:constituentFunction fns:sum3_3;
+                     fnoc:functionParameter ex:int2
+                 ]
+     ],
+     [
+        fnoc:mapFrom [
+            fnoc:constituentFunction fns:sum3_3;
             fnoc:functionOutput ex:intOut
         ];
         fnoc:mapTo[
             fnoc:constituentFunction ex:writeToFile;
             fnoc:functionParameter ex:int1
         ]
-    ],
-    [
-        fnoc:mapFromTerm "./test.txt";
+     ],
+     [
+        fnoc:mapFromTerm "./test0.txt";
         fnoc:mapTo [
             fnoc:constituentFunction ex:writeToFile;
             fnoc:functionParameter ex:string
         ]
-    ].
+     ].

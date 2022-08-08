@@ -25,6 +25,7 @@ import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 /**
@@ -106,17 +107,22 @@ public class Instantiator {
      * @return a lambda that is the composite function
      * @throws InstantiationException if the given functionId is not a function composition, this function will throw an error
      */
-    public ThrowableFunction getCompositeMethod(final String functionId) throws InstantiationException {
+    public ThrowableFunction getCompositeMethod(final String functionId, boolean debug) throws InstantiationException {
         logger.debug("constructing composite method for {}", functionId);
         if(id2CompositionLambdaMap.containsKey(functionId)){
             logger.debug("found composition for {} in cache!", functionId);
             return id2CompositionLambdaMap.get(functionId);
         }
 
+        if(!id2functionMap.containsKey(functionId)){
+            throw new FunctionNotFoundException("No function found with id " + functionId);
+        }
+
         final Function function = id2functionMap.get(functionId);
 
         if(!function.isComposite()){
-            throw new NotACompositeFunctionException("the provided functionId is not a function composition");
+            throw new NotACompositeFunctionException("the provided functionId is not a function composition"); // strict
+            //return (Agent agent, Object[] args) -> this.getMethod(functionId).invoke(null, args); // can also be used
         }
 
         // get the composition
@@ -159,22 +165,45 @@ public class Instantiator {
         // checks for cycles in dependencies
         checkDependencyCycles(dependencies, functionId);
 
-        // determine order of function calls
-        Stack<String> execStack = new Stack<>();
+
+        // order of function execution is determined with the debug parameter
+        Deque<String> execStack = new ArrayDeque<>();
+
+        // effective implementation: stack of necessary function calls to get output.
         List<String> toadd = new ArrayList<>();
         List<String> willBeAdded = new ArrayList<>();
         toadd.add(functionId);
         while(!toadd.isEmpty()) {
-            execStack.addAll(toadd);
+            toadd.forEach(execStack::push);
             for (String fId : toadd) {
                 Collection<String> dep = dependencies.get(fId);
                 dep.stream().filter((String funcName) -> !execStack.contains(funcName))
-                            .forEach(willBeAdded::add);
+                        .forEach(willBeAdded::add);
             }
             toadd.clear();
             toadd.addAll(willBeAdded);
             willBeAdded.clear();
         }
+
+        if(debug){
+            // less effective implementation: all nodes of the composition graph will be executed.
+            // they will be added after the necessary functions for the output and before the actual function.
+            execStack.removeLast();
+            Set<String> sideSet = dependencies.keySet().stream().filter(name -> !(execStack.contains(name))).collect(Collectors.toSet());
+            while(!sideSet.isEmpty()) {
+                List<String> toRemove = new ArrayList<>();
+                for(String s : sideSet){
+                    if(execStack.containsAll(dependencies.get(s))){
+                        execStack.addLast(s);
+                        toRemove.add(s);
+                    }
+                }
+                toRemove.forEach(sideSet::remove);
+                toRemove.clear();
+            }
+            execStack.addLast(functionId);
+        }
+
 
         // construct the lambda that represents the function
         // don't call the getMethod function from the instantiator to evaluate other functions, since the used functions can also be function compositions
@@ -239,16 +268,18 @@ public class Instantiator {
     private void checkFunction(CompositionMappingPoint compositionMappingPoint) throws InstantiationException{
         Function fromFunction = id2functionMap.get(compositionMappingPoint.getFunctionId());
         if(Objects.isNull(fromFunction)){
-            throw new CompositionReferenceException("the used function "+compositionMappingPoint.getFunctionId() + " could not be found");
+            throw new CompositionReferenceException("the used function " + compositionMappingPoint.getFunctionId() + " could not be found");
         }
         List<Parameter> fromInputParameters = fromFunction.getArgumentParameters();
         List<Parameter> fromReturnParameters = fromFunction.getReturnParameters();
+        String parameterId = compositionMappingPoint.getParameterId();
+        // parameter not in input parameters or in return parameters
         if(
-                fromInputParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, compositionMappingPoint.getParameterId()))
+                fromInputParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, parameterId))
                         &&
-                        fromReturnParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, compositionMappingPoint.getParameterId()))
+                        fromReturnParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, parameterId))
         ){
-            throw new CompositionReferenceException("the used parameter "+compositionMappingPoint.getParameterId() + " of function " + compositionMappingPoint.getFunctionId() + " could not be found");
+            throw new CompositionReferenceException("the used parameter " + parameterId + " of function " + compositionMappingPoint.getFunctionId() + " could not be found");
 
         }
     }

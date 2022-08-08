@@ -8,8 +8,12 @@ import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctio
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.ParameterNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
+import be.ugent.idlab.knows.misc.FileFinder;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.time.Instant;
 import java.util.Map;
 
@@ -245,6 +249,77 @@ public class AgentTest {
         assertThrows("expected an exception", InstantiationException.class, () -> agent.execute(FNS+"bad", arguments));
     }
 
+    @Test
+    public void testCompositeFunctionSum3WithDebug() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("sum-composition.ttl", "generalFunctions.ttl");
+        Arguments arguments = new Arguments()
+                // fns:aParameter fns:bParameter fns:cParameter
+                .add(FNS+"a", "1")
+                .add(FNS+"b", "2")
+                .add(FNS+"c", "3");
+
+        Object result = agent.execute(FNS+"sum3", arguments, true);
+
+        assertEquals("1 + 2 + 3 should be 6", 6L, result);
+        URL file = FileFinder.findFile("test.txt");
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(file.openStream()));
+        String line = bufferedReader.readLine();
+        assertEquals("print effect did not trigger", 6, Integer.parseInt(line));
+
+    }
+
+    @Test
+    public void testCompositeFunctionAdd10WithDebug() throws Exception{
+        final Agent agent = AgentFactory.createFromFnO("add10.ttl");
+
+        Arguments arguments = new Arguments().add(FNS+"b10", "5");
+
+        Object result = agent.execute(FNS+"add10", arguments, true);
+        assertEquals("5 + 10 should be 15", 15L, result);
+    }
+
+    @Test
+    public void testCompositeFunctionComplexLinearDependenciesWithDebug() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "computation.ttl");
+
+        Arguments arguments = new Arguments()
+                .add("http://example.org/p_int1", 4)
+                .add("http://example.org/p_int2", 2)
+                .add("http://example.org/p_int3", 3)
+                .add("http://example.org/p_int4", 5);
+        Object result = agent.execute(FNS + "computation", arguments, true);
+        assertEquals("4*(2+3^5) should be 980", 980L, result);
+    }
+
+    @Test
+    public void testCompositeFunctionComplexNonLinearDependenciesWithDebug() throws Exception{
+        // calculate (a+b)² with the formula a² + 2ab + b²
+        final Agent agent = AgentFactory.createFromFnO("sum-composition.ttl", "squareOfSum.ttl", "generalFunctions.ttl");
+
+        Arguments arguments = new Arguments()
+                .add("http://example.org/p_int1", 4)
+                .add("http://example.org/p_int2", 5);
+
+        Object result = agent.execute(FNS+"squareOfSum", arguments, true);
+        assertEquals("(4+5)² should be ", 81L, result);
+    }
+
+    @Test
+    public void testCompositeFunctionWithComplexSidePath() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("complex_side_path.ttl", "generalFunctions.ttl");
+        Arguments arguments = new Arguments()
+                // fns:aParameter fns:bParameter fns:cParameter
+                .add(FNS + "a", "1")
+                .add(FNS + "b", "2")
+                .add(FNS + "c", "3");
+        Object result = agent.execute(FNS + "complexSidePath", arguments, true);
+
+        assertEquals("1 + 2 + 3 should be 6", 6L, result);
+        URL file = FileFinder.findFile("test0.txt");
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(file.openStream()));
+        String line = bufferedReader.readLine();
+        assertEquals("print effect did not trigger", 12L, Integer.parseInt(line));
+    }
     @Test
     public void testPartialFunctionApplication() throws Exception{
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "add10PartialApplication.ttl");
