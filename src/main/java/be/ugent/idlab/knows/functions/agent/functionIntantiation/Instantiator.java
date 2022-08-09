@@ -90,7 +90,8 @@ public class Instantiator {
             final List<Parameter> parameters = function.getArgumentParameters();
             Method method;
             try {
-                method = getMethod(clazz, methodName, parameters, function.getReturnParameters().get(0));
+                Parameter p = function.getReturnParameters().size() == 0 ? new Parameter("","", this.dataTypeConverterProvider.getDataTypeConverter("void"), true) : function.getReturnParameters().get(0);
+                method = getMethod(clazz, methodName, parameters, p);
                 logger.debug("Found method {}", method.getName());
                 id2MethodMap.put(functionId, method);
                 return method;

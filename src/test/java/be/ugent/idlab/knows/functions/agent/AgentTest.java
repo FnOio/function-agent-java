@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
  */
 public class AgentTest {
     private static final String FNS = "http://example.com/functions#";
+    private static final String EX = "http://example.org/";
     @Test
     public void testEverythingGoesWell() throws Exception {
         // first initialize a DataTaypeConverterProvider
@@ -126,11 +127,11 @@ public class AgentTest {
     private void execute(final Agent agent) throws Exception {
         // prepare the parameters for the function
         Arguments arguments = new Arguments()
-                .add("http://example.org/p_int1", "5")
-                .add("http://example.org/p_int2", "1");
+                .add(EX+"p_int1", "5")
+                .add(EX+"p_int2", "1");
 
         // execute the function
-        Object result = agent.execute("http://example.org/sum", arguments);
+        Object result = agent.execute(EX+"sum", arguments);
         assertEquals("5 + 1 should be 6", 6L, result);
     }
 
@@ -176,10 +177,10 @@ public class AgentTest {
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "computation.ttl");
 
         Arguments arguments = new Arguments()
-                .add("http://example.org/p_int1", 4)
-                .add("http://example.org/p_int2", 2)
-                .add("http://example.org/p_int3", 3)
-                .add("http://example.org/p_int4", 5);
+                .add(EX+"p_int1", 4)
+                .add(EX+"p_int2", 2)
+                .add(EX+"p_int3", 3)
+                .add(EX+"p_int4", 5);
         Object result = agent.execute(FNS + "computation", arguments);
         assertEquals("4*(2+3^5) should be 980", 980L, result);
     }
@@ -190,8 +191,8 @@ public class AgentTest {
         final Agent agent = AgentFactory.createFromFnO("sum-composition.ttl", "squareOfSum.ttl", "generalFunctions.ttl");
 
         Arguments arguments = new Arguments()
-                .add("http://example.org/p_int1", 4)
-                .add("http://example.org/p_int2", 5);
+                .add(EX+"p_int1", 4)
+                .add(EX+"p_int2", 5);
 
         Object result = agent.execute(FNS+"squareOfSum", arguments);
         assertEquals("(4+5)² should be ", 81L, result);
@@ -203,13 +204,13 @@ public class AgentTest {
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "identityInteger.ttl");
 
         Arguments arguments = new Arguments()
-                .add("http://example.org/p_int1", "1");
+                .add(EX+"p_int1", "1");
         Object result = agent.execute(FNS+"identityInteger", arguments);
         assertEquals("Identity function should return input", 1L, result);
 
 
         arguments = new Arguments()
-                .add("http://example.org/p_int1", "2");
+                .add(EX+"p_int1", "2");
         result = agent.execute(FNS+"identityInteger", arguments);
         assertEquals("Identity function should return input", 2L, result);
 
@@ -219,7 +220,7 @@ public class AgentTest {
     public void testThrowExceptionForCyclicDependencies() throws Exception {
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "identityInteger.ttl", "cyclic.ttl");
         Arguments arguments = new Arguments()
-                .add("http://example.org/p_int1", "1");
+                .add(EX+"p_int1", "1");
         assertThrows("expected an exception to be thrown", InstantiationException.class, () -> agent.execute(FNS + "cyclicFunction", arguments));
     }
 
@@ -227,8 +228,8 @@ public class AgentTest {
     public void aliasTest() throws Exception{
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "aliasTest.ttl");
         Arguments arguments = new Arguments()
-                .add("http://example.org/p_int1", 1)
-                .add("http://example.org/p_int2", 2);
+                .add(EX+"p_int1", 1)
+                .add(EX+"p_int2", 2);
         Object result = agent.execute(FNS+"sumAlias", arguments);
         assertEquals("alias should work as original function", 3L, result);
     }
@@ -237,7 +238,7 @@ public class AgentTest {
     public void testThrowExceptionForNonExistingFunction() throws Exception{
         final Agent agent = AgentFactory.createFromFnO("badFunction.ttl", "generalFunctions.ttl");
         Arguments arguments = new Arguments()
-                .add("http://example.org/p_int1", 1);
+                .add(EX+"p_int1", 1);
         assertThrows("expected an exception", InstantiationException.class, () -> agent.execute(FNS+"bad", arguments));
     }
 
@@ -245,7 +246,7 @@ public class AgentTest {
     public void testThrowExceptionForNonExistingParameter() throws Exception{
         final Agent agent = AgentFactory.createFromFnO("badParameter.ttl", "generalFunctions.ttl");
         Arguments arguments = new Arguments()
-                .add("http://example.org/p_int1", 1);
+                .add(EX+"p_int1", 1);
         assertThrows("expected an exception", InstantiationException.class, () -> agent.execute(FNS+"bad", arguments));
     }
 
@@ -283,10 +284,10 @@ public class AgentTest {
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "computation.ttl");
 
         Arguments arguments = new Arguments()
-                .add("http://example.org/p_int1", 4)
-                .add("http://example.org/p_int2", 2)
-                .add("http://example.org/p_int3", 3)
-                .add("http://example.org/p_int4", 5);
+                .add(EX+"p_int1", 4)
+                .add(EX+"p_int2", 2)
+                .add(EX+"p_int3", 3)
+                .add(EX+"p_int4", 5);
         Object result = agent.execute(FNS + "computation", arguments, true);
         assertEquals("4*(2+3^5) should be 980", 980L, result);
     }
@@ -297,8 +298,8 @@ public class AgentTest {
         final Agent agent = AgentFactory.createFromFnO("sum-composition.ttl", "squareOfSum.ttl", "generalFunctions.ttl");
 
         Arguments arguments = new Arguments()
-                .add("http://example.org/p_int1", 4)
-                .add("http://example.org/p_int2", 5);
+                .add(EX+"p_int1", 4)
+                .add(EX+"p_int2", 5);
 
         Object result = agent.execute(FNS+"squareOfSum", arguments, true);
         assertEquals("(4+5)² should be ", 81L, result);
@@ -323,7 +324,7 @@ public class AgentTest {
     @Test
     public void testPartialFunctionApplication() throws Exception{
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "add10PartialApplication.ttl");
-        Arguments arguments = new Arguments().add("http://example.org/p_int2", 15);
+        Arguments arguments = new Arguments().add(EX+"p_int2", 15);
         Object result = agent.execute(FNS+"add10", arguments);
         assertEquals("15 + 10 should be 25", 25L, result);
     }
@@ -348,8 +349,19 @@ public class AgentTest {
     @Test
     public void testPartialApplicationWithoutMappingsIsApplies() throws Exception {
         final Agent agent = AgentFactory.createFromFnO("partialApplicationNoMappings.ttl", "generalFunctions.ttl");
-        Arguments arguments = new Arguments().add("http://example.org/p_int1", 5).add("http://example.org/p_int2", 15);
+        Arguments arguments = new Arguments().add(EX+"p_int1", 5).add(EX+"p_int2", 15);
         Object result = agent.execute(FNS+"add10", arguments);
         assertEquals("15 + 5 should be 20", 20L, result);
+    }
+
+    @Test
+    public void functionWithoutReturnValue() throws Exception {
+    final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl");
+        Arguments arguments = new Arguments()
+                // fns:aParameter fns:bParameter fns:cParameter
+                .add(EX + "p_int1", "1")
+                .add(EX + "p_string", "test1.txt");
+        Object result = agent.execute(EX+"writeToFileNoReturn", arguments, false);
+        assertNull(result);
     }
 }

@@ -46,6 +46,13 @@ ex:writeToFile a fno:Function ;
     fno:expects (ex:int1 ex:string );
     fno:returns ( ex:int2).
 
+ex:writeToFileNoReturn a fno:Function;
+    fno:name "write to file";
+    rdfs:label "tries to argument to file";
+    dcterms:description "tries to write argument to file";
+    fno:expects (ex:int1 ex:string);
+    fno:returns ().
+
 ex:tee a fno:Function ;
     fno:name "tee";
     rdfs:label "tee";
@@ -81,6 +88,11 @@ ex:writeMapping a fno:Mapping;
     fno:function ex:writeToFile;
     fno:implementation ex:internalTestFunctions;
     fno:methodMapping [a fnom:StringMethodMapping; fnom:method-name "writeToFile" ].
+
+ex:writeNoReturnMapping a fno:Mapping;
+    fno:function ex:writeToFileNoReturn;
+    fno:implementation ex:internalTestFunctions;
+    fno:methodMapping [a fnom:StringMethodMapping; fnom:method-name "writeToFileNoReturn"].
 
 ex:teeMapping a fno:Mapping;
    fno:function ex:tee;

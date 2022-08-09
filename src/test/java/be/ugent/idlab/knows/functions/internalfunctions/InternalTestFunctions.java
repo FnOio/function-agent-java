@@ -78,6 +78,15 @@ public class InternalTestFunctions {
         return 0L;
     }
 
+    public static void writeToFileNoReturn(Object o, String filename){
+        try (FileWriter fileWriter = new FileWriter(filename)){
+            fileWriter.write(o.toString());
+        }
+        catch (IOException ioException){
+            logger.error("error occurred while writing to file: {}", ioException.toString());
+        }
+    }
+
     public static Object tee(Object object, String filename){
         writeToFile(object, filename);
         return object;
