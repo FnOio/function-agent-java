@@ -6,7 +6,6 @@ import lombok.Data;
 public class CompositionMappingPoint {
     private final String functionId;
 
-    // TODO allow literals
     private final String parameterId;
 
     private final boolean isOutput;

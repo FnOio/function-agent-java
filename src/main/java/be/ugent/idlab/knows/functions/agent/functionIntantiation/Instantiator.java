@@ -30,6 +30,7 @@ import java.util.zip.ZipEntry;
 
 /**
  * An Instantiator tries to find an implementation (Java Method for now) for any given {@link Function}.
+ * If the function is a composition, it will construct a lambda for that function.
  * The method can be executed to perform the actual function.
  *
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -53,7 +54,7 @@ public class Instantiator {
     private final DataTypeConverterProvider dataTypeConverterProvider;
 
     /**
-     * Creates a new instance of an Initiator.
+     * Creates a new instance of an Instantiator.
      * @param functions The function descriptions used to find for possible implementations in the form of a map function ID -> Function.
      * @param dataTypeConverterProvider provides the converters for the arguments
      */
@@ -87,7 +88,7 @@ public class Instantiator {
             // now get the method
             final String methodName = mapping.getMethodMapping().getMethodName();
             final List<Parameter> parameters = function.getArgumentParameters();
-            Method method = null;
+            Method method;
             try {
                 method = getMethod(clazz, methodName, parameters, function.getReturnParameters().get(0));
                 logger.debug("Found method {}", method.getName());
@@ -400,7 +401,7 @@ public class Instantiator {
                     Class<?> methodParameterClass = method.getParameterTypes()[i];
                     DataTypeConverter<?> dataTypeConverter = expectedParameters.get(i).getTypeConverter();
                     if (dataTypeConverter.isSubTypeOf(methodParameterClass)) {
-                        if (dataTypeConverter.getTypeCategory().equals(DataTypeConverter.TypeCategory.COLLECTION)) {
+                        if (dataTypeConverter.getTypeCategory() == DataTypeConverter.TypeCategory.COLLECTION) {
                             if (parameterType instanceof ParameterizedType) {
                                 // we found a Java collection. Now check if we need converters for type arguments of the class,
                                 // e.g List<Boolean>: we potentiay din't know about the 'Boolean' argument type yet
