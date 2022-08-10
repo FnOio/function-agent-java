@@ -1,0 +1,72 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.com/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+@prefix fnml:   <http://semweb.mmlab.be/ns/fnml#> .
+@prefix fno: 	<https://w3id.org/function/ontology#> .
+@prefix grel: <http://users.ugent.be/~bjdmeest/function/grel.ttl#> .
+
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+
+@prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
+@prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
+
+@prefix idlab-fn: <http://example.com/idlab/function/> .
+@prefix idlab-fn-m: <http://example.com/idlab/function-mapping/> .
+
+
+idlab-fn:makeSeq a fno:Function ;
+  fno:name "makes a rdf:seq from parameters"^^xsd:string;
+  dcterms:description "makes a rdf:seq from parameters"^^xsd:string;
+  fno:expects ( idlab-fn:param_seq ) ;
+  fno:returns ( idlab-fn:output_seq ) .
+
+idlab-fn:param_seq
+    a             fno:Parameter ;
+    fno:name      "rdf:Seq parameter" ;
+    fno:predicate idlab-fn:_nnn ; # Similar to https://www.w3.org/TR/rdf-schema/#ch_containermembershipproperty
+# We can't use rdf:_nnn bc this would imply that _:exec also is an rdf:Seq, which is incorrect
+    fno:type      xsd:any ;
+    fno:required  "true"^^xsd:boolean .
+
+idlab-fn:output_seq
+    a             fno:Output;
+    fno:name      "rdf:Seq" ;
+    fno:predicate idlab-fn:o_seq ;
+    fno:type      rdf:Seq .
+
+idlab-fn:makeListFromSeq a fno:Function ;
+  fno:name "makes a rdf:list from parameters"^^xsd:string;
+  dcterms:description "makes a rdf:list from parameters"^^xsd:string;
+  fno:expects ( idlab-fn:param_seq ) ;
+  fno:returns ( grel:output_array ) .
+
+grel:output_array
+    a             fno:Output ;
+    fno:name      "array" ;
+    rdfs:label    "array" ;
+    fno:predicate grel:o_array ;
+    fno:type      rdf:List .
+
+
+
+
+ex:makeSeqMapping a fno:Mapping ;
+  fno:function idlab-fn:makeSeq ;
+  fno:implementation ex:internalTestFunctions ;
+  fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "makeSeq" ] .
+
+
+ex:makeListFromSeqMapping a fno:Mapping ;
+  fno:function idlab-fn:makeListFromSeq ;
+  fno:implementation ex:internalTestFunctions ;
+  fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "makeListFromSeq" ] .
+
+
+ex:internalTestFunctions a fnoi:JavaClass ;
+  fnoi:class-name "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions" .
