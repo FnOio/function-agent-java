@@ -514,7 +514,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
 
             // get name
             String name = getLiteralStr(functionResource, FNO + "name")
-                    .orElseThrow(() -> new FunctionNameNotFoundException("Could not find '" + FNO + "name' for"));
+                    .orElseThrow(() -> new FunctionNameNotFoundException("Could not find '" + FNO + "name' for " + functionURI));
 
             // get expected parameters
             List<Parameter> expects = parseParameters(functionResource, true);
