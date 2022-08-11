@@ -1,6 +1,7 @@
 package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
+import be.ugent.idlab.knows.functions.agent.exception.MissingRDFSeqIndexException;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
@@ -401,7 +402,7 @@ public class AgentTest {
                 .add(RDF+"_2", "b")
                 .add(RDF+"_4", "d");
 
-        assertThrows("expected exception for missing _3 parameter",Exception.class,() -> agent.execute(IDLABFN+"makeListFromSeq", arguments));
+        assertThrows("expected exception for missing _3 parameter", MissingRDFSeqIndexException.class,() -> agent.execute(IDLABFN+"makeListFromSeq", arguments));
     }
 
     @Test

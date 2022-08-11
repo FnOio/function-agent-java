@@ -1,6 +1,7 @@
 package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
+import be.ugent.idlab.knows.functions.agent.exception.MissingRDFSeqIndexException;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
@@ -11,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
 
@@ -72,20 +72,24 @@ public class AgentImpl implements Agent {
             Collection<Object> valueCollection = arguments.get(argumentParameter.getId());
             if(argumentParameter.getId().equals(RDF+"_nnn")){
                 logger.debug("found sequential parameter (_nnn), looking for values");
-                List<String> params = arguments.getArgumentNames().stream().filter(name -> Pattern.compile(RDF +"_\\d+").matcher(name).matches()).collect(Collectors.toList());
-                List<Integer> indices = params.stream().map(i -> Integer.parseInt(i.replace(RDF +"_", ""))).collect(Collectors.toList());
-                int max = indices.stream().max(Integer::compareTo).get();
+                // get the highest available sequence index
+                Optional<Integer> optionalInteger = arguments.getArgumentNames().stream()
+                                                        .filter(name -> Pattern.compile(RDF +"_\\d+").matcher(name).matches())
+                                                        .map(i -> Integer.parseInt(i.replace(RDF +"_", "")))
+                                                        .max(Integer::compareTo);
+
+                if(!optionalInteger.isPresent()){
+                    valuesInOrder.add(null);
+                    continue;
+                }
+                int max = optionalInteger.get();
                 Object[] values = new Object[max];
-                for (int i : indices) {
+                for (int i = 0; i < max; i++) {
                     // if something else, it could be a correct parameter predicate for another argument:
                     // https://fno.io/spec/#fn-parameter
-                    if(i >= 1){
-                        Optional<Object> value = arguments.get(RDF+"_"+i).stream().findFirst();
-                        if(!value.isPresent()){
-                            throw new RuntimeException("no parameter value found");
-                        }
-                        values[i-1] = value.get();
-                    }
+                    int finalI = i+1;
+                    Object value = arguments.get(RDF+"_"+(finalI)).stream().findFirst().orElseThrow(() -> new MissingRDFSeqIndexException("no parameter found for _" + (finalI)));
+                    values[i] = value;
                 }
                 valuesInOrder.add(values);
             }
