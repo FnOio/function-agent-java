@@ -400,13 +400,8 @@ public class AgentTest {
                 .add(RDF+"_1", "a")
                 .add(RDF+"_2", "b")
                 .add(RDF+"_4", "d");
-        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
-        List<String> correct = new ArrayList<>();
-        correct.add("a");
-        correct.add("b");
-        correct.add(null);
-        correct.add("d");
-        assertEquals("should be a list with elements a,b", correct, result );
+
+        assertThrows("expected exception for missing _3 parameter",Exception.class,() -> agent.execute(IDLABFN+"makeListFromSeq", arguments));
     }
 
     @Test
