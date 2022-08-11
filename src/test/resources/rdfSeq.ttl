@@ -56,17 +56,17 @@ grel:output_array
 
 
 
-ex:makeSeqMapping a fno:Mapping ;
+idlab-fn-m:makeSeqMapping a fno:Mapping ;
   fno:function idlab-fn:makeSeq ;
-  fno:implementation ex:internalTestFunctions ;
+  fno:implementation idlab-fn-m:internalTestFunctions ;
   fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "makeSeq" ] .
 
 
-ex:makeListFromSeqMapping a fno:Mapping ;
+idlab-fn-m:makeListFromSeqMapping a fno:Mapping ;
   fno:function idlab-fn:makeListFromSeq ;
-  fno:implementation ex:internalTestFunctions ;
+  fno:implementation idlab-fn-m:internalTestFunctions ;
   fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "makeListFromSeq" ] .
 
 
-ex:internalTestFunctions a fnoi:JavaClass ;
+idlab-fn-m:internalTestFunctions a fnoi:JavaClass ;
   fnoi:class-name "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions" .
