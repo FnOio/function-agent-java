@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -91,4 +93,13 @@ public class InternalTestFunctions {
         writeToFile(object, filename);
         return object;
     }
+
+    public static List<Object> makeSeq(Object... objects){
+        return new ArrayList<>(Arrays.asList(objects));
+    }
+
+    public static List<Object> makeListFromSeq(Object... objects){
+        return new ArrayList<>(Arrays.asList(objects));
+    }
+
 }
