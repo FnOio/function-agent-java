@@ -15,8 +15,11 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.IDLABFN;
 import static org.junit.Assert.*;
 
 /**
@@ -363,5 +366,45 @@ public class AgentTest {
                 .add(EX + "p_string", "test1.txt");
         Object result = agent.execute(EX+"writeToFileNoReturn", arguments, false);
         assertNull(result);
+    }
+
+    @Test
+    public void rdfListFromSeqTest1Element() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(IDLABFN+"_1", "a");
+        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
+        List<String> correct = new ArrayList<>();
+        correct.add("a");
+        assertEquals("should be a list with element a", correct, result );
+    }
+
+    @Test
+    public void rdfListFromSeqTest2Elements() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(IDLABFN+"_1", "a")
+                .add(IDLABFN+"_2", "b");
+        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
+        List<String> correct = new ArrayList<>();
+        correct.add("a");
+        correct.add("b");
+        assertEquals("should be a list with elements a,b", correct, result );
+    }
+
+    @Test
+    public void rdfListFromSeqTest4ElementOneMissing() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(IDLABFN+"_1", "a")
+                .add(IDLABFN+"_2", "b")
+                .add(IDLABFN+"_4", "d");
+        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
+        List<String> correct = new ArrayList<>();
+        correct.add("a");
+        correct.add("b");
+        correct.add(null);
+        correct.add("d");
+        assertEquals("should be a list with elements a,b", correct, result );
     }
 }
