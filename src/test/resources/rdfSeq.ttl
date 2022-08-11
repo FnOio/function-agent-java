@@ -29,7 +29,7 @@ idlab-fn:makeSeq a fno:Function ;
 idlab-fn:param_seq
     a             fno:Parameter ;
     fno:name      "rdf:Seq parameter" ;
-    fno:predicate idlab-fn:_nnn ; # Similar to https://www.w3.org/TR/rdf-schema/#ch_containermembershipproperty
+    fno:predicate rdf:_nnn ; # Similar to https://www.w3.org/TR/rdf-schema/#ch_containermembershipproperty
 # We can't use rdf:_nnn bc this would imply that _:exec also is an rdf:Seq, which is incorrect
     fno:type      xsd:any ;
     fno:required  "true"^^xsd:boolean .

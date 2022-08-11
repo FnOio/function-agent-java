@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.IDLABFN;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
 
 /**
  * <p>Copyright 2021 IDLab (Ghent University - imec)</p>
@@ -70,18 +70,21 @@ public class AgentImpl implements Agent {
         for (Parameter argumentParameter : function.getArgumentParameters()) {
             logger.debug("finding value for parameter {}", argumentParameter.getId());
             Collection<Object> valueCollection = arguments.get(argumentParameter.getId());
-            if(argumentParameter.getId().equals(IDLABFN+"_nnn")){
+            if(argumentParameter.getId().equals(RDF+"_nnn")){
                 logger.debug("found sequential parameter (_nnn), looking for values");
-                List<String> params = arguments.getArgumentNames().stream().filter(name -> Pattern.compile(IDLABFN +"_\\d+").matcher(name).matches()).collect(Collectors.toList());
-                List<Integer> indices = params.stream().map(i -> Integer.parseInt(i.replace(IDLABFN +"_", ""))).collect(Collectors.toList());
+                List<String> params = arguments.getArgumentNames().stream().filter(name -> Pattern.compile(RDF +"_\\d+").matcher(name).matches()).collect(Collectors.toList());
+                List<Integer> indices = params.stream().map(i -> Integer.parseInt(i.replace(RDF +"_", ""))).collect(Collectors.toList());
                 int max = indices.stream().max(Integer::compareTo).get();
                 Object[] values = new Object[max];
-                values.getClass();
                 for (int i : indices) {
                     // if something else, it could be a correct parameter predicate for another argument:
                     // https://fno.io/spec/#fn-parameter
                     if(i >= 1){
-                        values[i-1] = arguments.get(IDLABFN+"_"+i).stream().findFirst().get();
+                        Optional<Object> value = arguments.get(RDF+"_"+i).stream().findFirst();
+                        if(!value.isPresent()){
+                            throw new RuntimeException("no parameter value found");
+                        }
+                        values[i-1] = value.get();
                     }
                 }
                 valuesInOrder.add(values);

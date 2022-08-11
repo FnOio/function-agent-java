@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.IDLABFN;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
 import static org.junit.Assert.*;
 
 /**
@@ -372,7 +373,7 @@ public class AgentTest {
     public void rdfListFromSeqTest1Element() throws Exception {
         final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
         Arguments arguments = new Arguments()
-                .add(IDLABFN+"_1", "a");
+                .add(RDF+"_1", "a");
         Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
         List<String> correct = new ArrayList<>();
         correct.add("a");
@@ -383,8 +384,8 @@ public class AgentTest {
     public void rdfListFromSeqTest2Elements() throws Exception {
         final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
         Arguments arguments = new Arguments()
-                .add(IDLABFN+"_1", "a")
-                .add(IDLABFN+"_2", "b");
+                .add(RDF+"_1", "a")
+                .add(RDF+"_2", "b");
         Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
         List<String> correct = new ArrayList<>();
         correct.add("a");
@@ -396,9 +397,9 @@ public class AgentTest {
     public void rdfListFromSeqTest4ElementOneMissing() throws Exception {
         final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
         Arguments arguments = new Arguments()
-                .add(IDLABFN+"_1", "a")
-                .add(IDLABFN+"_2", "b")
-                .add(IDLABFN+"_4", "d");
+                .add(RDF+"_1", "a")
+                .add(RDF+"_2", "b")
+                .add(RDF+"_4", "d");
         Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
         List<String> correct = new ArrayList<>();
         correct.add("a");
@@ -412,7 +413,7 @@ public class AgentTest {
     public void rdfSeqTest1Element() throws Exception {
         final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
         Arguments arguments = new Arguments()
-                .add(IDLABFN+"_1", "a");
+                .add(RDF+"_1", "a");
         Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
         List<String> correct = new ArrayList<>();
         correct.add("a");
@@ -423,8 +424,8 @@ public class AgentTest {
     public void rdfSeqTest2Element() throws Exception {
         final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
         Arguments arguments = new Arguments()
-                .add(IDLABFN+"_2", "b")
-                .add(IDLABFN+"_1", "a");
+                .add(RDF+"_2", "b")
+                .add(RDF+"_1", "a");
         Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
         List<String> correct = new ArrayList<>();
         correct.add("a");
@@ -436,8 +437,8 @@ public class AgentTest {
     public void rdfSeqTestNoErrorForNegativeIndex() throws Exception {
         final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
         Arguments arguments = new Arguments()
-                .add(IDLABFN+"_-1", "a")
-                .add(IDLABFN+"_1", "x");
+                .add(RDF+"_-1", "a")
+                .add(RDF+"_1", "x");
         Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
         List<String> correct = new ArrayList<>();
         correct.add("x");
