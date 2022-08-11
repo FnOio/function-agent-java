@@ -418,4 +418,29 @@ public class AgentTest {
         correct.add("a");
         assertEquals("should be a list with element a", correct, result );
     }
+
+    @Test
+    public void rdfSeqTest2Element() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(IDLABFN+"_2", "b")
+                .add(IDLABFN+"_1", "a");
+        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
+        List<String> correct = new ArrayList<>();
+        correct.add("a");
+        correct.add("b");
+        assertEquals("should be a list with element a", correct, result );
+    }
+
+    @Test
+    public void rdfSeqTestNoErrorForNegativeIndex() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(IDLABFN+"_-1", "a")
+                .add(IDLABFN+"_1", "x");
+        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
+        List<String> correct = new ArrayList<>();
+        correct.add("x");
+        assertEquals("should be a list with element a", correct, result );
+    }
 }
