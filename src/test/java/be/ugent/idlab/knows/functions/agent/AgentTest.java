@@ -407,4 +407,15 @@ public class AgentTest {
         correct.add("d");
         assertEquals("should be a list with elements a,b", correct, result );
     }
+
+    @Test
+    public void rdfSeqTest1Element() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(IDLABFN+"_1", "a");
+        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
+        List<String> correct = new ArrayList<>();
+        correct.add("a");
+        assertEquals("should be a list with element a", correct, result );
+    }
 }
