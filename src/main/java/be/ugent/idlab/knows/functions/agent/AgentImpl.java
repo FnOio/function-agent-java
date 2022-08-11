@@ -10,6 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.IDLABFN;
 
 /**
  * <p>Copyright 2021 IDLab (Ghent University - imec)</p>
@@ -64,8 +68,26 @@ public class AgentImpl implements Agent {
         // "fill in" the argument parameters
         final List<Object> valuesInOrder = new ArrayList<>(arguments.size());
         for (Parameter argumentParameter : function.getArgumentParameters()) {
+            logger.debug("finding value for parameter {}", argumentParameter.getId());
             Collection<Object> valueCollection = arguments.get(argumentParameter.getId());
-            if (argumentParameter.getTypeConverter().getTypeCategory() == DataTypeConverter.TypeCategory.COLLECTION) {
+            if(argumentParameter.getId().equals(IDLABFN+"_nnn")){
+                logger.debug("found sequential parameter (_nnn), looking for values");
+                List<String> params = arguments.getArgumentNames().stream().filter(name -> Pattern.compile(IDLABFN +"_\\d+").matcher(name).matches()).collect(Collectors.toList());
+                List<Integer> indices = params.stream().map(i -> Integer.parseInt(i.replace(IDLABFN +"_", ""))).collect(Collectors.toList());
+                int max = indices.stream().max(Integer::compareTo).get();
+                Object[] values = new Object[max];
+                values.getClass();
+                for (int i : indices) {
+                    // if something else, it could be a correct parameter predicate for another argument:
+                    // https://fno.io/spec/#fn-parameter
+                    if(i >= 1){
+                        values[i-1] = arguments.get(IDLABFN+"_"+i).stream().findFirst().get();
+                    }
+                }
+                valuesInOrder.add(values);
+            }
+            else if (argumentParameter.getTypeConverter().getTypeCategory() == DataTypeConverter.TypeCategory.COLLECTION) {
+                logger.debug("got collection argument!");
                 Object convertedValue = argumentParameter.getTypeConverter().convert(valueCollection);
                 valuesInOrder.add(convertedValue);
             } else {
