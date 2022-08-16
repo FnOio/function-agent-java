@@ -75,18 +75,19 @@ public class AgentImpl implements Agent {
                 // get the highest available sequence index
                 Optional<Integer> optionalInteger = arguments.getArgumentNames().stream()
                                                         .filter(name -> Pattern.compile(RDF +"_\\d+").matcher(name).matches())
-                                                        .map(i -> Integer.parseInt(i.replace(RDF +"_", "")))
+                                                        .map(i -> Integer.parseInt(i.substring(RDF.toString().length()+1)))
                                                         .max(Integer::compareTo);
 
-                if(!optionalInteger.isPresent()){
+                if(!optionalInteger.isPresent()){ // no parameters of type _nnn available
                     valuesInOrder.add(null);
                     continue;
                 }
-                int max = optionalInteger.get();
+                int max = optionalInteger.get(); // get the highest used parameter
                 Object[] values = new Object[max];
+                // start from 0
+                // if < 0, it could be a correct parameter predicate for another argument:
+                // https://fno.io/spec/#fn-parameter
                 for (int i = 0; i < max; i++) {
-                    // if something else, it could be a correct parameter predicate for another argument:
-                    // https://fno.io/spec/#fn-parameter
                     int finalI = i+1;
                     Object value = arguments.get(RDF+"_"+(finalI)).stream().findFirst().orElseThrow(() -> new MissingRDFSeqIndexException("no parameter found for _" + (finalI)));
                     values[i] = value;
