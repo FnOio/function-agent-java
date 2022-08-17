@@ -170,7 +170,7 @@ public class Instantiator {
         // fix global dependencies for later:
         for (String funcId : dependencies.keySet()) {
             List<String> list = new ArrayList<>(dependencies.get(funcId));
-            Collection<String> deps = dependencies.get(funcId);
+            Collection<String> deps = globalDependencies.get(funcId);
             while(!list.isEmpty()) {
                 List<String> toAdd = new ArrayList<>();
                 for (String dep : list){
