@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.2.0] - 2022-07-12
 ### Added
+- Support for `rdf:seq` parameters.
 - `FnoFunctionModelProvider`: Can now parse Function Composition.
 - `FnoFunctionModelProvider`: Can now parse Partial Function Application.
 - `Agent`: Can execute Function Compositions.
