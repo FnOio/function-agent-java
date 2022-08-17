@@ -364,4 +364,13 @@ public class AgentTest {
         Object result = agent.execute(EX+"writeToFileNoReturn", arguments, false);
         assertNull(result);
     }
+
+    @Test
+    public void testExtraDependencies() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "test.ttl");
+        Arguments arguments = new Arguments()
+                .add(EX+"p_int1", "5")
+                .add(EX+"p_int2", "4");
+        assertEquals("expected 90", 90L, agent.execute(FNS+"comp", arguments));
+    }
 }

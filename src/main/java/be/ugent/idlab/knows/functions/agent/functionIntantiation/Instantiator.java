@@ -137,6 +137,9 @@ public class Instantiator {
         // K receives values from V, can be multiple values. Arguments class takes care of this.
         MultiValuedMap<FunctionFieldPair, FunctionFieldPair> parametermap = new ArrayListValuedHashMap<>();
 
+        // temporary global dependencies
+        MultiValuedMap<String, String> globalDependencies = new ArrayListValuedHashMap<>();
+
         // function dependencies and parameter maps
         for(CompositionMappingElement el : functionComposition.getMappings()){
             CompositionMappingPoint from = el.getFrom();
@@ -164,9 +167,28 @@ public class Instantiator {
             }
         }
 
+        // fix global dependencies for later:
+        for (String funcId : dependencies.keySet()) {
+            List<String> list = new ArrayList<>(dependencies.get(funcId));
+            Collection<String> deps = dependencies.get(funcId);
+            while(!list.isEmpty()) {
+                List<String> toAdd = new ArrayList<>();
+                for (String dep : list){
+                    List<String> tmpdep = dependencies.get(dep).stream()
+                                            .filter(i -> !deps.contains(i))
+                                            .filter(i -> !toAdd.contains(i))
+                                            .collect(Collectors.toList());
+                    toAdd.addAll(tmpdep);
+                }
+                deps.addAll(list);
+                list.clear();
+                list.addAll(toAdd);
+                toAdd.clear();
+            }
+        }
+
         // checks for cycles in dependencies
         checkDependencyCycles(dependencies, functionId);
-
 
         // order of function execution is determined with the debug parameter
         Deque<String> execStack = new ArrayDeque<>();
@@ -177,8 +199,20 @@ public class Instantiator {
         toadd.add(functionId);
         while(!toadd.isEmpty()) {
             toadd.forEach(execStack::push);
+            logger.debug("new toadd: {}", toadd);
             for (String fId : toadd) {
+                logger.debug("checking: {}", fId);
                 Collection<String> dep = dependencies.get(fId);
+                logger.debug("dependencies: {}", dep);
+                if(toadd.stream().anyMatch(other -> {
+                    Collection<String> otherDep = globalDependencies.get(other);
+                    return otherDep.contains(fId);
+                })){
+                    logger.debug("found bad dependency: {}", fId);
+                    willBeAdded.add(fId);
+                    continue;
+                }
+                logger.debug("added: {}", fId);
                 dep.stream().filter((String funcName) -> !execStack.contains(funcName))
                         .forEach(willBeAdded::add);
             }
@@ -187,6 +221,7 @@ public class Instantiator {
             willBeAdded.clear();
         }
 
+        logger.debug("execution stack: {}", execStack);
         if(debug){
             // less effective implementation: all nodes of the composition graph will be executed.
             // they will be added after the necessary functions for the output and before the actual function.
