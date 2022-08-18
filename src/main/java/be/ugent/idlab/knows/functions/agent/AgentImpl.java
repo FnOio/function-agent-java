@@ -5,11 +5,16 @@ import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
+import org.apache.jena.rdf.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.*;
+
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.*;
 
 /**
  * <p>Copyright 2021 IDLab (Ghent University - imec)</p>
@@ -28,6 +33,8 @@ public class AgentImpl implements Agent {
 
     @Override
     public Object execute(String functionId, Arguments arguments) throws Exception {
+        Function f = functionId2Function.get(functionId);
+        executeToFile(functionId, arguments, "tmp.txt");
         return execute(functionId, arguments, false);
     }
 
@@ -86,5 +93,61 @@ public class AgentImpl implements Agent {
         }
         // if the function is a composition, there is no specific method associated with.
         return instantiator.getCompositeMethod(functionId, debug).apply(this, valuesInOrder.toArray());
+    }
+
+    @Override
+    public void executeToFile(String functionId, Arguments arguments, String fileName) throws Exception {
+        this.executeToFile(functionId, arguments, fileName, false);
+    }
+
+    @Override
+    public void executeToFile(String functionId, Arguments arguments, String fileName, boolean debug) throws Exception {
+        constructResult(functionId, arguments, fileName, debug);
+    }
+
+    private void constructResult(String functionId, Arguments arguments, String filename, boolean debug) throws Exception{
+        Model model = ModelFactory.createDefaultModel();
+        Function function = functionId2Function.get(functionId);
+        Object result = this.execute(functionId, arguments, debug);
+        Resource executionResource = model.createResource(FNO+"execution")
+                                        .addProperty(ResourceFactory.createProperty(RDF.toString(), "type"), FNO+"Execution");
+        if(function.getReturnParameters().isEmpty()){
+            executionResource.addLiteral(ResourceFactory.createProperty(DCTERMS.toString(), "description"), "Function has no output");
+        }
+        else{
+            executionResource.addLiteral(ResourceFactory.createProperty(function.getReturnParameters().get(0).getId()), result.toString());
+        }
+        printModel(model, filename);
+    }
+
+    /**
+     * Prints out an RDF model
+     * If filename is null, print with the logger.
+     * @param model the RDF model that needs to be printed
+     * @param filename the filename to print it to. If null, default to logger.
+     * @throws IOException something goes wrong printing the model
+     */
+    private void printModel(Model model, String filename) throws IOException {
+        if(filename == null){
+            StmtIterator it = model.listStatements();
+            while(it.hasNext()){
+                Statement s = it.nextStatement();
+                logger.info("{} {} {}", s.getSubject(), s.getPredicate(), s.getObject());
+            }
+        }
+        else{
+            try(PrintWriter pw = new PrintWriter(filename)){
+                ResIterator it = model.listSubjects();
+                while(it.hasNext()){
+                    Resource subject = it.nextResource();
+                    pw.println(subject);
+                    StmtIterator stmtIterator = subject.listProperties();
+                    while(stmtIterator.hasNext()){
+                        Statement statement = stmtIterator.nextStatement();
+                        pw.println("\t"+statement.getPredicate() + " " + statement.getObject());
+                    }
+                }
+            }
+        }
     }
 }

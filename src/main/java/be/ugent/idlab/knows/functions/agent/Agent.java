@@ -24,4 +24,8 @@ public interface Agent {
      * @throws Exception    Something goes wrong looking up the function or executing it.
      */
     Object execute(final String functionId, final Arguments arguments, boolean debug) throws Exception;
+
+    void executeToFile(final String functionId, final Arguments arguments, final String fileName) throws Exception;
+
+    void executeToFile(final String functionId, final Arguments arguments, final String fileName, boolean debug) throws Exception;
 }
