@@ -5,13 +5,20 @@ import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
-import org.apache.jena.rdf.model.*;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.*;
@@ -35,6 +42,7 @@ public class AgentImpl implements Agent {
     public Object execute(String functionId, Arguments arguments) throws Exception {
         Function f = functionId2Function.get(functionId);
         executeToFile(functionId, arguments, "tmp.txt");
+        executeToFile(functionId, arguments, null);
         return execute(functionId, arguments, false);
     }
 
@@ -128,26 +136,13 @@ public class AgentImpl implements Agent {
      * @throws IOException something goes wrong printing the model
      */
     private void printModel(Model model, String filename) throws IOException {
-        if(filename == null){
-            StmtIterator it = model.listStatements();
-            while(it.hasNext()){
-                Statement s = it.nextStatement();
-                logger.info("{} {} {}", s.getSubject(), s.getPredicate(), s.getObject());
-            }
+        OutputStream stream = System.out;
+        if(filename != null){
+            stream = Files.newOutputStream(Paths.get(filename));
         }
-        else{
-            try(PrintWriter pw = new PrintWriter(filename)){
-                ResIterator it = model.listSubjects();
-                while(it.hasNext()){
-                    Resource subject = it.nextResource();
-                    pw.println(subject);
-                    StmtIterator stmtIterator = subject.listProperties();
-                    while(stmtIterator.hasNext()){
-                        Statement statement = stmtIterator.nextStatement();
-                        pw.println("\t"+statement.getPredicate() + " " + statement.getObject());
-                    }
-                }
-            }
+        RDFDataMgr.write(stream, model, Lang.TURTLE);
+        if(filename != null){
+            stream.close();
         }
     }
 }
