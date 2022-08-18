@@ -200,6 +200,5 @@ See also [AgentTest.java](src/test/java/be/ugent/idlab/knows/functions/agent/Age
 * Lazy loading of function implementations. 
 
 ## Current limitations
-* Does not support FnO's [function composition](https://fno.io/spec/#composition) yet.
 * No state supported.
 * Implemented in Java, no bindings for non-JVM languages provided.
