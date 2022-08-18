@@ -188,57 +188,44 @@ public class Instantiator {
         }
 
         // checks for cycles in dependencies
-        checkDependencyCycles(dependencies, functionId);
+        checkDependencyCycles2(globalDependencies); // based on global dependencies
+        // checkDependencyCycles(dependencies, functionId); based on DFS
 
         // order of function execution is determined with the debug parameter
         Deque<String> execStack = new ArrayDeque<>();
 
         // effective implementation: stack of necessary function calls to get output.
-        List<String> toadd = new ArrayList<>();
-        List<String> willBeAdded = new ArrayList<>();
+        Queue<String> toadd = new ArrayDeque<>();
         toadd.add(functionId);
         while(!toadd.isEmpty()) {
-            toadd.forEach(execStack::push);
-            logger.debug("new toadd: {}", toadd);
-            for (String fId : toadd) {
-                logger.debug("checking: {}", fId);
-                Collection<String> dep = dependencies.get(fId);
-                logger.debug("dependencies: {}", dep);
-                if(toadd.stream().anyMatch(other -> {
-                    Collection<String> otherDep = globalDependencies.get(other);
-                    return otherDep.contains(fId);
-                })){
-                    logger.debug("found bad dependency: {}", fId);
-                    willBeAdded.add(fId);
-                    continue;
-                }
-                logger.debug("added: {}", fId);
-                dep.stream().filter((String funcName) -> !execStack.contains(funcName))
-                        .forEach(willBeAdded::add);
+            String fId = toadd.poll();
+            Collection<String> dep = dependencies.get(fId);
+            // check if there are functions in the queue that are dependent on this one
+            if(toadd.stream().anyMatch(other -> {
+                Collection<String> otherDep = globalDependencies.get(other);
+                return otherDep.contains(fId);
+            })){
+                toadd.add(fId);
+                continue;
             }
-            toadd.clear();
-            toadd.addAll(willBeAdded);
-            willBeAdded.clear();
+            execStack.push(fId);
+            dep.stream().filter((String funcName) -> !execStack.contains(funcName))
+                    .forEach(toadd::add);
         }
-
-        logger.debug("execution stack: {}", execStack);
+        execStack.removeLast();
         if(debug){
             // less effective implementation: all nodes of the composition graph will be executed.
             // they will be added after the necessary functions for the output and before the actual function.
-            execStack.removeLast();
-            Set<String> sideSet = dependencies.keySet().stream().filter(name -> !(execStack.contains(name))).collect(Collectors.toSet());
+            Queue<String> sideSet = dependencies.keySet().stream().filter(name -> !(execStack.contains(name))).collect(Collectors.toCollection(ArrayDeque::new));
             while(!sideSet.isEmpty()) {
-                List<String> toRemove = new ArrayList<>();
-                for(String s : sideSet){
-                    if(execStack.containsAll(dependencies.get(s))){
-                        execStack.addLast(s);
-                        toRemove.add(s);
-                    }
+                String s = sideSet.poll();
+                if(execStack.containsAll(dependencies.get(s))){
+                    execStack.addLast(s);
                 }
-                toRemove.forEach(sideSet::remove);
-                toRemove.clear();
+                else{
+                    sideSet.add(s);
+                }
             }
-            execStack.addLast(functionId);
         }
 
 
@@ -259,7 +246,7 @@ public class Instantiator {
                 for each function, we will get for each parameter all the values that are mapped to that parameter
                 and we will execute the function when we have all the arguments
              */
-            while (execStack.size() > 1) {
+            while (!execStack.isEmpty()) {
                 String f = execStack.pop();
                 Arguments arguments = new Arguments();
                 Function func = id2functionMap.get(f);
@@ -267,19 +254,19 @@ public class Instantiator {
                     FunctionFieldPair ffp = new FunctionFieldPair(f, p.getId());
                     Collection<FunctionFieldPair> ffpc = new ArrayList<>();
                     Collection<FunctionFieldPair> toAdd = new ArrayList<>(parametermap.get(ffp));
-                    Collection<FunctionFieldPair> willBeAdded2 = new ArrayList<>();
+                    Collection<FunctionFieldPair> willBeAdded = new ArrayList<>();
                     // check for multiple references: a -> b -> c so a should take a value from c and d
                     //                                       -> d
                     while(!toAdd.isEmpty()){
                         ffpc.addAll(toAdd);
                         for(FunctionFieldPair functionFieldPair : toAdd){
-                            willBeAdded2.addAll(parametermap.get(functionFieldPair));
+                            willBeAdded.addAll(parametermap.get(functionFieldPair));
                         }
                         toAdd.clear();
-                        toAdd.addAll(willBeAdded2);
-                        willBeAdded2.clear();
+                        toAdd.addAll(willBeAdded);
+                        willBeAdded.clear();
                     }
-                    if(ffpc.isEmpty()){
+                    if(ffpc.isEmpty()) {
                         arguments = arguments.add(p.getId(), values.get(f).get(p.getId()));
                     }
                     for (FunctionFieldPair functionFieldPair: ffpc) {
@@ -321,6 +308,12 @@ public class Instantiator {
         }
     }
 
+
+    private void checkDependencyCycles2(MultiValuedMap<String, String> globalDependencies) throws InstantiationException{
+        for (String functionID : globalDependencies.keySet()) {
+            if(globalDependencies.get(functionID).contains(functionID)) throw new CyclicDependencyException("Cycle detected in dependency of " + functionID);
+        }
+    }
 
     /**
      * Checks a MultivaluedMap of function dependencies for cycles, starting with a start node
