@@ -1,6 +1,7 @@
 package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.ListConverter;
 import be.ugent.idlab.knows.functions.agent.exception.MissingRDFSeqIndexException;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
@@ -92,7 +93,9 @@ public class AgentImpl implements Agent {
                     Object value = arguments.get(RDF+"_"+(finalI)).stream().findFirst().orElseThrow(() -> new MissingRDFSeqIndexException("no parameter found for _" + (finalI)));
                     values[i] = value;
                 }
-                valuesInOrder.add(values);
+                ListConverter converter = new ListConverter();
+                converter.setArgumentTypeConverter(argumentParameter.getTypeConverter());
+                valuesInOrder.add(converter.convert(values));
             }
             else if (argumentParameter.getTypeConverter().getTypeCategory() == DataTypeConverter.TypeCategory.COLLECTION) {
                 logger.debug("got collection argument!");
