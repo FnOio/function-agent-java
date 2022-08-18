@@ -188,7 +188,7 @@ public class Instantiator {
         }
 
         // checks for cycles in dependencies
-        checkDependencyCycles2(globalDependencies); // based on global dependencies
+        checkDependencyCycles(globalDependencies); // based on global dependencies
 
         // order of function execution is determined with the debug parameter
         Deque<String> execStack = new ArrayDeque<>();
@@ -308,7 +308,7 @@ public class Instantiator {
     }
 
 
-    private void checkDependencyCycles2(MultiValuedMap<String, String> globalDependencies) throws InstantiationException{
+    private void checkDependencyCycles(MultiValuedMap<String, String> globalDependencies) throws InstantiationException{
         for (String functionID : globalDependencies.keySet()) {
             if(globalDependencies.get(functionID).contains(functionID)) throw new CyclicDependencyException("Cycle detected in dependency of " + functionID);
         }
