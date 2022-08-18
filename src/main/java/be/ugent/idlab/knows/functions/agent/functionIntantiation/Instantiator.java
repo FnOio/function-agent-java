@@ -189,7 +189,6 @@ public class Instantiator {
 
         // checks for cycles in dependencies
         checkDependencyCycles2(globalDependencies); // based on global dependencies
-        // checkDependencyCycles(dependencies, functionId); based on DFS
 
         // order of function execution is determined with the debug parameter
         Deque<String> execStack = new ArrayDeque<>();
@@ -313,38 +312,6 @@ public class Instantiator {
         for (String functionID : globalDependencies.keySet()) {
             if(globalDependencies.get(functionID).contains(functionID)) throw new CyclicDependencyException("Cycle detected in dependency of " + functionID);
         }
-    }
-
-    /**
-     * Checks a MultivaluedMap of function dependencies for cycles, starting with a start node
-     * @param dependencies the map of dependencies
-     * @param start the node to start at
-     * @throws InstantiationException Throws an exception if a cycle is detected
-     */
-    private void checkDependencyCycles(MultiValuedMap<String, String> dependencies, String start) throws InstantiationException{
-        logger.debug("checking for cyclic dependencies...");
-        Stack<String> path = new Stack<>();
-        boolean hasCycle = cycleRecursive(dependencies, start, new HashSet<>(), path);
-        if(hasCycle){
-            throw new CyclicDependencyException("Cycle detected in function dependencies. Path of cycle: " + path);
-        }
-    }
-
-    private boolean cycleRecursive(MultiValuedMap<String, String> dependencies, String current, Set<String> visited, Stack<String> path) {
-        path.add(current);
-        visited.add(current);
-        Collection<String> next = dependencies.get(current);
-        Optional<String> function = next.stream().filter(path::contains).findFirst();
-        boolean stop = function.isPresent();
-        if(stop){
-            path.push(function.get());
-            return true;
-        }
-        stop = next.stream().filter(function1 -> !visited.contains(function1)).anyMatch(function1 -> cycleRecursive(dependencies, function1, visited, path));
-        if(!stop){ // keep path intact to show in exception message
-            path.pop();
-        }
-        return stop;
     }
 
     /**

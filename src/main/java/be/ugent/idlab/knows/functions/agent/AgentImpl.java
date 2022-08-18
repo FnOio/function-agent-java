@@ -2,6 +2,7 @@ package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.MethodNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
@@ -58,6 +59,9 @@ public class AgentImpl implements Agent {
         // get the method if the function is not a composition
         if(!function.isComposite()){
             method = instantiator.getMethod(functionId);
+            if(method == null){
+                throw new MethodNotFoundException("No method found for function " + functionId);
+            }
         }
 
 
