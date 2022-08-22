@@ -156,6 +156,7 @@ public class AgentImpl implements Agent {
         Property rdfTypeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
         Property fnoNameProperty = ResourceFactory.createProperty(FNO.toString(), "name");
         Property fnoParameterProperty = ResourceFactory.createProperty(FNO.toString(), "expects");
+        Property fnoReturnProperty = ResourceFactory.createProperty(FNO.toString(), "returns");
 
         Resource function = model.createResource(FNO + method.getDeclaringClass().getName() + "." + method.getName());
         function.addProperty(rdfTypeProperty, FNO + "Function");
@@ -167,15 +168,22 @@ public class AgentImpl implements Agent {
         RDFNode[] rdfArray = new RDFNode[parameters.length];
         Arrays.stream(parameters).map(parameter -> {
             Resource parameterResource = model.createResource(FNO + parameter.getName());
+
             parameterResource.addProperty(fnoNameProperty, parameter.getName());
             return parameterResource;
         }).collect(Collectors.toList()).toArray(rdfArray);
-        RDFList list = model.createList(rdfArray);
-        function.addProperty(fnoParameterProperty, list);
+        RDFList parameterList = model.createList(rdfArray);
+        function.addProperty(fnoParameterProperty, parameterList);
 
-        method.getParameterTypes();
-        method.getParameterCount();
-        method.getReturnType(); // return type
+        // add return type
+        Class<?> returnType = method.getReturnType();
+        RDFNode[] returnList = new RDFNode[1];
+        Resource returnTypeResource = model.createResource(FNO+returnType.getName()+"Output");
+        returnTypeResource.addProperty(fnoNameProperty, returnType.getName()+"Output");
+        returnList[0] = returnTypeResource;
+        RDFList outputList = model.createList(returnList);
+        function.addProperty(fnoReturnProperty, outputList);
+
         method.getExceptionTypes(); // exceptions as optional output
         method.getModifiers(); // check for static modifier to link implementation
         Modifier.isStatic(0);
