@@ -391,7 +391,7 @@ public class AgentTest {
         List<String> correct = new ArrayList<>();
         correct.add("a");
         correct.add("b");
-        assertEquals("should be a list with elements a,b", correct, result );
+        assertEquals("should be a list with elements a and b", correct, result );
     }
 
     @Test
@@ -426,7 +426,7 @@ public class AgentTest {
         List<String> correct = new ArrayList<>();
         correct.add("a");
         correct.add("b");
-        assertEquals("should be a list with element a", correct, result );
+        assertEquals("should be a list with elements a and b", correct, result );
     }
 
     @Test
@@ -438,6 +438,6 @@ public class AgentTest {
         Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
         List<String> correct = new ArrayList<>();
         correct.add("x");
-        assertEquals("should be a list with element a", correct, result );
+        assertEquals("should be a list with element x", correct, result );
     }
 }
