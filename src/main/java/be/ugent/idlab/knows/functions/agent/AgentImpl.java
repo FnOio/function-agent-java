@@ -5,10 +5,7 @@ import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.slf4j.Logger;
@@ -17,9 +14,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.*;
 
@@ -125,7 +124,12 @@ public class AgentImpl implements Agent {
         else{
             executionResource.addLiteral(ResourceFactory.createProperty(function.getReturnParameters().get(0).getId()), result.toString());
         }
+        generateDescription(model, AgentImpl.class.getMethods()[0], "");
         printModel(model, filename);
+    }
+
+    private void printModel(Model model) throws IOException{
+        this.printModel(model, null);
     }
 
     /**
@@ -144,5 +148,37 @@ public class AgentImpl implements Agent {
         if(filename != null){
             stream.close();
         }
+    }
+
+    public void generateDescription(Model model, Method method, String filename) throws Exception {
+        logger.debug("name: {}", method.getName()); // name
+
+        Property rdfTypeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
+        Property fnoNameProperty = ResourceFactory.createProperty(FNO.toString(), "name");
+        Property fnoParameterProperty = ResourceFactory.createProperty(FNO.toString(), "expects");
+
+        Resource function = model.createResource(FNO + method.getDeclaringClass().getName() + "." + method.getName());
+        function.addProperty(rdfTypeProperty, FNO + "Function");
+        function.addProperty(fnoNameProperty, method.getName());
+        function.addProperty(ResourceFactory.createProperty(DCTERMS.toString(), "description"), method.getName());
+
+        // add parameters
+        java.lang.reflect.Parameter[] parameters = method.getParameters(); // parameters
+        RDFNode[] rdfArray = new RDFNode[parameters.length];
+        Arrays.stream(parameters).map(parameter -> {
+            Resource parameterResource = model.createResource(FNO + parameter.getName());
+            parameterResource.addProperty(fnoNameProperty, parameter.getName());
+            return parameterResource;
+        }).collect(Collectors.toList()).toArray(rdfArray);
+        RDFList list = model.createList(rdfArray);
+        function.addProperty(fnoParameterProperty, list);
+
+        method.getParameterTypes();
+        method.getParameterCount();
+        method.getReturnType(); // return type
+        method.getExceptionTypes(); // exceptions as optional output
+        method.getModifiers(); // check for static modifier to link implementation
+        Modifier.isStatic(0);
+        method.isVarArgs(); // varargs for the short rdf:_nnn notation?
     }
 }
