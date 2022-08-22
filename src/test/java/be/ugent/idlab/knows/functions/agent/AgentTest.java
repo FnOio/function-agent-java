@@ -440,4 +440,22 @@ public class AgentTest {
         correct.add("x");
         assertEquals("should be a list with element x", correct, result );
     }
+
+    @Test
+    public void testExtraDependencies1() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "weirdComposition1.ttl");
+        Arguments arguments = new Arguments()
+                .add(EX+"p_int1", "5")
+                .add(EX+"p_int2", "4");
+        assertEquals("expected 90", 90L, agent.execute(FNS+"comp", arguments));
+    }
+
+    @Test
+    public void testExtraDependencies2() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "weirdComposition2.ttl");
+        Arguments arguments = new Arguments()
+                .add(EX+"p_int1", "5")
+                .add(EX+"p_int2", "4");
+        assertEquals("expected 28", 28L, agent.execute(FNS+"comp", arguments));
+    }
 }

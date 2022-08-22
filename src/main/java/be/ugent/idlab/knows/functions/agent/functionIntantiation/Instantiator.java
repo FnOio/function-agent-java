@@ -137,6 +137,9 @@ public class Instantiator {
         // K receives values from V, can be multiple values. Arguments class takes care of this.
         MultiValuedMap<FunctionFieldPair, FunctionFieldPair> parametermap = new ArrayListValuedHashMap<>();
 
+        // temporary global dependencies
+        MultiValuedMap<String, String> globalDependencies = new ArrayListValuedHashMap<>();
+
         // function dependencies and parameter maps
         for(CompositionMappingElement el : functionComposition.getMappings()){
             CompositionMappingPoint from = el.getFrom();
@@ -164,46 +167,64 @@ public class Instantiator {
             }
         }
 
-        // checks for cycles in dependencies
-        checkDependencyCycles(dependencies, functionId);
+        // fix global dependencies for later:
+        for (String funcId : dependencies.keySet()) {
+            List<String> list = new ArrayList<>(dependencies.get(funcId));
+            Collection<String> deps = globalDependencies.get(funcId);
+            while(!list.isEmpty()) {
+                List<String> toAdd = new ArrayList<>();
+                for (String dep : list){
+                    List<String> tmpdep = dependencies.get(dep).stream()
+                                            .filter(i -> !deps.contains(i))
+                                            .filter(i -> !toAdd.contains(i))
+                                            .collect(Collectors.toList());
+                    toAdd.addAll(tmpdep);
+                }
+                deps.addAll(list);
+                list.clear();
+                list.addAll(toAdd);
+                toAdd.clear();
+            }
+        }
 
+        // checks for cycles in dependencies
+        checkDependencyCycles(globalDependencies); // based on global dependencies
 
         // order of function execution is determined with the debug parameter
         Deque<String> execStack = new ArrayDeque<>();
 
         // effective implementation: stack of necessary function calls to get output.
-        List<String> toadd = new ArrayList<>();
-        List<String> willBeAdded = new ArrayList<>();
+        Queue<String> toadd = new ArrayDeque<>();
         toadd.add(functionId);
         while(!toadd.isEmpty()) {
-            toadd.forEach(execStack::push);
-            for (String fId : toadd) {
-                Collection<String> dep = dependencies.get(fId);
-                dep.stream().filter((String funcName) -> !execStack.contains(funcName))
-                        .forEach(willBeAdded::add);
+            String fId = toadd.poll();
+            Collection<String> dep = dependencies.get(fId);
+            // check if there are functions in the queue that are dependent on this one
+            if(toadd.stream().anyMatch(other -> {
+                Collection<String> otherDep = globalDependencies.get(other);
+                return otherDep.contains(fId);
+            })){
+                toadd.add(fId);
+                continue;
             }
-            toadd.clear();
-            toadd.addAll(willBeAdded);
-            willBeAdded.clear();
+            execStack.push(fId);
+            dep.stream().filter((String funcName) -> !execStack.contains(funcName))
+                    .forEach(toadd::add);
         }
-
+        execStack.removeLast();
         if(debug){
             // less effective implementation: all nodes of the composition graph will be executed.
             // they will be added after the necessary functions for the output and before the actual function.
-            execStack.removeLast();
-            Set<String> sideSet = dependencies.keySet().stream().filter(name -> !(execStack.contains(name))).collect(Collectors.toSet());
+            Queue<String> sideSet = dependencies.keySet().stream().filter(name -> !(execStack.contains(name))).collect(Collectors.toCollection(ArrayDeque::new));
             while(!sideSet.isEmpty()) {
-                List<String> toRemove = new ArrayList<>();
-                for(String s : sideSet){
-                    if(execStack.containsAll(dependencies.get(s))){
-                        execStack.addLast(s);
-                        toRemove.add(s);
-                    }
+                String s = sideSet.poll();
+                if(execStack.containsAll(dependencies.get(s))){
+                    execStack.addLast(s);
                 }
-                toRemove.forEach(sideSet::remove);
-                toRemove.clear();
+                else{
+                    sideSet.add(s);
+                }
             }
-            execStack.addLast(functionId);
         }
 
 
@@ -224,7 +245,7 @@ public class Instantiator {
                 for each function, we will get for each parameter all the values that are mapped to that parameter
                 and we will execute the function when we have all the arguments
              */
-            while (execStack.size() > 1) {
+            while (!execStack.isEmpty()) {
                 String f = execStack.pop();
                 Arguments arguments = new Arguments();
                 Function func = id2functionMap.get(f);
@@ -232,19 +253,19 @@ public class Instantiator {
                     FunctionFieldPair ffp = new FunctionFieldPair(f, p.getId());
                     Collection<FunctionFieldPair> ffpc = new ArrayList<>();
                     Collection<FunctionFieldPair> toAdd = new ArrayList<>(parametermap.get(ffp));
-                    Collection<FunctionFieldPair> willBeAdded2 = new ArrayList<>();
+                    Collection<FunctionFieldPair> willBeAdded = new ArrayList<>();
                     // check for multiple references: a -> b -> c so a should take a value from c and d
                     //                                       -> d
                     while(!toAdd.isEmpty()){
                         ffpc.addAll(toAdd);
                         for(FunctionFieldPair functionFieldPair : toAdd){
-                            willBeAdded2.addAll(parametermap.get(functionFieldPair));
+                            willBeAdded.addAll(parametermap.get(functionFieldPair));
                         }
                         toAdd.clear();
-                        toAdd.addAll(willBeAdded2);
-                        willBeAdded2.clear();
+                        toAdd.addAll(willBeAdded);
+                        willBeAdded.clear();
                     }
-                    if(ffpc.isEmpty()){
+                    if(ffpc.isEmpty()) {
                         arguments = arguments.add(p.getId(), values.get(f).get(p.getId()));
                     }
                     for (FunctionFieldPair functionFieldPair: ffpc) {
@@ -287,36 +308,10 @@ public class Instantiator {
     }
 
 
-    /**
-     * Checks a MultivaluedMap of function dependencies for cycles, starting with a start node
-     * @param dependencies the map of dependencies
-     * @param start the node to start at
-     * @throws InstantiationException Throws an exception if a cycle is detected
-     */
-    private void checkDependencyCycles(MultiValuedMap<String, String> dependencies, String start) throws InstantiationException{
-        logger.debug("checking for cyclic dependencies...");
-        Stack<String> path = new Stack<>();
-        boolean hasCycle = cycleRecursive(dependencies, start, new HashSet<>(), path);
-        if(hasCycle){
-            throw new CyclicDependencyException("Cycle detected in function dependencies. Path of cycle: " + path);
+    private void checkDependencyCycles(MultiValuedMap<String, String> globalDependencies) throws InstantiationException{
+        for (String functionID : globalDependencies.keySet()) {
+            if(globalDependencies.get(functionID).contains(functionID)) throw new CyclicDependencyException("Cycle detected in dependency of " + functionID);
         }
-    }
-
-    private boolean cycleRecursive(MultiValuedMap<String, String> dependencies, String current, Set<String> visited, Stack<String> path) {
-        path.add(current);
-        visited.add(current);
-        Collection<String> next = dependencies.get(current);
-        Optional<String> function = next.stream().filter(path::contains).findFirst();
-        boolean stop = function.isPresent();
-        if(stop){
-            path.push(function.get());
-            return true;
-        }
-        stop = next.stream().filter(function1 -> !visited.contains(function1)).anyMatch(function1 -> cycleRecursive(dependencies, function1, visited, path));
-        if(!stop){ // keep path intact to show in exception message
-            path.pop();
-        }
-        return stop;
     }
 
     /**

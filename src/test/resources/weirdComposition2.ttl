@@ -1,0 +1,118 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fno:     <https://w3id.org/function/ontology#> .
+@prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
+@prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
+@prefix ex:      <http://example.org/> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xs:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix fns: <http://example.com/functions#> .
+@prefix fnoc: <https://w3id.org/function/vocabulary/composition#> .
+
+
+#############
+# FUNCTIONS #
+#############
+
+fns:comp a fno:Function;
+    fno:name "comp";
+    dcterms: "comp";
+    rdfs:label: "comp";
+    fno:expects (ex:int1 ex:int2);
+    fno:returns (ex:intOut).
+
+
+ex:sum1 fnoc:applies ex:sum.
+ex:sum2 fnoc:applies ex:sum.
+ex:sum3 fnoc:applies ex:sum.
+fns:compComposition a fnoc:Composition;
+    fnoc:composedOf [
+            fnoc:mapFrom [
+                fnoc:constituentFunction fns:comp;
+                fnoc:functionParameter ex:int1
+            ] ;
+            fnoc:mapTo [
+                fnoc:constituentFunction ex:sum;
+                fnoc:functionParameter ex:int1
+            ]
+        ],
+        [
+            fnoc:mapFrom [
+                fnoc:constituentFunction fns:comp;
+                fnoc:functionParameter ex:int2
+            ] ;
+            fnoc:mapTo [
+                fnoc:constituentFunction ex:sum;
+                fnoc:functionParameter ex:int2
+            ]
+        ],
+        [
+            fnoc:mapFrom[
+                fnoc:constituentFunction ex:sum;
+                fnoc:functionOutput ex:intOut
+            ];
+            fnoc:mapTo[
+                fnoc:constituentFunction ex:sum1;
+                fnoc:functionParameter ex:int1;
+            ]
+        ],
+        [
+            fnoc:mapFrom[
+                fnoc:constituentFunction fns:comp;
+                fnoc:functionParameter ex:int1
+            ];
+            fnoc:mapTo[
+                fnoc:constituentFunction ex:sum1;
+                fnoc:functionParameter ex:int2
+            ]
+        ],
+        [
+            fnoc:mapFrom [
+                fnoc:constituentFunction ex:sum1;
+                fnoc:functionOutput ex:intOut;
+            ];
+            fnoc:mapTo[
+                fnoc:constituentFunction ex:sum2;
+                fnoc:functionParameter ex:int1
+            ]
+        ],
+         [
+             fnoc:mapFrom [
+                 fnoc:constituentFunction ex:sum;
+                 fnoc:functionOutput ex:intOut;
+             ];
+             fnoc:mapTo[
+                 fnoc:constituentFunction ex:sum2;
+                 fnoc:functionParameter ex:int2
+             ]
+         ],
+           [
+               fnoc:mapFrom [
+                   fnoc:constituentFunction ex:sum2;
+                   fnoc:functionOutput ex:intOut;
+               ];
+               fnoc:mapTo[
+                   fnoc:constituentFunction ex:sum3;
+                   fnoc:functionParameter ex:int1
+               ]
+           ],
+           [
+              fnoc:mapFrom [
+                  fnoc:constituentFunction fns:comp;
+                  fnoc:functionParameter ex:int1;
+              ];
+              fnoc:mapTo[
+                  fnoc:constituentFunction ex:sum3;
+                  fnoc:functionParameter ex:int2
+              ]
+          ],
+          [
+                fnoc:mapFrom[
+                    fnoc:constituentFunction ex:sum3;
+                    fnoc:functionOutput ex:intOut
+                ];
+                fnoc:mapTo[
+                    fnoc:constituentFunction fns:comp;
+                    fnoc:functionOutput ex:intOut
+                ]
+          ]
