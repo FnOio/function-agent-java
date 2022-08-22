@@ -65,6 +65,8 @@ public class AgentImpl implements Agent {
             method = instantiator.getMethod(functionId);
         }
 
+        // pattern for finding rdf:_nnn parameters
+        Pattern pattern = Pattern.compile(RDF +"_\\d+");
 
         // "fill in" the argument parameters
         final List<Object> valuesInOrder = new ArrayList<>(arguments.size());
@@ -75,7 +77,7 @@ public class AgentImpl implements Agent {
                 logger.debug("found sequential parameter (_nnn), looking for values");
                 // get the highest available sequence index
                 Optional<Integer> optionalInteger = arguments.getArgumentNames().stream()
-                                                        .filter(name -> Pattern.compile(RDF +"_\\d+").matcher(name).matches())
+                                                        .filter(name -> pattern.matcher(name).matches())
                                                         .map(i -> Integer.parseInt(i.substring(RDF.toString().length()+1)))
                                                         .max(Integer::compareTo);
 
