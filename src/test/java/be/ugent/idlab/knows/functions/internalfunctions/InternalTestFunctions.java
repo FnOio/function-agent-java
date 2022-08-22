@@ -91,4 +91,13 @@ public class InternalTestFunctions {
         writeToFile(object, filename);
         return object;
     }
+
+    public static List<?> makeSeq(List<?> objects){
+        return objects;
+    }
+
+    public static List<?> makeListFromSeq(List<?> objects){
+        return objects;
+    }
+
 }

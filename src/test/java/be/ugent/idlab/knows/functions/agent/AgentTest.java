@@ -1,6 +1,7 @@
 package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
+import be.ugent.idlab.knows.functions.agent.exception.AgentException;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
@@ -15,8 +16,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.IDLABFN;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
 import static org.junit.Assert.*;
 
 /**
@@ -366,6 +371,77 @@ public class AgentTest {
     }
 
     @Test
+    public void rdfListFromSeqTest1Element() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(RDF+"_1", "a");
+        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
+        List<String> correct = new ArrayList<>();
+        correct.add("a");
+        assertEquals("should be a list with element a", correct, result );
+    }
+
+    @Test
+    public void rdfListFromSeqTest2Elements() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(RDF+"_1", "a")
+                .add(RDF+"_2", "b");
+        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
+        List<String> correct = new ArrayList<>();
+        correct.add("a");
+        correct.add("b");
+        assertEquals("should be a list with elements a and b", correct, result );
+    }
+
+    @Test
+    public void rdfListFromSeqTest4ElementOneMissing() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(RDF+"_1", "a")
+                .add(RDF+"_2", "b")
+                .add(RDF+"_4", "d");
+
+        assertThrows("expected exception for missing _3 parameter", AgentException.class,() -> agent.execute(IDLABFN+"makeListFromSeq", arguments));
+    }
+
+    @Test
+    public void rdfSeqTest1Element() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(RDF+"_1", "a");
+        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
+        List<String> correct = new ArrayList<>();
+        correct.add("a");
+        assertEquals("should be a list with element a", correct, result );
+    }
+
+    @Test
+    public void rdfSeqTest2Element() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(RDF+"_2", "b")
+                .add(RDF+"_1", "a");
+        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
+        List<String> correct = new ArrayList<>();
+        correct.add("a");
+        correct.add("b");
+        assertEquals("should be a list with elements a and b", correct, result );
+    }
+
+    @Test
+    public void rdfSeqTestNoErrorForNegativeIndex() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl");
+        Arguments arguments = new Arguments()
+                .add(RDF+"_-1", "a")
+                .add(RDF+"_1", "x");
+        Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
+        List<String> correct = new ArrayList<>();
+        correct.add("x");
+        assertEquals("should be a list with element x", correct, result );
+    }
+
+    @Test
     public void testExtraDependencies1() throws Exception {
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "weirdComposition1.ttl");
         Arguments arguments = new Arguments()
@@ -381,4 +457,5 @@ public class AgentTest {
                 .add(EX+"p_int1", "5")
                 .add(EX+"p_int2", "4");
         assertEquals("expected 28", 28L, agent.execute(FNS+"comp", arguments));
-}}
+    }
+}

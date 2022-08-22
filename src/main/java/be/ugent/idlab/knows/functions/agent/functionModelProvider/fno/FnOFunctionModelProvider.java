@@ -200,7 +200,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * @throws FnOException Something goes wrong parsing the function composition.
      *                      A subclass of FnOException specifies what exactly.
      */
-    public void parsePartialApplications() throws FnOException{
+    private void parsePartialApplications() throws FnOException{
         logger.debug("Parsing partial function applications");
         Resource partialApplicationObject = ResourceFactory.createProperty(FNOC+"PartiallyAppliedFunction");
         ResIterator applications = functionDescriptionTriples.listSubjectsWithProperty(typeProperty, partialApplicationObject);
@@ -216,7 +216,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * @throws FnOException             Something goes wrong parsing the partial function application.
      *                                  A subclass of FnOException specifies what exactly.
      */
-    public void parsePartialApplication(final Resource resource) throws FnOException{
+    private void parsePartialApplication(final Resource resource) throws FnOException{
         logger.debug("parsing partial application for function {}", resource.getURI());
         String functionId = resource.getURI();
         // function that is partially applied
@@ -514,7 +514,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
 
             // get name
             String name = getLiteralStr(functionResource, FNO + "name")
-                    .orElseThrow(() -> new FunctionNameNotFoundException("Could not find '" + FNO + "name' for"));
+                    .orElseThrow(() -> new FunctionNameNotFoundException("Could not find '" + FNO + "name' for " + functionURI));
 
             // get expected parameters
             List<Parameter> expects = parseParameters(functionResource, true);
