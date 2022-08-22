@@ -157,6 +157,7 @@ public class AgentImpl implements Agent {
         Property fnoNameProperty = ResourceFactory.createProperty(FNO.toString(), "name");
         Property fnoParameterProperty = ResourceFactory.createProperty(FNO.toString(), "expects");
         Property fnoReturnProperty = ResourceFactory.createProperty(FNO.toString(), "returns");
+        Property fnoPredicateProperty = ResourceFactory.createProperty(FNO.toString(), "predicate");
 
         Resource function = model.createResource(FNO + method.getDeclaringClass().getName() + "." + method.getName());
         function.addProperty(rdfTypeProperty, FNO + "Function");
@@ -170,6 +171,12 @@ public class AgentImpl implements Agent {
             Resource parameterResource = model.createResource(FNO + parameter.getName());
 
             parameterResource.addProperty(fnoNameProperty, parameter.getName());
+            if(!parameter.isVarArgs()){
+                parameterResource.addProperty(fnoPredicateProperty, parameter.getName());
+            }
+            else{
+                parameterResource.addProperty(fnoPredicateProperty, RDF+"_nnn");
+            }
             return parameterResource;
         }).collect(Collectors.toList()).toArray(rdfArray);
         RDFList parameterList = model.createList(rdfArray);
