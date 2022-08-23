@@ -28,7 +28,7 @@ public class DescriptionGenerator {
     private static final Property fnoPredicateProperty = ResourceFactory.createProperty(FNO.toString(), "predicate");
     private static final Property fnoRequiredProperty = ResourceFactory.createProperty(FNO.toString(), "required");
     private static final Property fnoTypeProperty = ResourceFactory.createProperty(FNO.toString(), "type");
-
+    private static final Property fnoiClassNameProperty = ResourceFactory.createProperty(FNOI.toString(), "class-name");
 
     /*
      * initialise datatype map
@@ -43,11 +43,8 @@ public class DescriptionGenerator {
         datatypeMap.put(Integer.class, XSDDatatype.XSDint);
     }
 
-    public static void generateDescription(Model model, Method method, String filename) throws Exception {
+    public static void generateDescription(Model model, Method method) {
         logger.debug("name: {}", method.getName()); // name
-
-
-
 
         Resource function = model.createResource(FNO + method.getDeclaringClass().getName() + "." + method.getName());
         function.addProperty(rdfTypeProperty, FNO + "Function");
@@ -93,17 +90,10 @@ public class DescriptionGenerator {
         int modifiers = method.getModifiers();
         if(Modifier.isStatic(modifiers)){ // static function, we can link implementation.
             Class<?> clazz = method.getDeclaringClass();
-            clazz.getPackage().getName();
-
             Resource classResource = model.createResource(FNO+clazz.getName());
             classResource.addProperty(rdfTypeProperty, FNOI + "JavaClass");
+            classResource.addProperty(fnoiClassNameProperty, clazz.getName());
         }
-
-        Class<?> clazz = method.getDeclaringClass();
-        clazz.getPackage().getName();
-        logger.debug("class name: {}", clazz.getName() );
-        method.getModifiers(); // check for static modifier to link implementation
-        Modifier.isStatic(0);
     }
     private static XSDDatatype getDatatype(Class<?> clazz){
         return datatypeMap.getOrDefault(clazz, XSDDatatype.XSDanyURI);

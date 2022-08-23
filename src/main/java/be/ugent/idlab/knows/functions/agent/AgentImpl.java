@@ -43,8 +43,6 @@ public class AgentImpl implements Agent {
     @Override
     public Object execute(String functionId, Arguments arguments) throws Exception {
         Function f = functionId2Function.get(functionId);
-        executeToFile(functionId, arguments, "tmp.txt");
-        executeToFile(functionId, arguments, null);
         return execute(functionId, arguments, false);
     }
 
@@ -127,7 +125,6 @@ public class AgentImpl implements Agent {
         else{
             executionResource.addLiteral(ResourceFactory.createProperty(function.getReturnParameters().get(0).getId()), result.toString());
         }
-        DescriptionGenerator.generateDescription(model, AgentImpl.class.getMethods()[0], "");
         printModel(model, filename);
     }
 
