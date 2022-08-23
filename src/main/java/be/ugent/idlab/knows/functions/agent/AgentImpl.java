@@ -5,6 +5,7 @@ import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -158,6 +159,8 @@ public class AgentImpl implements Agent {
         Property fnoParameterProperty = ResourceFactory.createProperty(FNO.toString(), "expects");
         Property fnoReturnProperty = ResourceFactory.createProperty(FNO.toString(), "returns");
         Property fnoPredicateProperty = ResourceFactory.createProperty(FNO.toString(), "predicate");
+        Property fnoRequiredProperty = ResourceFactory.createProperty(FNO.toString(), "required");
+        Property fnoTypeProperty = ResourceFactory.createProperty(FNO.toString(), "type");
 
         Resource function = model.createResource(FNO + method.getDeclaringClass().getName() + "." + method.getName());
         function.addProperty(rdfTypeProperty, FNO + "Function");
@@ -169,27 +172,37 @@ public class AgentImpl implements Agent {
         RDFNode[] rdfArray = new RDFNode[parameters.length];
         Arrays.stream(parameters).map(parameter -> {
             Resource parameterResource = model.createResource(FNO + parameter.getName());
-
             parameterResource.addProperty(fnoNameProperty, parameter.getName());
-            if(!parameter.isVarArgs()){
-                parameterResource.addProperty(fnoPredicateProperty, parameter.getName());
-            }
-            else{
-                parameterResource.addProperty(fnoPredicateProperty, RDF+"_nnn");
-            }
+            parameterResource.addProperty(fnoPredicateProperty,  parameter.getName());
+            parameterResource.addProperty(fnoRequiredProperty, "true", XSDDatatype.XSDboolean);
+            parameterResource.addProperty(fnoTypeProperty, XSDDatatype.XSDstring.getURI());
             return parameterResource;
         }).collect(Collectors.toList()).toArray(rdfArray);
         RDFList parameterList = model.createList(rdfArray);
         function.addProperty(fnoParameterProperty, parameterList);
 
-        // add return type
+        // add return type and exception types
         Class<?> returnType = method.getReturnType();
-        RDFNode[] returnList = new RDFNode[1];
+        Class<?>[] exceptionTypes = method.getExceptionTypes();
+        RDFNode[] returnList = new RDFNode[1 + exceptionTypes.length];
+
         Resource returnTypeResource = model.createResource(FNO+returnType.getName()+"Output");
         returnTypeResource.addProperty(fnoNameProperty, returnType.getName()+"Output");
+        returnTypeResource.addProperty(fnoRequiredProperty, "true", XSDDatatype.XSDboolean);
         returnList[0] = returnTypeResource;
+
+        for (int i = 0; i < exceptionTypes.length; i++){
+            Class<?> exceptionType = exceptionTypes[i];
+            Resource exceptionResource = model.createResource(FNO+exceptionType.getName()+"Exception");
+            exceptionResource.addProperty(fnoNameProperty, exceptionType.getName()+"Exception");
+            exceptionResource.addProperty(fnoRequiredProperty, "false");
+            returnList[i+1] = exceptionResource;
+        }
+
         RDFList outputList = model.createList(returnList);
         function.addProperty(fnoReturnProperty, outputList);
+
+
 
         method.getExceptionTypes(); // exceptions as optional output
         method.getModifiers(); // check for static modifier to link implementation
