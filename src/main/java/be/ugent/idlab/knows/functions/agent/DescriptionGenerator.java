@@ -20,6 +20,16 @@ public class DescriptionGenerator {
     private static final Map<Class<?>, XSDDatatype> datatypeMap = new HashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(DescriptionGenerator.class);
 
+
+    private static final Property rdfTypeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
+    private static final Property fnoNameProperty = ResourceFactory.createProperty(FNO.toString(), "name");
+    private static final Property fnoParameterProperty = ResourceFactory.createProperty(FNO.toString(), "expects");
+    private static final Property fnoReturnProperty = ResourceFactory.createProperty(FNO.toString(), "returns");
+    private static final Property fnoPredicateProperty = ResourceFactory.createProperty(FNO.toString(), "predicate");
+    private static final Property fnoRequiredProperty = ResourceFactory.createProperty(FNO.toString(), "required");
+    private static final Property fnoTypeProperty = ResourceFactory.createProperty(FNO.toString(), "type");
+
+
     /*
      * initialise datatype map
      */
@@ -36,13 +46,6 @@ public class DescriptionGenerator {
     public static void generateDescription(Model model, Method method, String filename) throws Exception {
         logger.debug("name: {}", method.getName()); // name
 
-        Property rdfTypeProperty = ResourceFactory.createProperty(RDF.toString(), "type");
-        Property fnoNameProperty = ResourceFactory.createProperty(FNO.toString(), "name");
-        Property fnoParameterProperty = ResourceFactory.createProperty(FNO.toString(), "expects");
-        Property fnoReturnProperty = ResourceFactory.createProperty(FNO.toString(), "returns");
-        Property fnoPredicateProperty = ResourceFactory.createProperty(FNO.toString(), "predicate");
-        Property fnoRequiredProperty = ResourceFactory.createProperty(FNO.toString(), "required");
-        Property fnoTypeProperty = ResourceFactory.createProperty(FNO.toString(), "type");
 
 
 
