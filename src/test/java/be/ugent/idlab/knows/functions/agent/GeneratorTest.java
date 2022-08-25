@@ -17,7 +17,7 @@ public class GeneratorTest {
     public void testCreationWithLink() throws Exception{
         Model model = ModelFactory.createDefaultModel();
 
-        OutputStream outputStream = Files.newOutputStream(Paths.get("src/test/resources/testCreationWithLink.ttl"));
+        OutputStream outputStream = Files.newOutputStream(Paths.get("testCreationWithLink.ttl"));
         DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethods()[0]);
         RDFDataMgr.write(outputStream, model, Lang.TURTLE);
         outputStream.flush();
