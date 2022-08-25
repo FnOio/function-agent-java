@@ -18,14 +18,16 @@ import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAM
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
 
 public class GeneratorTest {
+    // to print rdf to files to check data
+    private static final boolean OUTPUT = false;
+
     @Test
     public void testCreationWithLink() throws Exception{
         Model model = ModelFactory.createDefaultModel();
-        OutputStream outputStream = Files.newOutputStream(Paths.get("testCreationWithLink.ttl"));
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("pow",long.class, long.class ));
-        RDFDataMgr.write(outputStream, model, Lang.TURTLE);
-        outputStream.flush();
-        outputStream.close();
+        try(OutputStream outputStream = Files.newOutputStream(Paths.get("testCreationWithLink.ttl"))) {
+            RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+        }
         Agent agent = AgentFactory.createFromFnO("testCreationWithLink.ttl");
         Arguments arguments = new Arguments();
         arguments.add("https://w3id.org/function/vocabulary/predicates#arg0", "2");
@@ -37,11 +39,12 @@ public class GeneratorTest {
     @Test
     public void testExceptionAsOutput() throws Exception{
         Model model = ModelFactory.createDefaultModel();
-        OutputStream outputStream = Files.newOutputStream(Paths.get("testExceptionAsOutput.ttl"));
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("testExceptionFunction", Long.class));
-        RDFDataMgr.write(outputStream, model, Lang.TURTLE);
-        outputStream.flush();
-        outputStream.close();
+        if(OUTPUT){
+            try (OutputStream outputStream = Files.newOutputStream(Paths.get("testExceptionAsOutput.ttl"))) {
+                RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+            }
+        }
         Resource functionResource = model.getResource(methodURI);
         List<?> list = getResourcesFromList(functionResource.getPropertyResourceValue(ResourceFactory.createProperty("https://w3id.org/function/ontology#returns")));
         Assert.assertEquals("expected 2 output values: return type and 1 exception", 2, list.size());
@@ -50,11 +53,12 @@ public class GeneratorTest {
     @Test
     public void testVarArgs() throws Exception{
         Model model = ModelFactory.createDefaultModel();
-        OutputStream outputStream = Files.newOutputStream(Paths.get("testVarArgs.ttl"));
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("testVarargsFunction", Object[].class));
-        RDFDataMgr.write(outputStream, model, Lang.TURTLE);
-        outputStream.flush();
-        outputStream.close();
+        if(OUTPUT){
+            try (OutputStream outputStream = Files.newOutputStream(Paths.get("testVarArgs.ttl"))) {
+                RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+            }
+        }
         Resource parameter = model.getResource("https://w3id.org/function/ontology#arg0");
         Resource type = parameter.getPropertyResourceValue(ResourceFactory.createProperty(FNO.toString(), "type"));
         Assert.assertEquals(type.getURI(), RDF+"list");
@@ -63,9 +67,12 @@ public class GeneratorTest {
     @Test
     public void testVoidReturnFunction() throws Exception{
         Model model = ModelFactory.createDefaultModel();
-        OutputStream outputStream = Files.newOutputStream(Paths.get("testVoidReturnFunction.ttl"));
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("testVoidReturnFunction", Long.class));
-        RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+        if(OUTPUT){
+            try (OutputStream outputStream = Files.newOutputStream(Paths.get("testVoidReturnFunction.ttl"))) {
+                RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+            }
+        }
         Resource functionResource = model.getResource(methodURI);
         List<?> list = getResourcesFromList(functionResource.getPropertyResourceValue(ResourceFactory.createProperty("https://w3id.org/function/ontology#returns")));
         Assert.assertTrue("expected no output values", list.isEmpty());
@@ -74,9 +81,12 @@ public class GeneratorTest {
     @Test
     public void testNoParameters() throws Exception{
         Model model = ModelFactory.createDefaultModel();
-        OutputStream outputStream = Files.newOutputStream(Paths.get("testNoParameterFunction.ttl"));
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("testNoParameters"));
-        RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+        if(OUTPUT){
+            try (OutputStream outputStream = Files.newOutputStream(Paths.get("testNoParameterFunction.ttl"))) {
+                RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+            }
+        }
         Resource functionResource = model.getResource(methodURI);
         List<?> list = getResourcesFromList(functionResource.getPropertyResourceValue(ResourceFactory.createProperty("https://w3id.org/function/ontology#expects")));
         Assert.assertTrue("expected no parameters", list.isEmpty());
@@ -85,9 +95,12 @@ public class GeneratorTest {
     @Test
     public void testMultipleExceptions() throws Exception{
         Model model = ModelFactory.createDefaultModel();
-        OutputStream outputStream = Files.newOutputStream(Paths.get("testMultipleExceptionsFunction.ttl"));
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("testMultipleExceptions"));
-        RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+        if(OUTPUT){
+            try (OutputStream outputStream = Files.newOutputStream(Paths.get("testMultipleExceptionsFunction.ttl"))) {
+                RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+            }
+        }
         Resource functionResource = model.getResource(methodURI);
         List<?> list = getResourcesFromList(functionResource.getPropertyResourceValue(ResourceFactory.createProperty("https://w3id.org/function/ontology#returns")));
         Assert.assertEquals("expected 2 exceptions", 2, list.size());
