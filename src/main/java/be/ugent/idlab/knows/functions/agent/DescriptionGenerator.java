@@ -47,6 +47,10 @@ public class DescriptionGenerator {
         datatypeMap.put(Integer.class, XSDDatatype.XSDint.getURI());
         datatypeMap.put(long.class, XSDDatatype.XSDinteger.getURI());
         datatypeMap.put(Long.class, XSDDatatype.XSDinteger.getURI());
+        datatypeMap.put(float.class, XSDDatatype.XSDdecimal.getURI());
+        datatypeMap.put(Float.class, XSDDatatype.XSDdecimal.getURI());
+        datatypeMap.put(double.class, XSDDatatype.XSDfloat.getURI());
+        datatypeMap.put(Double.class, XSDDatatype.XSDfloat.getURI());
         datatypeMap.put(Object[].class, RDF+"list");
     }
 
@@ -72,15 +76,17 @@ public class DescriptionGenerator {
         // add return type and exception types
         Class<?> returnType = method.getReturnType();
         Class<?>[] exceptionTypes = method.getExceptionTypes();
-        RDFNode[] returnList = new RDFNode[1 + exceptionTypes.length];
-
-        Resource returnTypeResource = model.createResource(FNO+returnType.getName()+"Output");
-        returnTypeResource.addProperty(fnoNameProperty, returnType.getName()+"Output");
-        returnTypeResource.addProperty(fnoRequiredProperty, "true", XSDDatatype.XSDboolean);
-        returnTypeResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Output"));
-        returnTypeResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(returnType)));
-        returnTypeResource.addProperty(fnoPredicateProperty, model.createResource(returnType.getName()+"Output"));
-        returnList[0] = returnTypeResource;
+        int offset = "void".equals(returnType.getName()) ? 0 : 1;
+        RDFNode[] returnList = new RDFNode[exceptionTypes.length + offset];
+        if(!"void".equals(returnType.getName())){
+            Resource returnTypeResource = model.createResource(FNO+returnType.getName()+"Output");
+            returnTypeResource.addProperty(fnoNameProperty, returnType.getName()+"Output");
+            returnTypeResource.addProperty(fnoRequiredProperty, "true", XSDDatatype.XSDboolean);
+            returnTypeResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Output"));
+            returnTypeResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(returnType)));
+            returnTypeResource.addProperty(fnoPredicateProperty, model.createResource(FNOP+returnType.getName()+"Output"));
+            returnList[0] = returnTypeResource;
+        }
 
         for (int i = 0; i < exceptionTypes.length; i++){
             Class<?> exceptionType = exceptionTypes[i];
@@ -89,8 +95,8 @@ public class DescriptionGenerator {
             exceptionResource.addProperty(fnoRequiredProperty, "false");
             exceptionResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Output"));
             exceptionResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(exceptionType)));
-            returnTypeResource.addProperty(fnoPredicateProperty, model.createResource(exceptionType.getName()+"Output"));
-            returnList[i+1] = exceptionResource;
+            exceptionResource.addProperty(fnoPredicateProperty, model.createResource(FNOP+exceptionType.getName()+"Output"));
+            returnList[i+offset] = exceptionResource;
         }
 
         RDFList outputList = model.createList(returnList);
