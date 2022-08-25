@@ -91,4 +91,11 @@ public class InternalTestFunctions {
         writeToFile(object, filename);
         return object;
     }
+
+    public static Long testExceptionFunction(Long a) throws Exception{
+        if(a <= 0){
+            throw new Exception("a should be greater than 0");
+        }
+        return a;
+    }
 }
