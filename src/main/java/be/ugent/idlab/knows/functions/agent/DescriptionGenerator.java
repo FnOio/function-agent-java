@@ -49,7 +49,7 @@ public class DescriptionGenerator {
         datatypeMap.put(Long.class, XSDDatatype.XSDinteger);
     }
 
-    public static void generateDescription(Model model, Method method) {
+    public static String generateDescription(Model model, Method method) {
         logger.debug("name: {}", method.getName()); // name
 
         String methodURI = FNO + method.getDeclaringClass().getName() + "." + method.getName();
@@ -117,6 +117,7 @@ public class DescriptionGenerator {
             methodMappingResource.addProperty(fnomMethodNameProperty, method.getName());
             mappingResource.addProperty(fnoMethodMappingProperty, methodMappingResource);
         }
+        return methodURI;
     }
     private static XSDDatatype getDatatype(Class<?> clazz){
         return datatypeMap.getOrDefault(clazz, XSDDatatype.XSDanyURI);
