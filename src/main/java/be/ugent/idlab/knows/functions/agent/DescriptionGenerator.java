@@ -29,7 +29,11 @@ public class DescriptionGenerator {
     private static final Property fnoRequiredProperty = ResourceFactory.createProperty(FNO.toString(), "required");
     private static final Property fnoTypeProperty = ResourceFactory.createProperty(FNO.toString(), "type");
     private static final Property fnoiClassNameProperty = ResourceFactory.createProperty(FNOI.toString(), "class-name");
-
+    private static final Property fnoFunctionProperty = ResourceFactory.createProperty(FNO.toString(), "function");
+    private static final Property fnoImplementationProperty = ResourceFactory.createProperty(FNO.toString(), "implementation");
+    private static final Property fnoMethodMappingProperty = ResourceFactory.createProperty(FNO.toString(), "methodMapping");
+    private static final Property fnomMethodNameProperty = ResourceFactory.createProperty(FNOM.toString(), "method-name");
+    private static final String FNOP = "https://w3id.org/function/vocabulary/predicates#";
     /*
      * initialise datatype map
      */
@@ -41,13 +45,16 @@ public class DescriptionGenerator {
         datatypeMap.put(String.class, XSDDatatype.XSDstring);
         datatypeMap.put(int.class, XSDDatatype.XSDint);
         datatypeMap.put(Integer.class, XSDDatatype.XSDint);
+        datatypeMap.put(long.class, XSDDatatype.XSDinteger);
+        datatypeMap.put(Long.class, XSDDatatype.XSDinteger);
     }
 
     public static void generateDescription(Model model, Method method) {
         logger.debug("name: {}", method.getName()); // name
 
-        Resource function = model.createResource(FNO + method.getDeclaringClass().getName() + "." + method.getName());
-        function.addProperty(rdfTypeProperty, FNO + "Function");
+        String methodURI = FNO + method.getDeclaringClass().getName() + "." + method.getName();
+        Resource function = model.createResource(methodURI);
+        function.addProperty(rdfTypeProperty, model.createResource(FNO + "Function"));
         function.addProperty(fnoNameProperty, method.getName());
         function.addProperty(ResourceFactory.createProperty(DCTERMS.toString(), "description"), method.getName());
 
@@ -57,9 +64,11 @@ public class DescriptionGenerator {
         Arrays.stream(parameters).map(parameter -> {
             Resource parameterResource = model.createResource(FNO + parameter.getName());
             parameterResource.addProperty(fnoNameProperty, parameter.getName());
-            parameterResource.addProperty(fnoPredicateProperty,  parameter.getName());
+            Resource predicateResource = model.createResource(FNOP+parameter.getName());
+            parameterResource.addProperty(fnoPredicateProperty,  predicateResource);
             parameterResource.addProperty(fnoRequiredProperty, "true", XSDDatatype.XSDboolean);
-            parameterResource.addProperty(fnoTypeProperty, getDatatype(parameter.getType()).getURI());
+            parameterResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(parameter.getType()).getURI()));
+            parameterResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Parameter"));
             return parameterResource;
         }).collect(Collectors.toList()).toArray(rdfArray);
         RDFList parameterList = model.createList(rdfArray);
@@ -73,6 +82,9 @@ public class DescriptionGenerator {
         Resource returnTypeResource = model.createResource(FNO+returnType.getName()+"Output");
         returnTypeResource.addProperty(fnoNameProperty, returnType.getName()+"Output");
         returnTypeResource.addProperty(fnoRequiredProperty, "true", XSDDatatype.XSDboolean);
+        returnTypeResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Output"));
+        returnTypeResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(returnType).getURI()));
+        returnTypeResource.addProperty(fnoPredicateProperty, model.createResource(returnType.getName()+"Output"));
         returnList[0] = returnTypeResource;
 
         for (int i = 0; i < exceptionTypes.length; i++){
@@ -80,6 +92,9 @@ public class DescriptionGenerator {
             Resource exceptionResource = model.createResource(FNO+exceptionType.getName()+"Exception");
             exceptionResource.addProperty(fnoNameProperty, exceptionType.getName()+"Exception");
             exceptionResource.addProperty(fnoRequiredProperty, "false");
+            exceptionResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Output"));
+            exceptionResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(exceptionType).getURI()));
+            returnTypeResource.addProperty(fnoPredicateProperty, model.createResource(exceptionType.getName()+"Output"));
             returnList[i+1] = exceptionResource;
         }
 
@@ -91,8 +106,16 @@ public class DescriptionGenerator {
         if(Modifier.isStatic(modifiers)){ // static function, we can link implementation.
             Class<?> clazz = method.getDeclaringClass();
             Resource classResource = model.createResource(FNO+clazz.getName());
-            classResource.addProperty(rdfTypeProperty, FNOI + "JavaClass");
+            classResource.addProperty(rdfTypeProperty, model.createResource(FNOI + "JavaClass"));
             classResource.addProperty(fnoiClassNameProperty, clazz.getName());
+            Resource mappingResource = model.createResource(FNO+method.getName()+"Mapping");
+            mappingResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Mapping"));
+            mappingResource.addProperty(fnoFunctionProperty, function);
+            mappingResource.addProperty(fnoImplementationProperty, classResource);
+            Resource methodMappingResource = model.createResource();
+            methodMappingResource.addProperty(rdfTypeProperty, model.createResource(FNOM+"StringMethodMapping"));
+            methodMappingResource.addProperty(fnomMethodNameProperty, method.getName());
+            mappingResource.addProperty(fnoMethodMappingProperty, methodMappingResource);
         }
     }
     private static XSDDatatype getDatatype(Class<?> clazz){
