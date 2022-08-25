@@ -98,4 +98,9 @@ public class InternalTestFunctions {
         }
         return a;
     }
+
+    public static int testVarargsFunction(Object... objects){
+        return objects.length;
+    }
+
 }

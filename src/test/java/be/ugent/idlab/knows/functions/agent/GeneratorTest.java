@@ -46,6 +46,18 @@ public class GeneratorTest {
         Assert.assertEquals("expected 2 output values: return type and 1 exception", 2, list.size());
     }
 
+    @Test
+    public void testVarArgs() throws Exception{
+        Model model = ModelFactory.createDefaultModel();
+        OutputStream outputStream = Files.newOutputStream(Paths.get("testVarArgs.ttl"));
+        String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("testVarargsFunction", Object[].class));
+        RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+        outputStream.flush();
+        outputStream.close();
+        
+    }
+
+
     // from FnoFunctionModelProvider
     private List<Resource> getResourcesFromList(final Resource listResource) {
         List<Resource> resources = new ArrayList<>();

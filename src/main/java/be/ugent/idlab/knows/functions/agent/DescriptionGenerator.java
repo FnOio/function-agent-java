@@ -17,7 +17,7 @@ import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAM
 public class DescriptionGenerator {
 
 
-    private static final Map<Class<?>, XSDDatatype> datatypeMap = new HashMap<>();
+    private static final Map<Class<?>, String> datatypeMap = new HashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(DescriptionGenerator.class);
 
 
@@ -40,13 +40,14 @@ public class DescriptionGenerator {
     // TODO add more
 
     static {
-        datatypeMap.put(boolean.class, XSDDatatype.XSDboolean);
-        datatypeMap.put(Boolean.class, XSDDatatype.XSDboolean);
-        datatypeMap.put(String.class, XSDDatatype.XSDstring);
-        datatypeMap.put(int.class, XSDDatatype.XSDint);
-        datatypeMap.put(Integer.class, XSDDatatype.XSDint);
-        datatypeMap.put(long.class, XSDDatatype.XSDinteger);
-        datatypeMap.put(Long.class, XSDDatatype.XSDinteger);
+        datatypeMap.put(boolean.class, XSDDatatype.XSDboolean.getURI());
+        datatypeMap.put(Boolean.class, XSDDatatype.XSDboolean.getURI());
+        datatypeMap.put(String.class, XSDDatatype.XSDstring.getURI());
+        datatypeMap.put(int.class, XSDDatatype.XSDint.getURI());
+        datatypeMap.put(Integer.class, XSDDatatype.XSDint.getURI());
+        datatypeMap.put(long.class, XSDDatatype.XSDinteger.getURI());
+        datatypeMap.put(Long.class, XSDDatatype.XSDinteger.getURI());
+        datatypeMap.put(Object[].class, RDF+"list");
     }
 
     public static String generateDescription(Model model, Method method) {
@@ -67,7 +68,7 @@ public class DescriptionGenerator {
             Resource predicateResource = model.createResource(FNOP+parameter.getName());
             parameterResource.addProperty(fnoPredicateProperty,  predicateResource);
             parameterResource.addProperty(fnoRequiredProperty, "true", XSDDatatype.XSDboolean);
-            parameterResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(parameter.getType()).getURI()));
+            parameterResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(parameter.getType())));
             parameterResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Parameter"));
             return parameterResource;
         }).collect(Collectors.toList()).toArray(rdfArray);
@@ -83,7 +84,7 @@ public class DescriptionGenerator {
         returnTypeResource.addProperty(fnoNameProperty, returnType.getName()+"Output");
         returnTypeResource.addProperty(fnoRequiredProperty, "true", XSDDatatype.XSDboolean);
         returnTypeResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Output"));
-        returnTypeResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(returnType).getURI()));
+        returnTypeResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(returnType)));
         returnTypeResource.addProperty(fnoPredicateProperty, model.createResource(returnType.getName()+"Output"));
         returnList[0] = returnTypeResource;
 
@@ -93,7 +94,7 @@ public class DescriptionGenerator {
             exceptionResource.addProperty(fnoNameProperty, exceptionType.getName()+"Exception");
             exceptionResource.addProperty(fnoRequiredProperty, "false");
             exceptionResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Output"));
-            exceptionResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(exceptionType).getURI()));
+            exceptionResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(exceptionType)));
             returnTypeResource.addProperty(fnoPredicateProperty, model.createResource(exceptionType.getName()+"Output"));
             returnList[i+1] = exceptionResource;
         }
@@ -119,7 +120,11 @@ public class DescriptionGenerator {
         }
         return methodURI;
     }
-    private static XSDDatatype getDatatype(Class<?> clazz){
-        return datatypeMap.getOrDefault(clazz, XSDDatatype.XSDanyURI);
+    private static String getDatatype(Class<?> clazz){
+        logger.debug("getting data type for {}", clazz.getName());
+        if(!datatypeMap.containsKey(clazz)){
+            logger.debug("no entry found, returning default value XSDanyURI");
+        }
+        return datatypeMap.getOrDefault(clazz, XSDDatatype.XSDanyURI.getURI());
     }
 }
