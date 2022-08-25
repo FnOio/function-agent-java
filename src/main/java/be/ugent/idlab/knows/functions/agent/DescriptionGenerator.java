@@ -50,15 +50,7 @@ public class DescriptionGenerator {
         datatypeMap.put(Object[].class, RDF+"list");
     }
 
-    public static String generateDescription(Model model, Method method) {
-        logger.debug("name: {}", method.getName()); // name
-
-        String methodURI = FNO + method.getDeclaringClass().getName() + "." + method.getName();
-        Resource function = model.createResource(methodURI);
-        function.addProperty(rdfTypeProperty, model.createResource(FNO + "Function"));
-        function.addProperty(fnoNameProperty, method.getName());
-        function.addProperty(ResourceFactory.createProperty(DCTERMS.toString(), "description"), method.getName());
-
+    private static void addParameters(Model model, Method method, Resource function){
         // add parameters
         java.lang.reflect.Parameter[] parameters = method.getParameters(); // parameters
         RDFNode[] rdfArray = new RDFNode[parameters.length];
@@ -74,7 +66,9 @@ public class DescriptionGenerator {
         }).collect(Collectors.toList()).toArray(rdfArray);
         RDFList parameterList = model.createList(rdfArray);
         function.addProperty(fnoParameterProperty, parameterList);
+    }
 
+    private static void addReturnTypeAndExceptions(Model model, Method method, Resource function){
         // add return type and exception types
         Class<?> returnType = method.getReturnType();
         Class<?>[] exceptionTypes = method.getExceptionTypes();
@@ -101,22 +95,37 @@ public class DescriptionGenerator {
 
         RDFList outputList = model.createList(returnList);
         function.addProperty(fnoReturnProperty, outputList);
+    }
 
+    private static void addMapping(Model model, Method method, Resource function){
+        Class<?> clazz = method.getDeclaringClass();
+        Resource classResource = model.createResource(FNO+clazz.getName());
+        classResource.addProperty(rdfTypeProperty, model.createResource(FNOI + "JavaClass"));
+        classResource.addProperty(fnoiClassNameProperty, clazz.getName());
+        Resource mappingResource = model.createResource(FNO+method.getName()+"Mapping");
+        mappingResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Mapping"));
+        mappingResource.addProperty(fnoFunctionProperty, function);
+        mappingResource.addProperty(fnoImplementationProperty, classResource);
+        Resource methodMappingResource = model.createResource();
+        methodMappingResource.addProperty(rdfTypeProperty, model.createResource(FNOM+"StringMethodMapping"));
+        methodMappingResource.addProperty(fnomMethodNameProperty, method.getName());
+        mappingResource.addProperty(fnoMethodMappingProperty, methodMappingResource);
+    }
 
+    public static String generateDescription(Model model, Method method) {
+        logger.debug("name: {}", method.getName()); // name
+
+        String methodURI = FNO + method.getDeclaringClass().getName() + "." + method.getName();
+        Resource function = model.createResource(methodURI);
+        function.addProperty(rdfTypeProperty, model.createResource(FNO + "Function"));
+        function.addProperty(fnoNameProperty, method.getName());
+        function.addProperty(ResourceFactory.createProperty(DCTERMS.toString(), "description"), method.getName());
+
+        addParameters(model, method, function);
+        addReturnTypeAndExceptions(model, method, function);
         int modifiers = method.getModifiers();
         if(Modifier.isStatic(modifiers)){ // static function, we can link implementation.
-            Class<?> clazz = method.getDeclaringClass();
-            Resource classResource = model.createResource(FNO+clazz.getName());
-            classResource.addProperty(rdfTypeProperty, model.createResource(FNOI + "JavaClass"));
-            classResource.addProperty(fnoiClassNameProperty, clazz.getName());
-            Resource mappingResource = model.createResource(FNO+method.getName()+"Mapping");
-            mappingResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Mapping"));
-            mappingResource.addProperty(fnoFunctionProperty, function);
-            mappingResource.addProperty(fnoImplementationProperty, classResource);
-            Resource methodMappingResource = model.createResource();
-            methodMappingResource.addProperty(rdfTypeProperty, model.createResource(FNOM+"StringMethodMapping"));
-            methodMappingResource.addProperty(fnomMethodNameProperty, method.getName());
-            mappingResource.addProperty(fnoMethodMappingProperty, methodMappingResource);
+            addMapping(model, method, function);
         }
         return methodURI;
     }
