@@ -1,5 +1,8 @@
 package be.ugent.idlab.knows.functions.agent;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
 /**
  * <p>Copyright 2021 IDLab (Ghent University - imec)</p>
  *
@@ -28,4 +31,10 @@ public interface Agent {
     void executeToFile(final String functionId, final Arguments arguments, final String fileName) throws Exception;
 
     void executeToFile(final String functionId, final Arguments arguments, final String fileName, boolean debug) throws Exception;
+
+    void writeModel(final String filename);
+
+    String loadFunction(final Method javaFunction);
+
+    List<String> getParameterPredicates(String functionId);
 }

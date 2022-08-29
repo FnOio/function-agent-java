@@ -8,13 +8,16 @@ import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctio
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.ParameterNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
+import be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions;
 import be.ugent.idlab.knows.misc.FileFinder;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -364,4 +367,27 @@ public class AgentTest {
         Object result = agent.execute(EX+"writeToFileNoReturn", arguments, false);
         assertNull(result);
     }
+
+
+    @Test
+    public void loadNonStaticFunctionThrowsException() throws Exception{
+        final Agent agent = AgentFactory.createFromFnO();
+        assertThrows("Expected thrown exception", Exception.class, () -> agent.loadFunction(this.getClass().getMethods()[0])); // all test methods are non static
+
+    }
+    @Test
+    public void loadJavaFunctionTest() throws Exception{
+        final Agent agent = AgentFactory.createFromFnO();
+        String functionId = agent.loadFunction(InternalTestFunctions.class.getMethod("sum", long.class, long.class));
+        List<String> list = agent.getParameterPredicates(functionId);
+        Arguments args = new Arguments()
+                .add(list.get(0), 5)
+                .add(list.get(1), 6);
+        Object result = agent.execute(functionId, args);
+        Assert.assertEquals("5 + 6 is 11", 11L, result);
+
+
+
+    }
+
 }

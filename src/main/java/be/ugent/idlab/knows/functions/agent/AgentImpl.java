@@ -1,10 +1,10 @@
 package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
-import be.ugent.idlab.knows.functions.agent.model.Function;
-import be.ugent.idlab.knows.functions.agent.model.Parameter;
+import be.ugent.idlab.knows.functions.agent.model.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -17,9 +17,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.*;
 
@@ -150,4 +152,66 @@ public class AgentImpl implements Agent {
         }
     }
 
+    @Override
+    public String loadFunction(Method javaFunction) {
+        DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
+        if(!Modifier.isStatic(javaFunction.getModifiers())){
+            throw new UnsupportedOperationException("Java function needs to be static");
+        }
+        String name = javaFunction.getName();
+        Class<?> clazz = javaFunction.getDeclaringClass();
+        String functionId = FNO + "javaFunction." + clazz.getName() + "." +name;
+
+        if(functionId2Function.containsKey(functionId)){ // already a function present, overwrite it
+            logger.warn("loadFunction: already found a function with id {}. Overwriting...", functionId);
+        }
+
+        List<Parameter> parameters = loadParameters(javaFunction, dataTypeConverterProvider);
+        List<Parameter> returnValues = loadReturnValue(javaFunction, dataTypeConverterProvider);
+        Function function = new Function(functionId, name, "", parameters, returnValues);
+
+        FunctionMapping functionMapping = loadFunctionMapping(javaFunction, functionId);
+
+        function.setFunctionMapping(functionMapping);
+
+        // add to function list:
+        this.functionId2Function.put(functionId, function);
+        logger.debug("added Java function to Agent with id: {}", functionId);
+        return functionId;
+    }
+
+    private List<Parameter> loadParameters(Method javaFunction, DataTypeConverterProvider dataTypeConverterProvider){
+        List<Parameter> parameterList = new ArrayList<>();
+        java.lang.reflect.Parameter[] functionParameters = javaFunction.getParameters();
+        for(java.lang.reflect.Parameter parameter : functionParameters){
+            String parameterId = FNO + javaFunction.getClass().getName() + javaFunction.getName() + parameter.getName();
+            Parameter p = new Parameter(parameter.getName(), parameterId ,dataTypeConverterProvider.getDataTypeConverter(parameter.getType().getName()), true);
+            parameterList.add(p);
+        }
+        return parameterList;
+    }
+
+    private List<Parameter> loadReturnValue(Method javaFunction, DataTypeConverterProvider dataTypeConverterProvider){
+        Class<?> returnType = javaFunction.getReturnType();
+        Parameter returnParameter = new Parameter(returnType.getName()+"Output", "", dataTypeConverterProvider.getDataTypeConverter(returnType.getName()), true);
+        List<Parameter> returnValue = new ArrayList<>();
+        returnValue.add(returnParameter);
+        return returnValue;
+    }
+
+    private FunctionMapping loadFunctionMapping(Method javaFunction, String functionId){
+        MethodMapping methodMapping = new MethodMapping("fnom:StringMethodMapping", javaFunction.getName());
+        Implementation implementation = new Implementation(javaFunction.getDeclaringClass().getName(), "");
+        return new FunctionMapping(functionId, methodMapping, implementation);
+    }
+
+    @Override
+    public List<String> getParameterPredicates(String functionId){
+        return this.functionId2Function.get(functionId).getArgumentParameters().stream().map(Parameter::getId).collect(Collectors.toList());
+    }
+
+    @Override
+    public void writeModel(String filename) {
+
+    }
 }
