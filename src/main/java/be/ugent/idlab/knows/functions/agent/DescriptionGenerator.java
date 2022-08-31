@@ -1,7 +1,6 @@
 package be.ugent.idlab.knows.functions.agent;
 
-import be.ugent.idlab.knows.functions.agent.model.Function;
-import be.ugent.idlab.knows.functions.agent.model.Parameter;
+import be.ugent.idlab.knows.functions.agent.model.*;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
 import org.slf4j.Logger;
@@ -157,12 +156,31 @@ public class DescriptionGenerator {
         mappingResource.addProperty(fnoMethodMappingProperty, methodMappingResource);
     }
 
-    private static void addMapping(Model model, Function function, Resource functionResource){
-
+    private static void addMapping(Model model, Function function, Resource functionResource) {
+        if (function.isComposite()) {
+            return;
+        }
+        FunctionMapping functionMapping = function.getFunctionMapping();
+        MethodMapping methodMapping = functionMapping.getMethodMapping();
+        Implementation implementation = functionMapping.getImplementation();
+        Resource classResource = model.createResource(FNO + implementation.getClassName());
+        classResource.addProperty(rdfTypeProperty, model.createResource(FNOI + "JavaClass"));
+        classResource.addProperty(fnoiClassNameProperty, implementation.getClassName());
+        Resource mappingResource = model.createResource(FNO + function.getName() + "Mapping");
+        mappingResource.addProperty(rdfTypeProperty, model.createResource(FNO + "Mapping"));
+        mappingResource.addProperty(fnoFunctionProperty, functionResource);
+        mappingResource.addProperty(fnoImplementationProperty, classResource);
+        Resource methodMappingResource = model.createResource();
+        methodMappingResource.addProperty(rdfTypeProperty, model.createResource(methodMapping.getType()));
+        methodMappingResource.addProperty(fnoMethodMappingProperty, model.createResource(methodMapping.getMethodName()));
     }
 
     private static void addComposition(Model model, Function function, Resource functionResource){
-
+        if(!function.isComposite()){
+            return;
+        }
+        FunctionComposition functionComposition = function.getFunctionComposition();
+        List<CompositionMappingElement> functionCompositionMappings = functionComposition.getMappings();
     }
 
     public static String generateDescription(Model model, Method method) {
