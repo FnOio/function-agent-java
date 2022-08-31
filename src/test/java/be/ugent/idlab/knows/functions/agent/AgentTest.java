@@ -394,20 +394,20 @@ public class AgentTest {
         execute(agent);
     }
 
-    @Test
-    public void testWriteModelWithComposition() throws Exception{
-        Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "sum-composition.ttl");
-        agent.writeModel("testFileWriteWithComposition.ttl");
-        agent = AgentFactory.createFromFnO("testFileWriteWithComposition.ttl");
-        Arguments arguments = new Arguments()
-                // fns:aParameter fns:bParameter fns:cParameter
-                .add(FNS+"a", "1")
-                .add(FNS+"b", "2")
-                .add(FNS+"c", "3");
-
-        Object result = agent.execute(FNS+"sum3", arguments);
-
-        assertEquals("1 + 2 + 3 should be 6", 6L, result);
-    }
+//    @Test
+//    public void testWriteModelWithComposition() throws Exception{
+//        Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "sum-composition.ttl");
+//        agent.writeModel("testFileWriteWithComposition.ttl");
+//        agent = AgentFactory.createFromFnO("testFileWriteWithComposition.ttl");
+//        Arguments arguments = new Arguments()
+//                // fns:aParameter fns:bParameter fns:cParameter
+//                .add(FNS+"a", "1")
+//                .add(FNS+"b", "2")
+//                .add(FNS+"c", "3");
+//
+//        Object result = agent.execute(FNS+"sum3", arguments);
+//
+//        assertEquals("1 + 2 + 3 should be 6", 6L, result);
+//    }
 
 }

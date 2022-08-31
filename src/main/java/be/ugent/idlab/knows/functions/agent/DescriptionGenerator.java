@@ -270,7 +270,7 @@ public class DescriptionGenerator {
         addParameters(model, function, functionResource);
         addReturnTypeAndExceptions(model, function, functionResource);
         if(function.isComposite()){
-            addComposition(model, function);
+            // addComposition(model, function);
         }else{
             addMapping(model, function, functionResource);
         }
