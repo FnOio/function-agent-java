@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
@@ -211,10 +212,11 @@ public class AgentImpl implements Agent {
     }
 
     @Override
-    public void writeModel(String filename) {
+    public void writeModel(String filename) throws IOException{
         Model model = ModelFactory.createDefaultModel();
         for (Function function : this.functionId2Function.values()) {
             DescriptionGenerator.addFunctionToModel(model, function);
         }
+        RDFDataMgr.write(new PrintWriter(filename), model, Lang.TURTLE);
     }
 }

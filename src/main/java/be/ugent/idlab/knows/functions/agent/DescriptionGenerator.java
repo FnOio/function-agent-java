@@ -79,7 +79,7 @@ public class DescriptionGenerator {
         List<Parameter> parameterList = function.getArgumentParameters();
         RDFNode[] rdfArray = new RDFNode[parameterList.size()];
         parameterList.stream().map(parameter -> {
-           Resource parameterResource = model.createResource(FNO+function.getClass().getName()+parameter.getName());
+           Resource parameterResource = model.createResource(function.getId()+ parameter.getId());
            parameterResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Parameter"));
            parameterResource.addProperty(fnoNameProperty, parameter.getName());
            Resource predicateResource = model.createResource(parameter.getId());
@@ -127,7 +127,7 @@ public class DescriptionGenerator {
         List<Parameter> returnParameterList = function.getReturnParameters();
         RDFNode[] rdfArray = new RDFNode[returnParameterList.size()];
         returnParameterList.stream().map(returnType -> {
-            Resource returnResource = model.createResource(FNO+function.getClass().getName()+returnType.getName());
+            Resource returnResource = model.createResource(function.getId()+returnType.getId());
             returnResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Output"));
             returnResource.addProperty(fnoNameProperty, returnType.getName());
             Resource predicateResource = model.createResource(returnType.getId());
@@ -166,21 +166,33 @@ public class DescriptionGenerator {
         Resource classResource = model.createResource(FNO + implementation.getClassName());
         classResource.addProperty(rdfTypeProperty, model.createResource(FNOI + "JavaClass"));
         classResource.addProperty(fnoiClassNameProperty, implementation.getClassName());
-        Resource mappingResource = model.createResource(FNO + function.getName() + "Mapping");
+        Resource mappingResource = model.createResource(function.getId() + "Mapping");
         mappingResource.addProperty(rdfTypeProperty, model.createResource(FNO + "Mapping"));
         mappingResource.addProperty(fnoFunctionProperty, functionResource);
         mappingResource.addProperty(fnoImplementationProperty, classResource);
         Resource methodMappingResource = model.createResource();
         methodMappingResource.addProperty(rdfTypeProperty, model.createResource(methodMapping.getType()));
-        methodMappingResource.addProperty(fnoMethodMappingProperty, model.createResource(methodMapping.getMethodName()));
+        methodMappingResource.addProperty(fnomMethodNameProperty, methodMapping.getMethodName());
+        mappingResource.addProperty(fnoMethodMappingProperty, methodMappingResource);
     }
 
-    private static void addComposition(Model model, Function function, Resource functionResource){
+    private static void addComposition(Model model, Function function){
         if(!function.isComposite()){
             return;
         }
+        Resource compositionResource = model.createResource(FNO+function.getName()+"Composition");
+        compositionResource.addProperty(rdfTypeProperty, model.createResource(FNOC+"Composition"));
         FunctionComposition functionComposition = function.getFunctionComposition();
         List<CompositionMappingElement> functionCompositionMappings = functionComposition.getMappings();
+        for(CompositionMappingElement compositionMappingElement : functionCompositionMappings){
+            addCompositionElement(model, compositionMappingElement, compositionResource);
+        }
+    }
+
+    private static void addCompositionElement(Model model, CompositionMappingElement element, Resource compositionResource){
+        Resource mapResource = model.createResource();
+        Resource mapFromResource = model.createResource();
+        Resource mapToResource = model.createResource();
     }
 
     public static String generateDescription(Model model, Method method) {
@@ -212,7 +224,7 @@ public class DescriptionGenerator {
         addParameters(model, function, functionResource);
         addReturnTypeAndExceptions(model, function, functionResource);
         if(function.isComposite()){
-            addComposition(model, function, functionResource);
+            addComposition(model, function);
         }else{
             addMapping(model, function, functionResource);
         }

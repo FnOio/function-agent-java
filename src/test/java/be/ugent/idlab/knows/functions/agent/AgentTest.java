@@ -385,9 +385,13 @@ public class AgentTest {
                 .add(list.get(1), 6);
         Object result = agent.execute(functionId, args);
         Assert.assertEquals("5 + 6 is 11", 11L, result);
-
-
-
+    }
+    @Test
+    public void testWriteModel() throws Exception{
+        Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl");
+        agent.writeModel("testFileWrite.ttl");
+        agent = AgentFactory.createFromFnO("testFileWrite.ttl");
+        execute(agent);
     }
 
 }
