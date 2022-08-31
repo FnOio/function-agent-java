@@ -212,6 +212,9 @@ public class AgentImpl implements Agent {
 
     @Override
     public void writeModel(String filename) {
-
+        Model model = ModelFactory.createDefaultModel();
+        for (Function function : this.functionId2Function.values()) {
+            DescriptionGenerator.addFunctionToModel(model, function);
+        }
     }
 }

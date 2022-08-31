@@ -1,5 +1,7 @@
 package be.ugent.idlab.knows.functions.agent;
 
+import be.ugent.idlab.knows.functions.agent.model.Function;
+import be.ugent.idlab.knows.functions.agent.model.Parameter;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
 import org.slf4j.Logger;
@@ -9,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,7 @@ public class DescriptionGenerator {
     private static final Property fnoImplementationProperty = ResourceFactory.createProperty(FNO.toString(), "implementation");
     private static final Property fnoMethodMappingProperty = ResourceFactory.createProperty(FNO.toString(), "methodMapping");
     private static final Property fnomMethodNameProperty = ResourceFactory.createProperty(FNOM.toString(), "method-name");
+    private static final Property dctermsDescriptionProperty = ResourceFactory.createProperty(DCTERMS.toString(), "description");
     private static final String FNOP = "https://w3id.org/function/vocabulary/predicates#";
     /*
      * initialise datatype map
@@ -72,6 +76,23 @@ public class DescriptionGenerator {
         function.addProperty(fnoParameterProperty, parameterList);
     }
 
+    private static void addParameters(Model model, Function function, Resource functionResource){
+        List<Parameter> parameterList = function.getArgumentParameters();
+        RDFNode[] rdfArray = new RDFNode[parameterList.size()];
+        parameterList.stream().map(parameter -> {
+           Resource parameterResource = model.createResource(FNO+function.getClass().getName()+parameter.getName());
+           parameterResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Parameter"));
+           parameterResource.addProperty(fnoNameProperty, parameter.getName());
+           Resource predicateResource = model.createResource(parameter.getId());
+           parameterResource.addProperty(fnoPredicateProperty, predicateResource);
+           parameterResource.addProperty(fnoRequiredProperty, ""+parameter.isRequired());
+           parameterResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(parameter.getTypeConverter().getTypeClass())));
+           return parameterResource;
+        }).collect(Collectors.toList()).toArray(rdfArray);
+        RDFList parameters = model.createList(rdfArray);
+        functionResource.addProperty(fnoParameterProperty, parameters);
+    }
+
     private static void addReturnTypeAndExceptions(Model model, Method method, Resource function){
         // add return type and exception types
         Class<?> returnType = method.getReturnType();
@@ -103,6 +124,24 @@ public class DescriptionGenerator {
         function.addProperty(fnoReturnProperty, outputList);
     }
 
+    private static void addReturnTypeAndExceptions(Model model, Function function, Resource functionResource){
+        List<Parameter> returnParameterList = function.getReturnParameters();
+        RDFNode[] rdfArray = new RDFNode[returnParameterList.size()];
+        returnParameterList.stream().map(returnType -> {
+            Resource returnResource = model.createResource(FNO+function.getClass().getName()+returnType.getName());
+            returnResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Output"));
+            returnResource.addProperty(fnoNameProperty, returnType.getName());
+            Resource predicateResource = model.createResource(returnType.getId());
+            returnResource.addProperty(fnoPredicateProperty, predicateResource);
+            returnResource.addProperty(fnoRequiredProperty, ""+returnType.isRequired());
+            returnResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(returnType.getTypeConverter().getTypeClass())));
+            return returnResource;
+        }).collect(Collectors.toList()).toArray(rdfArray);
+        RDFList parameters = model.createList(rdfArray);
+        functionResource.addProperty(fnoReturnProperty, parameters);
+    }
+
+
     private static void addMapping(Model model, Method method, Resource function){
         Class<?> clazz = method.getDeclaringClass();
         Resource classResource = model.createResource(FNO+clazz.getName());
@@ -118,6 +157,14 @@ public class DescriptionGenerator {
         mappingResource.addProperty(fnoMethodMappingProperty, methodMappingResource);
     }
 
+    private static void addMapping(Model model, Function function, Resource functionResource){
+
+    }
+
+    private static void addComposition(Model model, Function function, Resource functionResource){
+
+    }
+
     public static String generateDescription(Model model, Method method) {
         logger.debug("name: {}", method.getName()); // name
 
@@ -125,16 +172,34 @@ public class DescriptionGenerator {
         Resource function = model.createResource(methodURI);
         function.addProperty(rdfTypeProperty, model.createResource(FNO + "Function"));
         function.addProperty(fnoNameProperty, method.getName());
-        function.addProperty(ResourceFactory.createProperty(DCTERMS.toString(), "description"), method.getName());
+        function.addProperty(dctermsDescriptionProperty, method.getName());
 
         addParameters(model, method, function);
         addReturnTypeAndExceptions(model, method, function);
+
         int modifiers = method.getModifiers();
         if(Modifier.isStatic(modifiers)){ // static function, we can link implementation.
             addMapping(model, method, function);
         }
         return methodURI;
     }
+
+    public static void addFunctionToModel(Model model, Function function){
+        String functionURI = function.getId();
+        Resource functionResource = model.createResource(functionURI);
+        functionResource.addProperty(rdfTypeProperty, model.createResource(FNO+"Function"));
+        functionResource.addProperty(fnoNameProperty, function.getName());
+        functionResource.addProperty(dctermsDescriptionProperty, function.getDescription());
+
+        addParameters(model, function, functionResource);
+        addReturnTypeAndExceptions(model, function, functionResource);
+        if(function.isComposite()){
+            addComposition(model, function, functionResource);
+        }else{
+            addMapping(model, function, functionResource);
+        }
+    }
+
     private static String getDatatype(Class<?> clazz){
         logger.debug("getting data type for {}", clazz.getName());
         if(!datatypeMap.containsKey(clazz)){
