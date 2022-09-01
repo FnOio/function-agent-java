@@ -1,7 +1,6 @@
 package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
-import be.ugent.idlab.knows.functions.agent.dataType.ListConverter;
 import be.ugent.idlab.knows.functions.agent.exception.MissingRDFSeqIndexException;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.MethodNotFoundException;
@@ -62,6 +61,7 @@ public class AgentImpl implements Agent {
 
         Method method = null;
         // get the method if the function is not a composition
+        // when moved to if-statement after parameter loading, tests fail (not sure why)
         if(!function.isComposite()){
             method = instantiator.getMethod(functionId);
             if(method == null){
@@ -77,36 +77,36 @@ public class AgentImpl implements Agent {
         for (Parameter argumentParameter : function.getArgumentParameters()) {
             logger.debug("finding value for parameter {}", argumentParameter.getId());
             Collection<Object> valueCollection = arguments.get(argumentParameter.getId());
-            if(argumentParameter.getId().equals(RDF+"_nnn")){
-                logger.debug("found sequential parameter (_nnn), looking for values");
-                // get the highest available sequence index
-                Optional<Integer> optionalInteger = arguments.getArgumentNames().stream()
-                                                        .filter(name -> pattern.matcher(name).matches())
-                                                        .map(i -> Integer.parseInt(i.substring(RDF.toString().length()+1)))
-                                                        .max(Integer::compareTo);
-
-                if(!optionalInteger.isPresent()){ // no parameters of type _nnn available
-                    valuesInOrder.add(null);
-                    continue;
-                }
-                int max = optionalInteger.get(); // get the highest used parameter
-                Object[] values = new Object[max];
-                // start from 0
-                // if < 0, it could be a correct parameter predicate for another argument:
-                // https://fno.io/spec/#fn-parameter
-                for (int i = 0; i < max; i++) {
-                    int finalI = i+1;
-                    Object value = arguments.get(RDF+"_"+(finalI)).stream().findFirst().orElseThrow(() -> new MissingRDFSeqIndexException("no parameter found for _" + (finalI)));
-                    values[i] = value;
-                }
-                ListConverter converter = new ListConverter();
-                converter.setArgumentTypeConverter(argumentParameter.getTypeConverter());
-                valuesInOrder.add(converter.convert(values));
-            }
-            else if (argumentParameter.getTypeConverter().getTypeCategory() == DataTypeConverter.TypeCategory.COLLECTION) {
+            if (argumentParameter.getTypeConverter().getTypeCategory() == DataTypeConverter.TypeCategory.COLLECTION) {
                 logger.debug("got collection argument!");
-                Object convertedValue = argumentParameter.getTypeConverter().convert(valueCollection);
-                valuesInOrder.add(convertedValue);
+                if((RDF+"_nnn").equals(argumentParameter.getId())){
+                    logger.debug("found sequential parameter (_nnn), looking for values");
+                    // get the highest available sequence index
+                    Optional<Integer> optionalInteger = arguments.getArgumentNames().stream()
+                            .filter(name -> pattern.matcher(name).matches())
+                            .map(i -> Integer.parseInt(i.substring(RDF.toString().length()+1)))
+                            .max(Integer::compareTo);
+
+                    if(!optionalInteger.isPresent()){ // no parameters of type _nnn available
+                        valuesInOrder.add(null);
+                        continue;
+                    }
+                    int max = optionalInteger.get(); // get the highest used parameter
+                    Object[] values = new Object[max];
+                    // start from 0
+                    // if < 0, it could be a correct parameter predicate for another argument:
+                    // https://fno.io/spec/#fn-parameter
+                    for (int i = 0; i < max; i++) {
+                        int finalI = i+1;
+                        Object value = arguments.get(RDF+"_"+(finalI)).stream().findFirst().orElseThrow(() -> new MissingRDFSeqIndexException("no parameter found for _" + (finalI)));
+                        values[i] = value;
+                    }
+                    valuesInOrder.add(argumentParameter.getTypeConverter().convert(values));
+                }
+                else{
+                    Object convertedValue = argumentParameter.getTypeConverter().convert(valueCollection);
+                    valuesInOrder.add(convertedValue);
+                }
             } else {
                 if (valueCollection.isEmpty()) {
                     logger.debug("No value found for parameter '{}' in function {}. Considering it to be 'null'.", argumentParameter.getId(), functionId);
