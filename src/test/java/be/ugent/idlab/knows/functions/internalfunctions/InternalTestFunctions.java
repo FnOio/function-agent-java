@@ -100,4 +100,27 @@ public class InternalTestFunctions {
         return objects;
     }
 
+
+    public static Long testExceptionFunction(Long a) throws Exception{
+        if(a <= 0){
+            throw new Exception("a should be greater than 0");
+        }
+        return a;
+    }
+
+    public static int testVarargsFunction(Object... objects){
+        return objects.length;
+    }
+
+    public static void testVoidReturnFunction(Long l){
+        System.out.print("");
+    }
+
+    public static Long testNoParameters(){
+        return 1L;
+    }
+
+    public static void testMultipleExceptions() throws IOException, NullPointerException{
+           throw new IOException("ioException");
+    }
 }
