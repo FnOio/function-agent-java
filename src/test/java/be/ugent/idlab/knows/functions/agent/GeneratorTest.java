@@ -18,29 +18,31 @@ import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAM
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
 
 public class GeneratorTest {
-    // to print rdf to files to check data
+    // to print RDF to files to check data
     private static final boolean OUTPUT = false;
 
     @Test
-    public void testCreationWithLink() throws Exception{
+    public void testCreationWithLink() throws Exception {
         Model model = ModelFactory.createDefaultModel();
-        String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("pow",long.class, long.class ));
-        try(OutputStream outputStream = Files.newOutputStream(Paths.get("testCreationWithLink.ttl"))) {
-            RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+        String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("pow", long.class, long.class));
+        if (OUTPUT) {
+            try (OutputStream outputStream = Files.newOutputStream(Paths.get("testCreationWithLink.ttl"))) {
+                RDFDataMgr.write(outputStream, model, Lang.TURTLE);
+            }
         }
         Agent agent = AgentFactory.createFromFnO("testCreationWithLink.ttl");
         Arguments arguments = new Arguments();
-        arguments.add("https://w3id.org/function/vocabulary/predicates#arg0", "2");
-        arguments.add("https://w3id.org/function/vocabulary/predicates#arg1", "6");
-        Object result = agent.execute(methodURI,arguments);
+        arguments.add("https://example.com/fno/Predicate#arg0", "2");
+        arguments.add("https://example.com/fno/Predicate#arg1", "6");
+        Object result = agent.execute(methodURI, arguments);
         Assert.assertEquals("2^6 = 64", 64L, result);
     }
 
     @Test
-    public void testExceptionAsOutput() throws Exception{
+    public void testExceptionAsOutput() throws Exception {
         Model model = ModelFactory.createDefaultModel();
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("testExceptionFunction", Long.class));
-        if(OUTPUT){
+        if (OUTPUT) {
             try (OutputStream outputStream = Files.newOutputStream(Paths.get("testExceptionAsOutput.ttl"))) {
                 RDFDataMgr.write(outputStream, model, Lang.TURTLE);
             }
@@ -51,24 +53,24 @@ public class GeneratorTest {
     }
 
     @Test
-    public void testVarArgs() throws Exception{
+    public void testVarArgs() throws Exception {
         Model model = ModelFactory.createDefaultModel();
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("testVarargsFunction", Object[].class));
-        if(OUTPUT){
+        if (OUTPUT) {
             try (OutputStream outputStream = Files.newOutputStream(Paths.get("testVarArgs.ttl"))) {
                 RDFDataMgr.write(outputStream, model, Lang.TURTLE);
             }
         }
-        Resource parameter = model.getResource("https://w3id.org/function/ontology#arg0");
+        Resource parameter = model.getResource("https://example.com/fno/Parameter#arg0");
         Resource type = parameter.getPropertyResourceValue(ResourceFactory.createProperty(FNO.toString(), "type"));
-        Assert.assertEquals(type.getURI(), RDF+"list");
+        Assert.assertEquals(type.getURI(), RDF + "list");
     }
 
     @Test
-    public void testVoidReturnFunction() throws Exception{
+    public void testVoidReturnFunction() throws Exception {
         Model model = ModelFactory.createDefaultModel();
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("testVoidReturnFunction", Long.class));
-        if(OUTPUT){
+        if (OUTPUT) {
             try (OutputStream outputStream = Files.newOutputStream(Paths.get("testVoidReturnFunction.ttl"))) {
                 RDFDataMgr.write(outputStream, model, Lang.TURTLE);
             }
@@ -79,10 +81,10 @@ public class GeneratorTest {
     }
 
     @Test
-    public void testNoParameters() throws Exception{
+    public void testNoParameters() throws Exception {
         Model model = ModelFactory.createDefaultModel();
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("testNoParameters"));
-        if(OUTPUT){
+        if (OUTPUT) {
             try (OutputStream outputStream = Files.newOutputStream(Paths.get("testNoParameterFunction.ttl"))) {
                 RDFDataMgr.write(outputStream, model, Lang.TURTLE);
             }
@@ -93,10 +95,10 @@ public class GeneratorTest {
     }
 
     @Test
-    public void testMultipleExceptions() throws Exception{
+    public void testMultipleExceptions() throws Exception {
         Model model = ModelFactory.createDefaultModel();
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("testMultipleExceptions"));
-        if(OUTPUT){
+        if (OUTPUT) {
             try (OutputStream outputStream = Files.newOutputStream(Paths.get("testMultipleExceptionsFunction.ttl"))) {
                 RDFDataMgr.write(outputStream, model, Lang.TURTLE);
             }
@@ -105,7 +107,6 @@ public class GeneratorTest {
         List<?> list = getResourcesFromList(functionResource.getPropertyResourceValue(ResourceFactory.createProperty("https://w3id.org/function/ontology#returns")));
         Assert.assertEquals("expected 2 exceptions", 2, list.size());
     }
-
 
     // from FnoFunctionModelProvider
     private List<Resource> getResourcesFromList(final Resource listResource) {
@@ -125,6 +126,7 @@ public class GeneratorTest {
         }
         return resources;
     }
+
     private Optional<Resource> getObjectResource(final Resource subject, final String predicateURI) {
         Property property = ResourceFactory.createProperty(predicateURI);
         Statement statement = subject.getProperty(property);
