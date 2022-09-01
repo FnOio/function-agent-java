@@ -25,10 +25,8 @@ public class GeneratorTest {
     public void testCreationWithLink() throws Exception {
         Model model = ModelFactory.createDefaultModel();
         String methodURI = DescriptionGenerator.generateDescription(model, InternalTestFunctions.class.getMethod("pow", long.class, long.class));
-        if (OUTPUT) {
-            try (OutputStream outputStream = Files.newOutputStream(Paths.get("testCreationWithLink.ttl"))) {
-                RDFDataMgr.write(outputStream, model, Lang.TURTLE);
-            }
+        try (OutputStream outputStream = Files.newOutputStream(Paths.get("testCreationWithLink.ttl"))) {
+            RDFDataMgr.write(outputStream, model, Lang.TURTLE);
         }
         Agent agent = AgentFactory.createFromFnO("testCreationWithLink.ttl");
         Arguments arguments = new Arguments();
@@ -36,6 +34,9 @@ public class GeneratorTest {
         arguments.add("https://example.com/fno/Predicate#arg1", "6");
         Object result = agent.execute(methodURI, arguments);
         Assert.assertEquals("2^6 = 64", 64L, result);
+        if (!OUTPUT) {
+            Files.delete(Paths.get("testCreationWithLink.ttl"));
+        }
     }
 
     @Test
