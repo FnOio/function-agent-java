@@ -208,7 +208,7 @@ then add this dependency:
     <dependency>
         <groupId>com.github.fnoio</groupId>
         <artifactId>function-agent-java</artifactId>
-        <version>v0.1.0</version>
+        <version>v0.2.0</version>
     </dependency>
 </dependencies>
 
