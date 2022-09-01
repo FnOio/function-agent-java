@@ -25,6 +25,40 @@ ex:rawListLen a fno:Function ;
   fno:expects ( ex:rawList ) ;
   fno:returns ( ex:intOut ) .
 
+ex:multiply a fno:Function;
+    fno:name "Product of two integers";
+    rdfs:label "Product of two integers";
+    dcterms:description "Returns the product of two given integers";
+    fno:expects (ex:int1 ex:int2);
+    fno:returns (ex:intOut).
+
+ex:pow a fno:Function ;
+    fno:name "power of 2 numbers";
+    rdfs:label "power of 2 numbers";
+    dcterms:description "returns the power of the 2 arguments";
+    fno:expects (ex:int1 ex:int2) ;
+    fno:returns (ex:intOut).
+
+ex:writeToFile a fno:Function ;
+    fno:name "write to file";
+    rdfs:label "writes argument to file";
+    dcterms:description "returns 0 if success, writes argument to file";
+    fno:expects (ex:int1 ex:string );
+    fno:returns ( ex:int2).
+
+ex:writeToFileNoReturn a fno:Function;
+    fno:name "write to file";
+    rdfs:label "tries to argument to file";
+    dcterms:description "tries to write argument to file";
+    fno:expects (ex:int1 ex:string);
+    fno:returns ().
+
+ex:tee a fno:Function ;
+    fno:name "tee";
+    rdfs:label "tee";
+    dcterms:description "return the object it is given and writes it to a given file" ;
+    fno:expects (ex:int1 ex:string);
+    fno:returns (ex:intOut).
 
 #####################
 # FUNCTION MAPPINGS #
@@ -39,6 +73,31 @@ ex:rawListLenMapping a fno:Mapping ;
   fno:function ex:rawListLen ;
   fno:implementation ex:internalTestFunctions ;
   fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "rawListLen" ] .
+
+ex:multiplyMapping a fno:Mapping;
+    fno:function ex:multiply;
+    fno:implementation ex:internalTestFunctions;
+    fno:methodMapping [ a fnom:StringMethodMapping; fnom:method-name "multiply" ] .
+
+ex:powMapping a fno:Mapping;
+    fno:function ex:pow;
+    fno:implementation ex:internalTestFunctions;
+    fno:methodMapping [ a fnom:StringMethodMapping; fnom:method-name "pow" ] .
+
+ex:writeMapping a fno:Mapping;
+    fno:function ex:writeToFile;
+    fno:implementation ex:internalTestFunctions;
+    fno:methodMapping [a fnom:StringMethodMapping; fnom:method-name "writeToFile" ].
+
+ex:writeNoReturnMapping a fno:Mapping;
+    fno:function ex:writeToFileNoReturn;
+    fno:implementation ex:internalTestFunctions;
+    fno:methodMapping [a fnom:StringMethodMapping; fnom:method-name "writeToFileNoReturn"].
+
+ex:teeMapping a fno:Mapping;
+   fno:function ex:tee;
+   fno:implementation ex:internalTestFunctions;
+   fno:methodMapping [a fnom:StringMethodMapping; fnom:method-name "tee" ].
 
 ##############
 # PARAMETERS #
@@ -65,6 +124,12 @@ ex:rawList a fno:Parameter ;
     fno:type rdf:List ;
     fno:required "true"^^xs:boolean .
 
+ex:string a fno:Parameter;
+    fno:name "string parameter";
+    rdfs:label "a string parameter";
+    fno:predicate ex:p_string;
+    fno:type xs:string;
+    fno:required "true"^^xs:boolean.
 
 ###########
 # OUTPUTS #

@@ -3,20 +3,87 @@
 This library enables execution of semantically described functions.
 
 The idea is that when:
-* software A needs a certain functionality, and;
-* software B provides that functionality, and;
-* there is a description of the functionality and its implementation;
+- software A needs a certain functionality, and;
+- software B provides that functionality, and;
+- there is a description of the functionality and its implementation;
 then Function Agent can be called from A to execute functions of B.
 
 Describing functions can be done with the Function Ontology ([FnO.io](https://fno.io/)),
 or by providing another function model.
 
+## Function Composition
+
+This library supports [Function composition as described by FnO](https://fno.io/spec/#composition).
+
+If a function is a composition and also has an implementation, the implementation will be used.
+
+If a function is a composition, only the functions whose results are needed for the output will be executed.
+If all functions need execution, set the debug flag of the `Agent`.
+
+### Constructing compositions
+
+A composition is represented internally as a lambda of type [ThrowableFunction](./src/main/java/be/ugent/idlab/knows/functions/agent/functionIntantiation/ThrowableFunction.java).
+This interface requires an `Agent` to be passed. This is to evaluate the functions the composition depends upon.
+The lambda is built at [getCompositeMethod](./src/main/java/be/ugent/idlab/knows/functions/agent/functionIntantiation/Instantiator.java).
+This lambda is built based on the composition and is constructed using the following steps:
+
+1. Initialise and do safety checks
+2. Construct the execution stack
+3. Construct lambdas
+
+#### Initialise and do safety checks
+
+- Check if the lambda is already constructed and is present in the cache.
+- Some safety checks (Function exists and is a composition).
+- Initialise some maps which are required later.
+- Look over all parameter mappings
+  - If it's a literal, make it available in a value map for later use.
+  - Check if the functions and parameters used exist.
+  - Add parameters to a map for mapping the values.
+  - If it maps an output, make the target parameter dependent on the source.
+- Make a map for global dependencies: if A is dependent on B and B is dependent on C, then C is a global dependency of A.
+- Check the dependencies for cycles
+
+#### Construct execution stack
+
+There is a function dependency _queue_ and an execution _stack_.
+
+- initialization
+  - the execution stack is initialized empty
+  - the function dependency queue is initialized with the function of which the composition is calculated.
+- construct the execution stack ([BFS](https://en.wikipedia.org/wiki/Breadth-first_search) based) (will only add functions necessary to calculate output):
+  - repeat until queue is empty
+    - Poll a function from the queue and get its dependencies.
+      - > TODO clarify what 'dependencies' means
+    - If the function is contained in another functions dependencies, add it to the queue again.
+    - Push it to the execution stack.
+      - > TODO clarify what 'it' means
+    - Add the function's dependencies to the queue.
+- postprocess
+  - normal mode
+    - remove the last function on the stack, this is the composite function and can't be executed.
+  - debug mode: add all functions in the composition, also the non-required ones for the function output.
+    - remove the last element in the deque (original function)
+    - get all elements in the composition that aren't on the execution stack yet.
+    - Queue based adding: check if the functions dependencies are all on the stack. If yes, add it at the end of the execution stack, else place it at the back of the queue.
+    - Add removed function again.
+
+#### Lambda construction
+
+- Make the arguments available in the value map.
+- execute the execution stack:
+  - Repeat until stack is empty.
+  - Take a function from the stack and get its `Function` object.
+  - for each of the functions parameters, we will get all the parameters of which it receives values, and get their values from the valueMap.
+  - Execute the function with the provided `Agent` and make its result available in the valueMap.
+- Get the output of the parameters linked to the output of the composite function and return the first value.
+- Cache the constructed lambda.
+
 ## Example
 
-Suppose you have this great library with a function you want to use in your code, 
+Suppose you have this great library with a function you want to use in your code,
 in this case the method `sum` that sums parameters `a` and `b`.
 (see [InternalTestFunctions.java](src/test/java/be/ugent/idlab/knows/functions/internalfunctions/InternalTestFunctions.java))
-
 
 ```java
 public class InternalTestFunctions
@@ -36,7 +103,7 @@ public class InternalTestFunctions
 
 And you have a FnO document describing that function and its implementation (see [internalTestFunctions.ttl](src/test/resources/internalTestFunctions.ttl)):
 
-```
+```turtle
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix fno:     <https://w3id.org/function/ontology#> .
 @prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
@@ -89,7 +156,7 @@ ex:internalTestFunctions a fnoi:JavaClass ;         # The method is part of a Ja
   fnoi:class-name "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions" .  #... with this name.
 ```
 
-Now we first need to initialize a Function Agent with a path to the FnO document. 
+Now we first need to initialize a Function Agent with a path to the FnO document.
 This path can be local or a URL to such document, or a big String containing the document.
 Then the function can be called with the required arguments:
 
@@ -109,16 +176,16 @@ public static void main(String[] args) {
     long result = (Long) agent.execute("http://example.org/sum", arguments);
     assert (result == 6l);
 }
-
-
 ```
 
 ## Download
 
 ### Jar file
+
 Grab the latest [release](https://github.com/FnOio/function-agent-java/releases) from GitHub.
 
 ### Maven
+
 Use [JitPack](https://jitpack.io/) to include the latest version. In your `pom.xml` add
 the following repository:
 
@@ -141,7 +208,7 @@ then add this dependency:
     <dependency>
         <groupId>com.github.fnoio</groupId>
         <artifactId>function-agent-java</artifactId>
-        <version>v0.1.0</version>
+        <version>v0.2.0</version>
     </dependency>
 </dependencies>
 
@@ -150,13 +217,16 @@ then add this dependency:
 See also [AgentTest.java](src/test/java/be/ugent/idlab/knows/functions/agent/AgentTest.java).
 
 ## Features
-* Use the [Function Ontology](https://fno.io/) to describe functions, or implement your own [FunctionModelProvider](src/main/java/be/ugent/idlab/knows/functions/agent/functionModelProvider/FunctionModelProvider.java);
-* Include function implementations (see [AgentTest](src/test/java/be/ugent/idlab/knows/functions/agent/AgentTest.java)) for an example of the options):
-  * As classes on the classpath (e.g. by using your favorite build tool)
-  * By referring to a JAR file.
-* Lazy loading of function implementations. 
+
+- Use the [Function Ontology](https://fno.io/) to describe functions, or implement your own [FunctionModelProvider](src/main/java/be/ugent/idlab/knows/functions/agent/functionModelProvider/FunctionModelProvider.java).
+- Include function implementations (see [AgentTest](src/test/java/be/ugent/idlab/knows/functions/agent/AgentTest.java)) for an example of the options):
+  - As classes on the classpath (e.g. by using your favorite build tool)
+  - By referring to a JAR file.
+- Lazy loading of function implementations.
+- Use FnO composition.
 
 ## Current limitations
-* Does not support FnO's [function composition](https://fno.io/spec/#composition) yet.
-* No state supported.
-* Implemented in Java, no bindings for non-JVM languages provided.
+
+- No state supported.
+- Implemented in Java, no bindings for non-JVM languages provided.
+- Composition: no recursion supported.

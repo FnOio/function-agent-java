@@ -1,0 +1,5 @@
+@prefix ex:      <http://example.org/> .
+@prefix fns: <http://example.com/functions#> .
+@prefix fnoc: <https://w3id.org/function/vocabulary/composition#> .
+
+fns:sumAlias fnoc:applies ex:sum .

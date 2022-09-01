@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -71,7 +72,14 @@ public class FileFinder {
         logger.debug("Searching '{}' (absolute or relative to current working dir)", path);
         final String workingDir = System.getProperty("user.dir");
         final Path workingDirPath = Paths.get(workingDir);
-        final Path resolved = workingDirPath.resolve(path);
+        final Path resolved;
+        try{
+            resolved = workingDirPath.resolve(path);
+        }
+        catch(InvalidPathException invalidPathException){
+            logger.info(invalidPathException.getMessage());
+            return null;
+        }
         final File file = resolved.toFile();
         if (file.exists()) {
             try {

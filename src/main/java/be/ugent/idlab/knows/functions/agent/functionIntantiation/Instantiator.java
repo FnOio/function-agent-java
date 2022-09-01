@@ -1,17 +1,18 @@
 package be.ugent.idlab.knows.functions.agent.functionIntantiation;
 
+import be.ugent.idlab.knows.functions.agent.Agent;
+import be.ugent.idlab.knows.functions.agent.Arguments;
 import be.ugent.idlab.knows.functions.agent.dataType.ArrayConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.CollectionConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.ClassNotFoundException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.MethodNotFoundException;
-import be.ugent.idlab.knows.functions.agent.model.Function;
-import be.ugent.idlab.knows.functions.agent.model.FunctionMapping;
-import be.ugent.idlab.knows.functions.agent.model.Parameter;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.*;
+import be.ugent.idlab.knows.functions.agent.model.*;
 import be.ugent.idlab.knows.misc.FileFinder;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,12 +22,15 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 /**
  * An Instantiator tries to find an implementation (Java Method for now) for any given {@link Function}.
+ * If the function is a composition, it will construct a lambda for that function.
  * The method can be executed to perform the actual function.
  *
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -41,15 +45,18 @@ public class Instantiator {
     // a 'cache' of Methods associated with function ids.
     private final Map<String, Method> id2MethodMap = new HashMap<>();
 
+    // a 'cache' for constructed composition methods.
+    private final Map<String, ThrowableFunction> id2CompositionLambdaMap = new HashMap<>();
+
     // a 'cache' of loaded classes
     private final Map<String, Class<?>> className2ClassMap = new HashMap<>();
 
     private final DataTypeConverterProvider dataTypeConverterProvider;
 
     /**
-     * Creates a new instance of an Initiator.
+     * Creates a new instance of an Instantiator.
      * @param functions The function descriptions used to find for possible implementations in the form of a map function ID -> Function.
-     * @param dataTypeConverterProvider
+     * @param dataTypeConverterProvider provides the converters for the arguments
      */
     public Instantiator(final Map<String, Function> functions, final DataTypeConverterProvider dataTypeConverterProvider) {
         id2functionMap = functions;
@@ -81,9 +88,10 @@ public class Instantiator {
             // now get the method
             final String methodName = mapping.getMethodMapping().getMethodName();
             final List<Parameter> parameters = function.getArgumentParameters();
-            Method method = null;
+            Method method;
             try {
-                method = getMethod(clazz, methodName, parameters, function.getReturnParameters().get(0));
+                Parameter p = function.getReturnParameters().size() == 0 ? new Parameter("","", this.dataTypeConverterProvider.getDataTypeConverter("void"), true) : function.getReturnParameters().get(0);
+                method = getMethod(clazz, methodName, parameters, p);
                 logger.debug("Found method {}", method.getName());
                 id2MethodMap.put(functionId, method);
                 return method;
@@ -92,6 +100,217 @@ public class Instantiator {
             }
         } else {
             throw new FunctionNotFoundException("No function found with id " + functionId);
+        }
+    }
+
+    /**
+     * Generates a lambda that executes the composite method for the given function
+     * @param functionId the name of the function for which the function composition must be generated
+     * @return a lambda that is the composite function
+     * @throws InstantiationException if the given functionId is not a function composition, this function will throw an error
+     */
+    public ThrowableFunction getCompositeMethod(final String functionId, boolean debug) throws InstantiationException {
+        logger.debug("constructing composite method for {}", functionId);
+        if(id2CompositionLambdaMap.containsKey(functionId)){
+            logger.debug("found composition for {} in cache!", functionId);
+            return id2CompositionLambdaMap.get(functionId);
+        }
+
+        if(!id2functionMap.containsKey(functionId)){
+            throw new FunctionNotFoundException("No function found with id " + functionId);
+        }
+
+        final Function function = id2functionMap.get(functionId);
+
+        if(!function.isComposite()){
+            throw new NotACompositeFunctionException("the provided functionId is not a function composition"); // strict
+            //return (Agent agent, Object[] args) -> this.getMethod(functionId).invoke(null, args); // can also be used
+        }
+
+        // get the composition
+        final FunctionComposition functionComposition = function.getFunctionComposition();
+
+        // maps a specific parameter of a function on a value (outputs included)
+        Map<String, Map<String, Object>> values = new HashMap<>();
+        // functions depend on certain parameters of other functions
+        MultiValuedMap<String, String> dependencies = new ArrayListValuedHashMap<>();
+        // K receives values from V, can be multiple values. Arguments class takes care of this.
+        MultiValuedMap<FunctionFieldPair, FunctionFieldPair> parametermap = new ArrayListValuedHashMap<>();
+
+        // temporary global dependencies
+        MultiValuedMap<String, String> globalDependencies = new ArrayListValuedHashMap<>();
+
+        // function dependencies and parameter maps
+        for(CompositionMappingElement el : functionComposition.getMappings()){
+            CompositionMappingPoint from = el.getFrom();
+            CompositionMappingPoint to = el.getTo();
+            if(from.isLiteral()){
+                Map<String, Object> functionValues = values.getOrDefault(to.getFunctionId(), new HashMap<>());
+                functionValues.put(to.getParameterId(), from.getParameterId());
+                values.put(to.getFunctionId(), functionValues);
+                continue;
+            }
+
+            // check for the use of actual parameters
+            checkFunction(from);
+            checkFunction(to);
+
+            parametermap.put(
+                    new FunctionFieldPair(to.getFunctionId(), to.getParameterId()),
+                    new FunctionFieldPair(from.getFunctionId(), from.getParameterId())
+            );
+
+            // add function dependencies
+            // if the source value is an output, the target function is dependent on the source function
+            if(from.isOutput()){
+                dependencies.put(to.getFunctionId(), from.getFunctionId());
+            }
+        }
+
+        // fix global dependencies for later:
+        for (String funcId : dependencies.keySet()) {
+            List<String> list = new ArrayList<>(dependencies.get(funcId));
+            Collection<String> deps = globalDependencies.get(funcId);
+            while(!list.isEmpty()) {
+                List<String> toAdd = new ArrayList<>();
+                for (String dep : list){
+                    List<String> tmpdep = dependencies.get(dep).stream()
+                                            .filter(i -> !deps.contains(i))
+                                            .filter(i -> !toAdd.contains(i))
+                                            .collect(Collectors.toList());
+                    toAdd.addAll(tmpdep);
+                }
+                deps.addAll(list);
+                list.clear();
+                list.addAll(toAdd);
+                toAdd.clear();
+            }
+        }
+
+        // checks for cycles in dependencies
+        checkDependencyCycles(globalDependencies); // based on global dependencies
+
+        // order of function execution is determined with the debug parameter
+        Deque<String> execStack = new ArrayDeque<>();
+
+        // effective implementation: stack of necessary function calls to get output.
+        Queue<String> toadd = new ArrayDeque<>();
+        toadd.add(functionId);
+        while(!toadd.isEmpty()) {
+            String fId = toadd.poll();
+            Collection<String> dep = dependencies.get(fId);
+            // check if there are functions in the queue that are dependent on this one
+            if(toadd.stream().anyMatch(other -> {
+                Collection<String> otherDep = globalDependencies.get(other);
+                return otherDep.contains(fId);
+            })){
+                toadd.add(fId);
+                continue;
+            }
+            execStack.push(fId);
+            dep.stream().filter((String funcName) -> !execStack.contains(funcName))
+                    .forEach(toadd::add);
+        }
+        execStack.removeLast();
+        if(debug){
+            // less effective implementation: all nodes of the composition graph will be executed.
+            // they will be added after the necessary functions for the output and before the actual function.
+            Queue<String> sideSet = dependencies.keySet().stream().filter(name -> !(execStack.contains(name))).collect(Collectors.toCollection(ArrayDeque::new));
+            while(!sideSet.isEmpty()) {
+                String s = sideSet.poll();
+                if(execStack.containsAll(dependencies.get(s))){
+                    execStack.addLast(s);
+                }
+                else{
+                    sideSet.add(s);
+                }
+            }
+        }
+
+
+        // construct the lambda that represents the function
+        // don't call the getMethod function from the instantiator to evaluate other functions, since the used functions can also be function compositions
+        ThrowableFunction returnFunction = (Agent agent, Object[] args) -> {
+            // make arguments available
+            List<Parameter> fArgs = function.getArgumentParameters();
+            for(int i = 0; i < fArgs.size(); i++){
+                Parameter p = fArgs.get(i);
+                Object value = args[i];
+                Map<String, Object> vals = values.getOrDefault(functionId, new HashMap<>());
+                vals.put(p.getId(), value);
+                values.put(functionId, vals);
+            }
+
+            /*
+                for each function, we will get for each parameter all the values that are mapped to that parameter
+                and we will execute the function when we have all the arguments
+             */
+            while (!execStack.isEmpty()) {
+                String f = execStack.pop();
+                Arguments arguments = new Arguments();
+                Function func = id2functionMap.get(f);
+                for(Parameter p : func.getArgumentParameters()){
+                    FunctionFieldPair ffp = new FunctionFieldPair(f, p.getId());
+                    Collection<FunctionFieldPair> ffpc = new ArrayList<>();
+                    Collection<FunctionFieldPair> toAdd = new ArrayList<>(parametermap.get(ffp));
+                    Collection<FunctionFieldPair> willBeAdded = new ArrayList<>();
+                    // check for multiple references: a -> b -> c so a should take a value from c and d
+                    //                                       -> d
+                    while(!toAdd.isEmpty()){
+                        ffpc.addAll(toAdd);
+                        for(FunctionFieldPair functionFieldPair : toAdd){
+                            willBeAdded.addAll(parametermap.get(functionFieldPair));
+                        }
+                        toAdd.clear();
+                        toAdd.addAll(willBeAdded);
+                        willBeAdded.clear();
+                    }
+                    if(ffpc.isEmpty()) {
+                        arguments = arguments.add(p.getId(), values.get(f).get(p.getId()));
+                    }
+                    for (FunctionFieldPair functionFieldPair: ffpc) {
+                        arguments = arguments.add(p.getId(), values.get(functionFieldPair.getFunction()).get(functionFieldPair.getField()));
+                    }
+                }
+                Object result = agent.execute(f, arguments);
+                Map<String, Object> functionValues = values.getOrDefault(f, new HashMap<>());
+                functionValues.put(func.getReturnParameters().get(0).getId(), result);
+                values.put(f, functionValues);
+            }
+            // for java, we get the first returnparameter to use to get the output of the function
+            Collection<FunctionFieldPair> returnFfp = parametermap.get(new FunctionFieldPair(functionId, function.getReturnParameters().get(0).getId()));
+            List<Object> returnList = new ArrayList<>();
+            returnFfp.forEach((FunctionFieldPair functionFieldPair) -> returnList.add(values.get(functionFieldPair.getFunction()).get(functionFieldPair.getField())));
+            return returnList.get(0);
+        };
+        // cache the constructed function
+        id2CompositionLambdaMap.put(functionId, returnFunction);
+        return returnFunction;
+    }
+
+    private void checkFunction(CompositionMappingPoint compositionMappingPoint) throws InstantiationException{
+        Function fromFunction = id2functionMap.get(compositionMappingPoint.getFunctionId());
+        if(Objects.isNull(fromFunction)){
+            throw new CompositionReferenceException("the used function " + compositionMappingPoint.getFunctionId() + " could not be found");
+        }
+        List<Parameter> fromInputParameters = fromFunction.getArgumentParameters();
+        List<Parameter> fromReturnParameters = fromFunction.getReturnParameters();
+        String parameterId = compositionMappingPoint.getParameterId();
+        // parameter not in input parameters or in return parameters
+        if(
+                fromInputParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, parameterId))
+                        &&
+                        fromReturnParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, parameterId))
+        ){
+            throw new CompositionReferenceException("the used parameter " + parameterId + " of function " + compositionMappingPoint.getFunctionId() + " could not be found");
+
+        }
+    }
+
+
+    private void checkDependencyCycles(MultiValuedMap<String, String> globalDependencies) throws InstantiationException{
+        for (String functionID : globalDependencies.keySet()) {
+            if(globalDependencies.get(functionID).contains(functionID)) throw new CyclicDependencyException("Cycle detected in dependency of " + functionID);
         }
     }
 
@@ -178,7 +397,7 @@ public class Instantiator {
                     Class<?> methodParameterClass = method.getParameterTypes()[i];
                     DataTypeConverter<?> dataTypeConverter = expectedParameters.get(i).getTypeConverter();
                     if (dataTypeConverter.isSubTypeOf(methodParameterClass)) {
-                        if (dataTypeConverter.getTypeCategory().equals(DataTypeConverter.TypeCategory.COLLECTION)) {
+                        if (dataTypeConverter.getTypeCategory() == DataTypeConverter.TypeCategory.COLLECTION) {
                             if (parameterType instanceof ParameterizedType) {
                                 // we found a Java collection. Now check if we need converters for type arguments of the class,
                                 // e.g List<Boolean>: we potentiay din't know about the 'Boolean' argument type yet
@@ -235,9 +454,9 @@ public class Instantiator {
 
     private void loadClassesFromJAR(final URL jarFileUrl) throws IOException {
         // TODO add jarfile cache?
-
         try (
-                JarFile jarFile = new JarFile(jarFileUrl.getFile());
+                // url decoder for special characters in path.
+                JarFile jarFile = new JarFile(URLDecoder.decode(jarFileUrl.getPath(), "utf-8"));
                 URLClassLoader cl = URLClassLoader.newInstance(new URL[]{jarFileUrl})) {
 
             jarFile
@@ -260,5 +479,4 @@ public class Instantiator {
                     });
         }
     }
-    
 }
