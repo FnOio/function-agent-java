@@ -5,8 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2022-07-12
+## Unreleased
+
+## [0.2.0] - 2022-09-01
+
 ### Added
+
 - Support for `rdf:seq` parameters.
 - `FnoFunctionModelProvider`: Can now parse Function Composition.
 - `FnoFunctionModelProvider`: Can now parse Partial Function Application.
@@ -14,8 +18,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `Agent`: Can execute Partial Function Application.
 - `Agent`: Has a debug mode.
 - `Instantiator`: In debug mode it will execute all nodes of a composition, otherwise only those necessary for the output (works non-recursive).
+- `DescriptionGenerator`: Can now output Function triples (both execution and functions/mappings from JAVA methods)
 
 ### Fixed
+
 - `Instantiator`: fixed Windows path resolving issues.
 - `Instantiator`: fixed URL decoding for special characters in path.
 
@@ -54,8 +60,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.0.1] - 2022-03-25
 
-[0.0.1]: https://github.com/FnOio/function-agent-java/releases
-[0.0.2]: https://github.com/FnOio/function-agent-java/compare/v0.0.1...v0.0.2
-[0.0.3]: https://github.com/FnOio/function-agent-java/compare/v0.0.2...v0.0.3
-[0.0.4]: https://github.com/FnOio/function-agent-java/compare/v0.0.3...v0.0.4
+[0.2.0]: https://github.com/FnOio/function-agent-java/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/FnOio/function-agent-java/compare/v0.0.4...v0.1.0
+[0.0.4]: https://github.com/FnOio/function-agent-java/compare/v0.0.3...v0.0.4
+[0.0.3]: https://github.com/FnOio/function-agent-java/compare/v0.0.2...v0.0.3
+[0.0.2]: https://github.com/FnOio/function-agent-java/compare/v0.0.1...v0.0.2
+[0.0.1]: https://github.com/FnOio/function-agent-java/releases
