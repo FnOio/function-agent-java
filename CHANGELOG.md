@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.2.1] - 2022-10-10
 
 ### Fixed
 - If the `DataTypeConverter` of the generic type parameter of a `Collection` is not found, try to find a `DataTypeConverter` that can process a subtype of the generic type ((see GitLab [issue 14](https://gitlab.ilabt.imec.be/fno/proc/function-component/-/issues/14))). 
@@ -63,6 +63,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.0.1] - 2022-03-25
 
+[0.2.1]: https://github.com/FnOio/function-agent-java/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/FnOio/function-agent-java/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/FnOio/function-agent-java/compare/v0.0.4...v0.1.0
 [0.0.4]: https://github.com/FnOio/function-agent-java/compare/v0.0.3...v0.0.4
