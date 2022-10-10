@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Fixed
+- If the `DataTypeConverter` of the generic type parameter of a `Collection` is not found, try to find a `DataTypeConverter` that can process a subtype of the generic type ((see GitLab [issue 14](https://gitlab.ilabt.imec.be/fno/proc/function-component/-/issues/14))). 
+
 ## [0.2.0] - 2022-09-01
 
 ### Added

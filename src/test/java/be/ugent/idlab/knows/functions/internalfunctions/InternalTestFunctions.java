@@ -123,4 +123,9 @@ public class InternalTestFunctions {
     public static void testMultipleExceptions() throws IOException, NullPointerException{
            throw new IOException("ioException");
     }
+
+    public static String concatSequence(final List<CharSequence> seq, final CharSequence delimiter) {
+        final CharSequence sep = delimiter == null? "" : delimiter;
+        return String.join(sep, seq);
+    }
 }
