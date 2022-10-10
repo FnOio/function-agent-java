@@ -518,4 +518,15 @@ public class AgentTest {
 //        assertEquals("1 + 2 + 3 should be 6", 6L, result);
 //    }
 
+    @Test
+    public void testGenericsInCollectionAsFunctionParameter() throws Exception {
+        final Agent agent = AgentFactory.createFromFnO("rdfSeqGenerics.ttl");
+        Arguments arguments = new Arguments()
+                .add(RDF+"_1", "a")
+                .add(RDF+"_2", "b")
+                .add(EX + "delimiter", " precedes ");
+        Object result = agent.execute(EX+"concatSequence", arguments, true);
+        assertEquals("a precedes b", result );
+    }
+
 }

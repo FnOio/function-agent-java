@@ -3,6 +3,7 @@ package be.ugent.idlab.knows.functions.agent.dataType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -19,8 +20,39 @@ public class DataTypeConverterProvider {
         addRDFConverters();
     }
 
+    /**
+     * Returns a DataTypeConverter for the given data type.
+     * @param type  The data type to find a DataTypeConverter for
+     * @return      A DataTypeConverter for the given data type, or the DefaultDataTypeConverter if no converter
+     *              for the given data type is found.
+     */
     public DataTypeConverter<?> getDataTypeConverter(final String type) {
         return nameToConverter.getOrDefault(type, new DefaultDataTypeConverter());
+    }
+
+    /**
+     * Returns a DataTypeConverter for the given data type. If no converter is found for the given type,
+     * it looks for a DataTypeConverter that can handle a subtype of the given type.
+     *
+     * @param type  The data type to find a DataTypeConverter for
+     * @return      A DataTypeConverter for the given data type (or a subtype thereof),
+     *              or the DefaultDataTypeConverter if no converter for the given data type is found.
+     */
+    public DataTypeConverter<?> getDataTypeConverterWhichProcessesSubTypeOf(final String type) {
+        if (nameToConverter.containsKey(type)) {
+            return nameToConverter.get(type);
+        } else {
+            try {
+                Class<?> theClass = Class.forName(type);
+                Optional<DataTypeConverter<?>> candidate = nameToConverter.values().stream()
+                        .filter(dataTypeConverter -> dataTypeConverter.isSubTypeOf(theClass))
+                        .findFirst();
+                return candidate.orElse(new DefaultDataTypeConverter());
+            } catch (ClassNotFoundException e) {
+                return new DefaultDataTypeConverter();
+            }
+
+        }
     }
 
     private void addJavaConverters() {
