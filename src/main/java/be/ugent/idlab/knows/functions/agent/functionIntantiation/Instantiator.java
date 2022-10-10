@@ -400,18 +400,18 @@ public class Instantiator {
                         if (dataTypeConverter.getTypeCategory() == DataTypeConverter.TypeCategory.COLLECTION) {
                             if (parameterType instanceof ParameterizedType) {
                                 // we found a Java collection. Now check if we need converters for type arguments of the class,
-                                // e.g List<Boolean>: we potentiay din't know about the 'Boolean' argument type yet
+                                // e.g List<Boolean>: we potentiay didn't know about the 'Boolean' argument type yet
                                 ParameterizedType pType = (ParameterizedType) parameterType;
                                 Type[] typeArgs = pType.getActualTypeArguments();
-                                DataTypeConverter<?> argumentDataTypeConverter = dataTypeConverterProvider.getDataTypeConverter(typeArgs[0].getTypeName());
+                                DataTypeConverter<?> argumentDataTypeConverter = dataTypeConverterProvider.getDataTypeConverterWhichProcessesSubTypeOf(typeArgs[0].getTypeName());
                                 ((CollectionConverter<?>) dataTypeConverter).setArgumentTypeConverter(argumentDataTypeConverter);
                             } else if (methodParameterClass.isArray()) {
                                 // We found a Java array. Now check if we need converters for type arguments of the class,
-                                // e.g Boolean[]: we potentiay din't know about the 'Boolean' argument type yet
+                                // e.g Boolean[]: we potentiay didn't know about the 'Boolean' argument type yet
                                 // change the ListConverter by an ArrayConverter
                                 Class<?> componentType = methodParameterClass.getComponentType();
                                 ArrayConverter arrayConverter = new ArrayConverter();
-                                arrayConverter.setArgumentTypeConverter(dataTypeConverterProvider.getDataTypeConverter(componentType.getTypeName()));
+                                arrayConverter.setArgumentTypeConverter(dataTypeConverterProvider.getDataTypeConverterWhichProcessesSubTypeOf(componentType.getTypeName()));
                                 expectedParameters.get(i).setTypeConverter(arrayConverter);
                             } else {
                                 // check if raw collection. If so, do nothing and use the DefaultDataTypeConverter. If not, we can't use the list converter.

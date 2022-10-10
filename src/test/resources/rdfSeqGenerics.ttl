@@ -1,0 +1,60 @@
+# This file is used in AgentTest
+
+@prefix ex: <http://example.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix fno: 	<https://w3id.org/function/ontology#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
+@prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
+
+###
+# functions
+###
+
+ex:concatSequence
+    a                   fno:Function ;
+    fno:name            "concatSequence" ;
+    rdfs:label          "concatSequence" ;
+    dcterms:description "Concatenates an rdf:seq of strings, optionally with a separator" ;
+    fno:expects         ( ex:_seq ex:_delimiter ) ;
+    fno:returns         ( ex:_stringOut ) .
+
+###
+# parameters
+###
+
+ex:_seq
+    a             fno:Parameter ;
+    fno:name      "rdf:Seq parameter" ;
+    fno:predicate rdf:_nnn ; # Similar to https://www.w3.org/TR/rdf-schema/#ch_containermembershipproperty
+                             # We can't use rdf:_nnn bc this would imply that _:exec also is an rdf:Seq, which is incorrect
+    fno:type      xsd:any ;
+    fno:required  "true"^^xsd:boolean .
+
+ex:_delimiter
+    a             fno:Parameter ;
+    fno:name      "delimiter" ;
+    rdfs:label    "delimiter" ;
+    fno:type      xsd:string ;
+    fno:predicate ex:delimiter .
+
+ex:_stringOut
+    a             fno:Output ;
+    fno:name      "output string" ;
+    rdfs:label    "output string" ;
+    fno:type      xsd:string ;
+    fno:predicate ex:stringOut .
+
+###
+# function mappings
+###
+
+ex:concatSequenceMapping a fno:Mapping ;
+  fno:function ex:concatSequence ;
+  fno:implementation ex:internalTestFunctions ;
+  fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "concatSequence" ] .
+
+ex:internalTestFunctions a fnoi:JavaClass ;
+  fnoi:class-name "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions" .

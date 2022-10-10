@@ -1,3 +1,5 @@
+# This file is used in AgentTest
+
 @prefix rr: <http://www.w3.org/ns/r2rml#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix ex: <http://example.com/> .

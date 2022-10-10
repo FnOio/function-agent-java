@@ -581,13 +581,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         // This is actually not used at the moment and supposed to be true.
         ResourceFactory.createProperty(FNO + "required");
         boolean isRequired = getLiteralBoolean(parameterResource, FNO + "required").orElse(true);
-        DataTypeConverter<?> typeConverter = dataTypeConverterProvider.getDataTypeConverter(typeUri);
-
-        if((RDF+"_nnn").equals(predicateUri)){
-            ListConverter listConverter = new ListConverter();
-            listConverter.setArgumentTypeConverter(dataTypeConverterProvider.getDataTypeConverter(typeUri));
-            typeConverter = listConverter;
-        }
+        DataTypeConverter<?> typeConverter = predicateUri.equals(RDF+"_nnn") ? new ListConverter() : dataTypeConverterProvider.getDataTypeConverter(typeUri);
 
         return new Parameter(name, predicateUri, typeConverter, isRequired);
     }

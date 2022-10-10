@@ -117,64 +117,6 @@ public abstract class DataTypeConverter<T> {
                 superTypes.add(classTypeName);
         }
 
-//        switch (classTypeName) {
-//            case "int":
-//                typesToCheck.add(Integer.class);
-//                typesToCheck.add(Long.class);
-//                break;
-//            case "java.lang.Integer":
-//                superTypes.add("int");
-//                break;
-//            case "short":
-//                typesToCheck.add(Short.class);
-//                typesToCheck.add(int.class);
-//                break;
-//            case "java.lang.Short":
-//                superTypes.add("short");
-//                break;
-//            case "long":
-//                typesToCheck.add(Long.class);
-//                break;
-//            case "java.lang.Long":
-//                superTypes.add("long");
-//                break;
-//            case "java.lang.Float":
-//                superTypes.add("float");
-//                break;
-//            case "float" :
-//                typesToCheck.add(Float.class);
-//                typesToCheck.add(Double.class);
-//                break;
-//            case "double":
-//                typesToCheck.add(Double.class);
-//                break;
-//            case "java.lang.Double":
-//                superTypes.add("double");
-//                break;
-//            case "byte":
-//                typesToCheck.add(Byte.class);
-//                typesToCheck.add(Short.class);
-//                break;
-//            case "java.lang.Byte":
-//                superTypes.add("byte");
-//                break;
-//            case "boolean":
-//                typesToCheck.add(Boolean.class);
-//                break;
-//            case "java.lang.Boolean":
-//                superTypes.add("boolean");
-//                break;
-//            case "java.lang.Character":
-//                superTypes.add("char");
-//                break;
-//            case "char":
-//                typesToCheck.add(Character.class);
-//                break;
-//            case "java.util.List":
-//                superTypes.add("_array");   // there is no real array class name...
-//                break;
-//        }
-
         // check if array
         if (clazz.isArray()) {
             superTypes.add("_array");
