@@ -36,7 +36,7 @@ cache:
   script:
     - 'mvn $MAVEN_CLI_OPTS test'
 
-# Test merge requests using JDK8
-test:jdk8:
+# Test using JDK17
+test:jdk17:
   <<: *test
-  image: maven:3-jdk-8
+  image: maven:3-eclipse-temurin-17-alpine # Java 17 is the latest LTS at the moment

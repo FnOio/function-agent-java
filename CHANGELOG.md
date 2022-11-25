@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Updated JUnit from 4.13.2 to 5.9.1 (tests)
 - Updated grel-functions-java from v0.7.3 to v0.8.2 (tests)
+- Java language version changed to 10; requires JRE >= 10 to run
 
 ### Fixed
 - be.ugent.idlab.knows.functions.agent.AgentTest.testGrelClassesOnClassPathRemoteFnODoc: point remote `grel.ttl` to specific GitHub commit to keep function definitions and implementations in sync.

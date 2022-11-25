@@ -20,9 +20,9 @@
         <grel.java.version>v0.8.2</grel.java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- we stick to Java 8 because this library is integrated in RMLMapper (https://github.com/RMLio/rmlmapper-java) -->
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <!-- This is the language level, it is recommended to use the latests LTS JVM to build / run it -->
+        <maven.compiler.source>10</maven.compiler.source>
+        <maven.compiler.target>10</maven.compiler.target>
     </properties>
 
     <repositories>
