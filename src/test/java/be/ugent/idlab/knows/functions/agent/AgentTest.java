@@ -467,14 +467,14 @@ public class AgentTest {
 
     @Test
     public void loadNonStaticFunctionThrowsException() throws FnOException {
-        final Agent agent = AgentFactory.createFromFnO();
+        final AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO();
         assertThrows(Exception.class, () -> agent.loadFunction(this.getClass().getMethods()[0])); // all test methods are non static
 
     }
 
     @Test
     public void loadJavaFunctionTest() throws Exception {
-        final Agent agent = AgentFactory.createFromFnO();
+        final AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO();
         String functionId = agent.loadFunction(InternalTestFunctions.class.getMethod("sum", long.class, long.class));
         List<String> list = agent.getParameterPredicates(functionId);
         Arguments args = new Arguments()
@@ -486,15 +486,15 @@ public class AgentTest {
 
     @Test
     public void testWriteModel() throws Exception {
-        Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl");
+        AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO("generalFunctions.ttl");
         agent.writeModel("testFileWrite.ttl");
-        agent = AgentFactory.createFromFnO("testFileWrite.ttl");
+        agent = (AgentImpl) AgentFactory.createFromFnO("testFileWrite.ttl");
         execute(agent);
     }
 
     @Test
     public void testWriteExecutionToFile() throws Exception {
-        Agent agent = AgentFactory.createFromFnO("internalTestFunctions.ttl");
+        AgentImpl agent = (AgentImpl)AgentFactory.createFromFnO("internalTestFunctions.ttl");
         // prepare the parameters for the function
         Arguments arguments = new Arguments().add(EX + "p_int1", "5").add(EX + "p_int2", "1");
 

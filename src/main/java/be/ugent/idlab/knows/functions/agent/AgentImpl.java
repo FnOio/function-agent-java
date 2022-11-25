@@ -142,13 +142,11 @@ public class AgentImpl implements Agent {
         return instantiator.getCompositeMethod(functionId, debug).apply(this, valuesInOrder.toArray());
     }
 
-    @Override
-    public void executeToFile(String functionId, Arguments arguments, String fileName) throws Exception {
+    void executeToFile(String functionId, Arguments arguments, String fileName) throws Exception {
         this.executeToFile(functionId, arguments, fileName, false);
     }
 
-    @Override
-    public void executeToFile(String functionId, Arguments arguments, String fileName, boolean debug) throws Exception {
+    void executeToFile(String functionId, Arguments arguments, String fileName, boolean debug) throws Exception {
         constructResult(functionId, arguments, fileName, debug);
     }
 
@@ -188,8 +186,7 @@ public class AgentImpl implements Agent {
         }
     }
 
-    @Override
-    public String loadFunction(Method javaFunction) {
+    String loadFunction(Method javaFunction) {
         DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
         if (!Modifier.isStatic(javaFunction.getModifiers())) {
             throw new UnsupportedOperationException("Java function needs to be static");
@@ -241,13 +238,11 @@ public class AgentImpl implements Agent {
         return new FunctionMapping(functionId, methodMapping, implementation);
     }
 
-    @Override
-    public List<String> getParameterPredicates(String functionId) {
+    List<String> getParameterPredicates(String functionId) {
         return this.functionId2Function.get(functionId).getArgumentParameters().stream().map(Parameter::getId).collect(Collectors.toList());
     }
 
-    @Override
-    public void writeModel(String filename) throws IOException {
+    void writeModel(String filename) throws IOException {
         Model model = ModelFactory.createDefaultModel();
         for (Function function : this.functionId2Function.values()) {
             DescriptionGenerator.addFunctionToModel(model, function);

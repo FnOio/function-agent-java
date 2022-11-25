@@ -1,9 +1,5 @@
 package be.ugent.idlab.knows.functions.agent;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.List;
-
 /**
  * <p>Copyright 2021 IDLab (Ghent University - imec)</p>
  *
@@ -28,14 +24,4 @@ public interface Agent {
      * @throws Exception    Something goes wrong looking up the function or executing it.
      */
     Object execute(final String functionId, final Arguments arguments, boolean debug) throws Exception;
-
-    void executeToFile(final String functionId, final Arguments arguments, final String fileName) throws Exception;
-
-    void executeToFile(final String functionId, final Arguments arguments, final String fileName, boolean debug) throws Exception;
-
-    void writeModel(final String filename) throws IOException;
-
-    String loadFunction(final Method javaFunction);
-
-    List<String> getParameterPredicates(String functionId);
 }
