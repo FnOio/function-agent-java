@@ -4,8 +4,7 @@ import be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -16,6 +15,8 @@ import java.util.Optional;
 
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.FNO;
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GeneratorTest {
     // to print RDF to files to check data
@@ -33,7 +34,7 @@ public class GeneratorTest {
         arguments.add("https://example.com/fno/Predicate#arg0", "2");
         arguments.add("https://example.com/fno/Predicate#arg1", "6");
         Object result = agent.execute(methodURI, arguments);
-        Assert.assertEquals("2^6 = 64", 64L, result);
+        assertEquals(64L, result, "2^6 = 64");
         if (!OUTPUT) {
             Files.delete(Paths.get("testCreationWithLink.ttl"));
         }
@@ -50,7 +51,7 @@ public class GeneratorTest {
         }
         Resource functionResource = model.getResource(methodURI);
         List<?> list = getResourcesFromList(functionResource.getPropertyResourceValue(ResourceFactory.createProperty("https://w3id.org/function/ontology#returns")));
-        Assert.assertEquals("expected 2 output values: return type and 1 exception", 2, list.size());
+        assertEquals(2, list.size(), "expected 2 output values: return type and 1 exception");
     }
 
     @Test
@@ -64,7 +65,7 @@ public class GeneratorTest {
         }
         Resource parameter = model.getResource("https://example.com/fno/Parameter#arg0");
         Resource type = parameter.getPropertyResourceValue(ResourceFactory.createProperty(FNO.toString(), "type"));
-        Assert.assertEquals(type.getURI(), RDF + "list");
+        assertEquals(type.getURI(), RDF + "list");
     }
 
     @Test
@@ -78,7 +79,7 @@ public class GeneratorTest {
         }
         Resource functionResource = model.getResource(methodURI);
         List<?> list = getResourcesFromList(functionResource.getPropertyResourceValue(ResourceFactory.createProperty("https://w3id.org/function/ontology#returns")));
-        Assert.assertTrue("expected no output values", list.isEmpty());
+        assertTrue(list.isEmpty(), "expected no output values");
     }
 
     @Test
@@ -92,7 +93,7 @@ public class GeneratorTest {
         }
         Resource functionResource = model.getResource(methodURI);
         List<?> list = getResourcesFromList(functionResource.getPropertyResourceValue(ResourceFactory.createProperty("https://w3id.org/function/ontology#expects")));
-        Assert.assertTrue("expected no parameters", list.isEmpty());
+        assertTrue(list.isEmpty(), "expected no parameters");
     }
 
     @Test
@@ -106,7 +107,7 @@ public class GeneratorTest {
         }
         Resource functionResource = model.getResource(methodURI);
         List<?> list = getResourcesFromList(functionResource.getPropertyResourceValue(ResourceFactory.createProperty("https://w3id.org/function/ontology#returns")));
-        Assert.assertEquals("expected 2 exceptions", 2, list.size());
+        assertEquals(2, list.size(), "expected 2 exceptions");
     }
 
     // from FnoFunctionModelProvider

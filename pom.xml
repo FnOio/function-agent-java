@@ -15,9 +15,9 @@
         <commons.version>4.4</commons.version>
         <jena.version>3.17.0</jena.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <junit.version>4.13.2</junit.version>
+        <junit.version>5.9.1</junit.version>
         <lombok.version>1.18.22</lombok.version>
-        <grel.java.version>v0.7.3</grel.java.version>
+        <grel.java.version>v0.8.2</grel.java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- we stick to Java 8 because this library is integrated in RMLMapper (https://github.com/RMLio/rmlmapper-java) -->
@@ -69,8 +69,14 @@
 
         <!-- Unit test framework -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>

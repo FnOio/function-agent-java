@@ -1,13 +1,13 @@
 package be.ugent.idlab.knows.misc;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -67,10 +67,10 @@ public class FileFinderTest {
     }
 
     private void checkURL(final URL url, final String path) throws IOException {
-        assertNotNull("URL with path " + path + " should not be null", url);
+        assertNotNull(url, "URL with path " + path + " should not be null");
         try (InputStream in = url.openStream()) {
             int bite = in.read();
-            assertTrue("There should be contents available on URL " + url, bite >= 0);
+            assertTrue(bite >= 0, "There should be contents available on URL " + url);
         }
     }
 }

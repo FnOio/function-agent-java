@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+- Updated JUnit from 4.13.2 to 5.9.1 (tests)
+- Updated grel-functions-java from v0.7.3 to v0.8.2 (tests)
+
+### Fixed
+- be.ugent.idlab.knows.functions.agent.AgentTest.testGrelClassesOnClassPathRemoteFnODoc: point remote `grel.ttl` to specific GitHub commit to keep function definitions and implementations in sync.
+
 ## [0.2.1] - 2022-10-10
 
 ### Fixed
