@@ -13,7 +13,7 @@
 
     <properties>
         <commons.version>4.4</commons.version>
-        <jena.version>3.17.0</jena.version>
+        <jena.version>4.6.1</jena.version>
         <slf4j.version>1.7.36</slf4j.version>
         <junit.version>5.9.1</junit.version>
         <lombok.version>1.18.22</lombok.version>
