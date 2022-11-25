@@ -1,6 +1,7 @@
 package be.ugent.idlab.knows.functions.agent;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterException;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.exception.MissingRDFSeqIndexException;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
@@ -40,6 +41,9 @@ public class AgentImpl implements Agent {
     private final Map<String, Function> functionId2Function;
     private final Instantiator instantiator;
 
+    // pattern for finding rdf:_nnn parameters
+    final private Pattern seq_pattern = Pattern.compile(RDF +"_\\d+");
+
     public AgentImpl(final Map<String, Function> functionId2Function, final Instantiator instantiator) {
         this.functionId2Function = functionId2Function;
         this.instantiator = instantiator;
@@ -70,24 +74,25 @@ public class AgentImpl implements Agent {
         // find the corresponding function
         final Function function = functionId2Function.get(functionId);
 
-        if (Objects.isNull(function)) {
+        if (function == null) {
             throw new FunctionNotFoundException("Function with id " + functionId + " not found");
         }
 
-        Method method = null;
-        // get the method if the function is not a composition
-        // when moved to if-statement after parameter loading, tests fail (not sure why)
-        if (!function.isComposite()) {
-            method = instantiator.getMethod(functionId);
-            if(method == null){
-                throw new MethodNotFoundException("No method found for function " + functionId);
+        if (function.isComposite()) {
+            List<Object> values = getParameterValues(functionId, arguments, function);
+            return instantiator.getCompositeMethod(functionId, debug).apply(this, values.toArray());
+        } else {
+            Method method = instantiator.getMethod(functionId);
+            if (method != null) {
+                List<Object> values = getParameterValues(functionId, arguments, function);
+                return method.invoke(null, values.toArray());
+            } else {
+                throw new MethodNotFoundException("No method found for function " + function.getId() + " (" + function.getName() + ')');
             }
         }
+    }
 
-        // pattern for finding rdf:_nnn parameters
-        Pattern pattern = Pattern.compile(RDF +"_\\d+");
-
-        // "fill in" the argument parameters
+    private List<Object> getParameterValues(String functionId, Arguments arguments, Function function) throws MissingRDFSeqIndexException, DataTypeConverterException {
         final List<Object> valuesInOrder = new ArrayList<>(arguments.size());
         for (Parameter argumentParameter : function.getArgumentParameters()) {
             logger.debug("finding value for parameter {}", argumentParameter.getId());
@@ -98,7 +103,7 @@ public class AgentImpl implements Agent {
                     logger.debug("found sequential parameter (_nnn), looking for values");
                     // get the highest available sequence index
                     Optional<Integer> optionalInteger = arguments.getArgumentNames().stream()
-                            .filter(name -> pattern.matcher(name).matches())
+                            .filter(name -> seq_pattern.matcher(name).matches())
                             .map(i -> Integer.parseInt(i.substring(RDF.toString().length()+1)))
                             .max(Integer::compareTo);
 
@@ -133,13 +138,7 @@ public class AgentImpl implements Agent {
                 }
             }
         }
-
-        // now execute the method
-        if (!function.isComposite()) {
-            return method.invoke(null, valuesInOrder.toArray());
-        }
-        // if the function is a composition, there is no specific method associated with.
-        return instantiator.getCompositeMethod(functionId, debug).apply(this, valuesInOrder.toArray());
+        return valuesInOrder;
     }
 
     void executeToFile(String functionId, Arguments arguments, String fileName) throws Exception {
