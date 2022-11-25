@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -456,7 +457,7 @@ public class Instantiator {
         // TODO add jarfile cache?
         try (
                 // url decoder for special characters in path.
-                JarFile jarFile = new JarFile(URLDecoder.decode(jarFileUrl.getPath(), "utf-8"));
+                JarFile jarFile = new JarFile(URLDecoder.decode(jarFileUrl.getPath(), StandardCharsets.UTF_8));
                 URLClassLoader cl = URLClassLoader.newInstance(new URL[]{jarFileUrl})) {
 
             jarFile
