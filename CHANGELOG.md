@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated grel-functions-java from v0.7.3 to v0.8.2 (tests)
 - Updated jena-arq from 3.17.0 to 4.6.1
 - Updated Lombok from 1.18.22 to 1.18.24
+- Updated slf4j from 1.7.36 to 2.0.4
 - Java language version changed to 10; requires JRE >= 10 to run
 
 ### Fixed
