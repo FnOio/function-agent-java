@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [1.0.0] - 2022-12-08
 
 ### Changed
 - Updated JUnit from 4.13.2 to 5.9.1 (tests)
@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated Lombok from 1.18.22 to 1.18.24
 - Updated slf4j from 1.7.36 to 2.0.5
 - Java language version changed to 11; requires JRE >= 11 to run
+- be.ugent.idlab.knows.functions.agent.Agent: deleted methods that were not meant to be in this interface again.
 
 ### Fixed
 - be.ugent.idlab.knows.functions.agent.AgentTest.testGrelClassesOnClassPathRemoteFnODoc: point remote `grel.ttl` to specific GitHub commit to keep function definitions and implementations in sync.
@@ -76,6 +77,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.0.1] - 2022-03-25
 
+[1.0.0]: https://github.com/FnOio/function-agent-java/compare/v0.2.1...v1.0.0
 [0.2.1]: https://github.com/FnOio/function-agent-java/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/FnOio/function-agent-java/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/FnOio/function-agent-java/compare/v0.0.4...v0.1.0
