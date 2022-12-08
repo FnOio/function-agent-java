@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Updated JUnit from 4.13.2 to 5.9.1 (tests)
-- Updated grel-functions-java from v0.7.3 to v0.8.2 (tests)
+- Updated grel-functions-java from v0.7.3 to v0.9.0 (tests)
 - Updated jena-arq from 3.17.0 to 4.6.1
 - Updated Lombok from 1.18.22 to 1.18.24
 - Updated slf4j from 1.7.36 to 2.0.4
