@@ -27,10 +27,10 @@ grel:dataset
     dcterms:title        "GREL Fno Descriptions"@en ;
     dcterms:description  "The FnO descriptions of the GREL functions" ;
     dcterms:contributor  <https://ben.de-meester.org/#me> ;
-    dcterms:modified     "2021-08-04"^^xsd:date ;
+    dcterms:modified     "2022-10-12"^^xsd:date ;
     cc:license           <http://creativecommons.org/license/by/3.0/> ;
     dcterms:issued       "2016-12-15"^^xsd:date ;
-    dcterms:rights       "Copyright © Ghent University – imec – IDLab"@en ;
+    dcterms:rights       "Copyright © Ghent University -- imec -- IDLab"@en ;
     dcterms:subject      <http://dbpedia.org/resource/Function_(mathematics)> ;
     dcterms:subject      <http://dbpedia.org/resource/Function_model> ;
     void:feature         <http://www.w3.org/ns/formats/Turtle> ;
@@ -412,7 +412,7 @@ grel:output_number
     fno:name      "number" ;
     rdfs:label    "number" ;
     fno:predicate grel:o_number ;
-    fno:type      xsd:decimal .
+    fno:type      xsd:integer .
 
 #TOSTRING
 
@@ -420,7 +420,7 @@ grel:string_toString
     a                   fno:Function ;
     fno:name            "toString" ;
     dcterms:description "toString" ;
-    fno:expects         ( grel:param_any_e ) ;
+    fno:expects         ( grel:param_any_e grel:string_opt_format ) ;
     fno:returns         ( grel:stringOut ) .
 
 #STARTSWITH
@@ -717,7 +717,7 @@ grel:string_toNumber
    fno:name            "toNumber" ;
    dcterms:description "toNumber" ;
    fno:expects         ( grel:param_any_e ) ;
-   fno:returns         ( grel:output_number ) .
+   fno:returns         ( grel:output_decimal ) .
 
 grel:param_any_e
     a             fno:Parameter ;
@@ -942,14 +942,22 @@ grel:string_reinterpret
    a                   fno:Function ;
    fno:name            "reinterpret" ;
    dcterms:description "reinterpret" ;
-   fno:expects         ( grel:valueParam grel:param_string_encoder ) ;
+   fno:expects         ( grel:valueParam grel:param_string_encoder_target grel:param_string_encoder_source ) ;
    fno:returns         ( grel:stringOut ) .
 
-grel:param_string_encoder
+grel:param_string_encoder_target
     a             fno:Parameter ;
-    fno:name      "encoder" ;
-    rdfs:label    "encoder" ;
-    fno:predicate grel:p_string_encoder ;
+    fno:name      "encoder target" ;
+    rdfs:label    "encoder target" ;
+    fno:predicate grel:p_string_encoder_target ;
+    fno:type      xsd:string ;
+    fno:required  "true"^^xsd:boolean .
+
+grel:param_string_encoder_source
+    a             fno:Parameter ;
+    fno:name      "encoder source" ;
+    rdfs:label    "encoder source" ;
+    fno:predicate grel:p_string_encoder_source ;
     fno:type      xsd:string ;
     fno:required  "true"^^xsd:boolean .
 
@@ -1185,7 +1193,7 @@ grel:param_string_unit
    fno:predicate grel:p_string_unit ;
    fno:type      xsd:string ;
    fno:required  "true"^^xsd:boolean .
-   
+
 #DATEPART
 
 grel:date_datePart
@@ -1206,6 +1214,14 @@ grel:prob_floor
     dcterms:description
              "Returning the largest (closest to positive infinity) number with no fractional part that is not greater than the given value."^^xsd:string .
 
+grel:output_decimal
+    a             fno:Output ;
+    fno:name      "decimal" ;
+    rdfs:label    "decimal" ;
+    fno:predicate grel:o_decimal ;
+    fno:type      xsd:decimal .
+
+
 #FLOOR
 
 grel:math_floor
@@ -1214,7 +1230,7 @@ grel:math_floor
    dcterms:description "floor" ;
    fno:solves          grel:prob_floor ;
    fno:expects         ( grel:param_dec_n ) ;
-   fno:returns         ( grel:output_number ) .
+   fno:returns         ( grel:output_decimal ) .
 
 # <https://www.w3.org/TR/sparql11-query/#func-floor>
 #    skos:broader grel:math_floor .
@@ -1233,7 +1249,7 @@ grel:math_ceil
    dcterms:description "ceil" ;
    fno:solves          grel:prob_ceil ;
    fno:expects         ( grel:param_dec_n ) ;
-   fno:returns         ( grel:output_number ) .
+   fno:returns         ( grel:output_decimal ) .
 
 grel:prob_round
     a        fno:Problem ;
@@ -1249,7 +1265,7 @@ grel:math_round
    dcterms:description "round" ;
    fno:solves          grel:prob_round ;
    fno:expects         ( grel:param_dec_n ) ;
-   fno:returns         ( grel:output_number ) .
+   fno:returns         ( grel:output_decimal ) .
 
 #<https://www.w3.org/TR/sparql11-query/#func-round>
 #    skos:broader grel:math_round .
@@ -1267,7 +1283,7 @@ grel:math_min
    dcterms:description "min" ;
    fno:solves         grel:prob_min ;
    fno:expects         ( grel:param_dec_n grel:param_dec_n2 ) ;
-   fno:returns         ( grel:output_number ) .
+   fno:returns         ( grel:output_decimal ) .
 
 grel:param_dec_n2
    a             fno:Parameter ;
@@ -1290,7 +1306,7 @@ grel:math_max
    dcterms:description "max" ;
    fno:solves          grel:prob_max ;
    fno:expects         ( grel:param_dec_n grel:param_dec_n2 ) ;
-   fno:returns         ( grel:output_number ) .
+   fno:returns         ( grel:output_decimal) .
 
 #MOD
 
@@ -1313,7 +1329,7 @@ grel:math_ln
    fno:name            "ln" ;
    dcterms:description "ln" ;
    fno:expects         ( grel:param_dec_n ) ;
-   fno:returns         ( grel:output_number ) .
+   fno:returns         ( grel:output_decimal ) .
 
 #LOG
 
@@ -1322,7 +1338,7 @@ grel:math_log
    fno:name            "log" ;
    dcterms:description "log" ;
    fno:expects         ( grel:param_dec_n ) ;
-   fno:returns         ( grel:output_number ) .
+   fno:returns         ( grel:output_decimal ) .
 
 #EXP
 
@@ -1331,7 +1347,7 @@ grel:math_exp
    fno:name            "exp" ;
    dcterms:description "exp" ;
    fno:expects         ( grel:param_dec_n ) ;
-   fno:returns         ( grel:output_number ) .
+   fno:returns         ( grel:output_decimal ) .
 
 #POW
 
@@ -1340,7 +1356,7 @@ grel:math_pow
    fno:name            "pow" ;
    dcterms:description "pow" ;
    fno:expects         ( grel:param_dec_n grel:param_dec_n_exp ) ;
-   fno:returns         ( grel:output_number ) .
+   fno:returns         ( grel:output_decimal ) .
 
 grel:param_dec_n_exp
    a             fno:Parameter ;
@@ -1349,6 +1365,196 @@ grel:param_dec_n_exp
    fno:predicate grel:p_any_exp ;
    fno:type      xsd:decimal ;
    fno:required  "true"^^xsd:boolean .
+
+#ABS
+grel:math_abs
+    a                   fno:Function ;
+    fno:name            "abs" ;
+    dcterms:description "abs" ;
+    fno:expects         ( grel:param_dec_n  );
+    fno:returns         ( grel:output_decimal ) .
+
+#ACOS
+grel:math_acos
+    a                   fno:Function;
+    fno:name            "acos";
+    dcterms:description "acos";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+#ASIN
+grel:math_asin
+    a                   fno:Function;
+    fno:name            "asin";
+    dcterms:description "asin";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+#ATAN
+grel:math_atan
+    a                   fno:Function;
+    fno:name            "atan";
+    dcterms:description "atan";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+#ATAN2
+grel:math_atan
+    a                   fno:Function;
+    fno:name            "atan2";
+    dcterms:description "atan2";
+    fno:expects         (grel:param_dec_n grel:param_dec_n2);
+    fno:returns         (grel:output_decimal).
+
+#COMBIN
+grel:math_combin
+    a                   fno:Function;
+    fno:name            "combin";
+    dcterms:description "combin";
+    fno:expects         (grel:param_int_i grel:param_int_i2);
+    fno:returns         (grel:output_number).
+
+#COS
+grel:math_cos
+    a                   fno:Function;
+    fno:name            "cos";
+    dcterms:description "cos";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+#COSH
+grel:math_cosh
+    a                   fno:Function;
+    fno:name            "cosh";
+    dcterms:description "cosh";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+
+#SIN
+grel:math_sin
+    a                   fno:Function;
+    fno:name            "sin";
+    dcterms:description "sin";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+#SINH
+grel:math_sinh
+    a                   fno:Function;
+    fno:name            "sinh";
+    dcterms:description "sinh";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+#TAN
+grel:math_tan
+    a                   fno:Function;
+    fno:name            "tan";
+    dcterms:description "tan";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+#TANH
+grel:math_tanh
+    a                   fno:Function;
+    fno:name            "tanh";
+    dcterms:description "tanh";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+
+#DEGREES
+grel:math_degrees
+    a                   fno:Function;
+    fno:name            "degrees";
+    dcterms:description "degrees";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+#RADIANS
+grel:math_radians
+    a                   fno:Function;
+    fno:name            "radians";
+    dcterms:description "degrees";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+#EVEN
+grel:math_even
+    a                   fno:Function;
+    fno:name            "even";
+    dcterms:description "even";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+#ODD
+grel:math_odd
+    a                   fno:Function;
+    fno:name            "odd";
+    dcterms:description "odd";
+    fno:expects         (grel:param_dec_n);
+    fno:returns         (grel:output_decimal).
+
+#FACT
+grel:math_fact
+    a                   fno:Function;
+    fno:name            "fact";
+    dcterms:description "fact";
+    fno:expects         (grel:param_int_i);
+    fno:returns         (grel:output_number).
+
+#FACTN
+grel:math_factn
+    a                   fno:Function;
+    fno:name            "factn";
+    dcterms:description "factn";
+    fno:expects         (grel:param_int_i grel:param_int_i2);
+    fno:returns         (grel:output_number).
+
+#GCD
+grel:math_gcd
+    a                   fno:Function;
+    fno:name            "gcd";
+    dcterms:description "gcd";
+    fno:expects         (grel:param_int_i grel:param_int_i2);
+    fno:returns         (grel:output_number).
+
+#LCM
+grel:math_lcm
+    a                   fno:Function;
+    fno:name            "lcm";
+    dcterms:description "lcm";
+    fno:expects         (grel:param_int_i grel:param_int_i2);
+    fno:returns         (grel:output_number).
+
+#QUOTIENT
+grel:math_quotient
+    a                   fno:Function;
+    fno:name            "quotient";
+    dcterms:description "quotient";
+    fno:expects         (grel:param_dec_n grel:param_dec_n2);
+    fno:returns         (grel:output_decimal).
+
+
+#RANDOMNUMBER
+grel:math_randomNumber
+    a                   fno:Function;
+    fno:name            "randomNumber";
+    dcterms:description "randomNumber";
+    fno:expects         (grel:param_int_i grel:param_int_i2);
+    fno:returns         (grel:output_number).
+
+
+#MULTINOMIAL
+grel:math_multinomial
+    a                   fno:Function;
+    fno:name            "multinomial";
+    dcterms:description "multinomial";
+    fno:expects         ( grel:param_a );
+    fno:returns         (grel:output_number).
+
+
 
 #grel:math_sum
 #    a                   fno:Function ;
@@ -1510,6 +1716,15 @@ grel:param_any_rep_e
 #    fno:predicate grel:param_format ;
 #    fno:type      xsd:string ;
 #    fno:required  "true"^^xsd:boolean .
+
+grel:string_opt_format
+    a             fno:Parameter ;
+    fno:name      "format" ;
+    rdfs:label    "format" ;
+    fno:predicate grel:param_opt_format ;
+    fno:type      xsd:string ;
+    fno:required  "false"^^xsd:boolean .
+
 
 #grel:bool_opt_omit
 #    a             fno:Parameter ;

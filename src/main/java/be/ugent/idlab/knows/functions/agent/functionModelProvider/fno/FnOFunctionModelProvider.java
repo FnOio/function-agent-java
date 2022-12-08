@@ -162,7 +162,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * searches the FnO document for fno:predicate and puts them into a map to use later for mappings of function
      * composition.
      */
-    private void parseParameterPredicateMappings() {
+    private void parseParameterPredicateMappings() throws ParameterPredicateNotFoundException {
         logger.debug("Parsing parameter URI to predicate");
         Property parameterPredicateObject = ResourceFactory.createProperty(FNO+"predicate");
         ResIterator parameters = functionDescriptionTriples.listSubjectsWithProperty(parameterPredicateObject);
@@ -175,8 +175,9 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      * add a parameter predicate to the map.
      * @param parameter the resource that represents a parameter.
      */
-    private void parseParameterPredicateMapping(Resource parameter) {
-        String predicateURI = getObjectURI(parameter, FNO+"predicate").get();
+    private void parseParameterPredicateMapping(Resource parameter) throws ParameterPredicateNotFoundException {
+        String predicateURI = getObjectURI(parameter, FNO+"predicate")
+                .orElseThrow(() -> new ParameterPredicateNotFoundException("Could not find " + FNO + "predicate value for parameter " + parameter.getLocalName()));
         parameterURItoPredicate.put(parameter.getURI(), predicateURI);
     }
 
@@ -466,14 +467,15 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
     /**
      * Searches the FnO document for fnoc:applies resources and adds them to the function list as aliases
      */
-    private void parseApplies() {
+    private void parseApplies() throws AppliesNotFoundException {
         logger.debug("Parsing fnoc:applies");
         final Map<String, String> appliesMap = new HashMap<>();
         Property appliesObject = ResourceFactory.createProperty(FNOC + "applies");
         ResIterator applies = functionDescriptionTriples.listSubjectsWithProperty(appliesObject);
         while (applies.hasNext()){
             final Resource alias = applies.nextResource();
-            final String original = getObjectURI(alias, FNOC+"applies").get();
+            final String original = getObjectURI(alias, FNOC+"applies")
+                    .orElseThrow(() -> new AppliesNotFoundException("Could not find value for predicate '" + FNOC + "applies' of subject '" + alias + '\''));
             appliesMap.put(alias.getURI(), original);
         }
         for(String first : appliesMap.keySet()){

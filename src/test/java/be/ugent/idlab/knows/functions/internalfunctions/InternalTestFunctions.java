@@ -35,7 +35,7 @@ public class InternalTestFunctions {
      * @return  The length of the raw list
      */
     public static long rawListLen(final List aRawList) {
-        return (long) aRawList.size();
+        return aRawList.size();
     }
     /**
      * Returns the sum of a and b
