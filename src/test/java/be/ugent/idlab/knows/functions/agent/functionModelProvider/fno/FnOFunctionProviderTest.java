@@ -8,7 +8,7 @@ import be.ugent.idlab.knows.functions.agent.model.*;
 import be.ugent.idlab.knows.misc.FileFinder;
 import org.apache.jena.ext.com.google.common.io.CharSource;
 import org.apache.jena.ext.com.google.common.io.Files;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -41,8 +41,9 @@ public class FnOFunctionProviderTest {
 
     @Test
     public void testFnoDocNotFound() {
-        assertThrows("Constructing an FnOFunctionModelProvider from an unexisting file should fail.", Throwable.class,
-                () -> new FnOFunctionModelProvider(dataTypeConverterProvider, "src/test/resources/doesnotexist.ttl"));
+        assertThrows(Throwable.class,
+                () -> new FnOFunctionModelProvider(dataTypeConverterProvider, "src/test/resources/doesnotexist.ttl"),
+                "Constructing an FnOFunctionModelProvider from an unexisting file should fail.");
     }
 
     @Test
@@ -61,16 +62,16 @@ public class FnOFunctionProviderTest {
         List<Function> functions = new ArrayList<>(functionCollection);
         functions.sort(Comparator.comparing(Function::getId));
 
-        assertEquals("Number of functions parsed should be 2 ", 2, functions.size());
+        assertEquals(2, functions.size(), "Number of functions parsed should be 2 ");
         Function rawListLenFunction = functions.get(0);
-        assertEquals("Wrong function id", "http://example.org/rawListLen", rawListLenFunction.getId());
-        assertEquals("Wrong function name", "length of a raw list", rawListLenFunction.getName());
-        assertEquals("Wrong function description", "Returns the length of a raw list, i.e. without parameterized type", rawListLenFunction.getDescription());
+        assertEquals("http://example.org/rawListLen", rawListLenFunction.getId(), "Wrong function id");
+        assertEquals("length of a raw list", rawListLenFunction.getName(), "Wrong function name");
+        assertEquals("Returns the length of a raw list, i.e. without parameterized type", rawListLenFunction.getDescription(), "Wrong function description");
 
         Function sumFunction = functions.get(1);
-        assertEquals("Wrong function id", "http://example.org/sum", sumFunction.getId());
-        assertEquals("Wrong function name", "Sum of two integers", sumFunction.getName());
-        assertEquals("Wrong function description", "Returns the sum of two given integers", sumFunction.getDescription());
+        assertEquals("http://example.org/sum", sumFunction.getId(), "Wrong function id");
+        assertEquals("Sum of two integers", sumFunction.getName(), "Wrong function name");
+        assertEquals("Returns the sum of two given integers", sumFunction.getDescription(), "Wrong function description");
 
         // check input parameters
         List<Parameter> inputParameters = sumFunction.getArgumentParameters();
@@ -79,33 +80,33 @@ public class FnOFunctionProviderTest {
         for (int pi = 0; pi < inputParameters.size(); pi++) {
             int i = pi + 1;
             Parameter parameter = inputParameters.get(pi);
-            assertEquals("Wrong parameter " + i + " name ", "integer " + i, parameter.getName());
-            assertEquals("Wrong parameter " + i + " id ", "http://example.org/p_int" + i, parameter.getId());
+            assertEquals("integer " + i, parameter.getName(), "Wrong parameter " + i + " name ");
+            assertEquals("http://example.org/p_int" + i, parameter.getId(), "Wrong parameter " + i + " id ");
             DataTypeConverter<?> typeConverter = parameter.getTypeConverter();
-            assertTrue("Wrong type converter class", typeConverter.isSubTypeOf(Long.class));
-            assertTrue("Required should be true for parameter " + i , parameter.isRequired());
+            assertTrue(typeConverter.isSubTypeOf(Long.class), "Wrong type converter class");
+            assertTrue(parameter.isRequired(), "Required should be true for parameter " + i);
         }
 
         // check output parameters
-        assertEquals("Wrong number of return parameters", 1, sumFunction.getReturnParameters().size());
+        assertEquals(1, sumFunction.getReturnParameters().size(), "Wrong number of return parameters");
         Parameter returnParameter = sumFunction.getReturnParameters().get(0);
-        assertEquals("Wrong return parameter name ", "integer output", returnParameter.getName());
-        assertEquals("Wrong return parameter id ", "http://example.org/o_int", returnParameter.getId());
+        assertEquals("integer output", returnParameter.getName(), "Wrong return parameter name ");
+        assertEquals("http://example.org/o_int", returnParameter.getId(), "Wrong return parameter id ");
         DataTypeConverter<?> typeConverter = returnParameter.getTypeConverter();
-        assertTrue("Wrong type converter class", typeConverter.isSuperTypeOf(Long.class));
-        assertTrue("Required should be true for return parameter", returnParameter.isRequired());
+        assertTrue(typeConverter.isSuperTypeOf(Long.class), "Wrong type converter class");
+        assertTrue(returnParameter.isRequired(), "Required should be true for return parameter");
 
         // check mapping
         FunctionMapping mapping = sumFunction.getFunctionMapping();
-        assertEquals("wrong function id for mapping", "http://example.org/sum", mapping.getFunctionId());
+        assertEquals("http://example.org/sum", mapping.getFunctionId(), "wrong function id for mapping");
 
         MethodMapping methodMapping = mapping.getMethodMapping();
-        assertEquals("Wrong method name", "sum", methodMapping.getMethodName());
-        assertEquals("Wrong method type", "https://w3id.org/function/vocabulary/mapping#StringMethodMapping", methodMapping.getType());
+        assertEquals("sum", methodMapping.getMethodName(), "Wrong method name");
+        assertEquals("https://w3id.org/function/vocabulary/mapping#StringMethodMapping", methodMapping.getType(), "Wrong method type");
 
         Implementation implementation = mapping.getImplementation();
-        assertEquals("Wrong implementation class name", "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions", implementation.getClassName());
-        assertEquals("Implementation: location should be empty.","", implementation.getLocation());
+        assertEquals("be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions", implementation.getClassName(), "Wrong implementation class name");
+        assertEquals("", implementation.getLocation(), "Implementation: location should be empty.");
     }
 
     @Test
@@ -119,7 +120,7 @@ public class FnOFunctionProviderTest {
         functionProvider.getFunctions().values().forEach(function -> {
             String functionId = function.getId();
             String location = function.getFunctionMapping().getImplementation().getLocation();
-            assertEquals("Wrong location of function '" + functionId + "'.", newLocation, location);
+            assertEquals(newLocation, location, "Wrong location of function '" + functionId + "'.");
         });
     }
 
@@ -134,20 +135,20 @@ public class FnOFunctionProviderTest {
         functionProvider.getFunctions().values().forEach(function -> {
             String functionId = function.getId();
             String location = function.getFunctionMapping().getImplementation().getLocation();
-            assertEquals("Wrong location of function '" + functionId + "'.", "AaabimFunctions.jar", location);
+            assertEquals("AaabimFunctions.jar", location, "Wrong location of function '" + functionId + "'.");
         });
     }
 
     @Test
     public void testCompositeFunctionFound() throws FnOException{
         FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, "sum-composition.ttl");
-        assertNotEquals("No functions were found", 0, functionProvider.getFunctions().size());
+        assertNotEquals(0, functionProvider.getFunctions().size(), "No functions were found");
     }
 
     @Test
     public void testCompositeFunctionWithLiteralFound() throws FnOException{
         FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, "add10.ttl");
-        assertNotEquals("no functions were found", 0, functionProvider.getFunctions().size());
+        assertNotEquals(0, functionProvider.getFunctions().size(), "no functions were found");
     }
 
 }

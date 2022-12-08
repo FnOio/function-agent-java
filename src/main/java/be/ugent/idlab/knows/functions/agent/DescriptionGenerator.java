@@ -34,9 +34,9 @@ public class DescriptionGenerator {
     private static final Property fnoMethodMappingProperty = ResourceFactory.createProperty(FNO.toString(), "methodMapping");
     private static final Property fnomMethodNameProperty = ResourceFactory.createProperty(FNOM.toString(), "method-name");
     private static final Property dctermsDescriptionProperty = ResourceFactory.createProperty(DCTERMS.toString(), "description");
-    private static final Property fnocConstituentFunctionProperty = ResourceFactory.createProperty(FNOC.toString(), "constituentFunction");
-    private static final Property fnocFunctionParameterProperty = ResourceFactory.createProperty(FNOC.toString(), "functionParameter");
-    private static final Property fnocFunctionOutputProperty = ResourceFactory.createProperty(FNOC.toString(), "functionOutput");
+//    private static final Property fnocConstituentFunctionProperty = ResourceFactory.createProperty(FNOC.toString(), "constituentFunction");
+//    private static final Property fnocFunctionParameterProperty = ResourceFactory.createProperty(FNOC.toString(), "functionParameter");
+//    private static final Property fnocFunctionOutputProperty = ResourceFactory.createProperty(FNOC.toString(), "functionOutput");
     // TODO make this configurable
     private static final String BASE = "https://example.com/fno/";
     /*
@@ -83,12 +83,7 @@ public class DescriptionGenerator {
         parameterList.stream().map(parameter -> {
             Resource parameterResource = model.createResource(function.getId() + parameter.getId());
             parameterResource.addProperty(rdfTypeProperty, model.createResource(FNO + "Parameter"));
-            parameterResource.addProperty(fnoNameProperty, parameter.getName());
-            Resource predicateResource = model.createResource(parameter.getId());
-            parameterResource.addProperty(fnoPredicateProperty, predicateResource);
-            parameterResource.addProperty(fnoRequiredProperty, "" + parameter.isRequired());
-            parameterResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(parameter.getTypeConverter().getTypeClass())));
-            return parameterResource;
+            return addCommonProperties(model, parameter, parameterResource);
         }).collect(Collectors.toList()).toArray(rdfArray);
         RDFList parameters = model.createList(rdfArray);
         functionResource.addProperty(fnoParameterProperty, parameters);
@@ -131,15 +126,19 @@ public class DescriptionGenerator {
         returnParameterList.stream().map(returnType -> {
             Resource returnResource = model.createResource(function.getId() + returnType.getId());
             returnResource.addProperty(rdfTypeProperty, model.createResource(FNO + "Output"));
-            returnResource.addProperty(fnoNameProperty, returnType.getName());
-            Resource predicateResource = model.createResource(returnType.getId());
-            returnResource.addProperty(fnoPredicateProperty, predicateResource);
-            returnResource.addProperty(fnoRequiredProperty, "" + returnType.isRequired());
-            returnResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(returnType.getTypeConverter().getTypeClass())));
-            return returnResource;
+            return addCommonProperties(model, returnType, returnResource);
         }).collect(Collectors.toList()).toArray(rdfArray);
         RDFList parameters = model.createList(rdfArray);
         functionResource.addProperty(fnoReturnProperty, parameters);
+    }
+
+    private static Resource addCommonProperties(Model model, Parameter returnType, Resource returnResource) {
+        returnResource.addProperty(fnoNameProperty, returnType.getName());
+        Resource predicateResource = model.createResource(returnType.getId());
+        returnResource.addProperty(fnoPredicateProperty, predicateResource);
+        returnResource.addProperty(fnoRequiredProperty, "" + returnType.isRequired());
+        returnResource.addProperty(fnoTypeProperty, model.createResource(getDatatype(returnType.getTypeConverter().getTypeClass())));
+        return returnResource;
     }
 
     private static void addMapping(Model model, Method method, Resource function) {
@@ -177,66 +176,66 @@ public class DescriptionGenerator {
         mappingResource.addProperty(fnoMethodMappingProperty, methodMappingResource);
     }
 
-    private static void addComposition(Model model, Function function) {
-        if (!function.isComposite()) {
-            return;
-        }
-        Resource compositionResource = model.createResource(BASE + "Composition#" + function.getName());
-        compositionResource.addProperty(rdfTypeProperty, model.createResource(FNOC + "Composition"));
-        FunctionComposition functionComposition = function.getFunctionComposition();
-        List<CompositionMappingElement> functionCompositionMappings = functionComposition.getMappings();
-        for (CompositionMappingElement compositionMappingElement : functionCompositionMappings) {
-            addCompositionElement(model, compositionMappingElement, compositionResource);
-        }
-    }
-
-    private static void addCompositionElement(Model model, CompositionMappingElement element, Resource compositionResource) {
-        Resource mapResource = model.createResource();
-        CompositionMappingPoint from = element.getFrom();
-        CompositionMappingPoint to = element.getTo();
-//        if(from.isLiteral()){
-//            mapResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), "mapFromTerm"), from.getParameterId());
+//    private static void addComposition(Model model, Function function) {
+//        if (!function.isComposite()) {
+//            return;
 //        }
-//        else{
-//            Resource mapFromResource = model.createResource();
-//            mapResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), "mapFrom"), mapFromResource);
-//            mapFromResource.addProperty(fnocConstituentFunctionProperty, model.createResource(from.getFunctionId()));
-//            if(from.isOutput()){
-//                mapFromResource.addProperty(fnocFunctionOutputProperty, model.createResource(from.getParameterId()));
-//            }else{
-//                mapFromResource.addProperty(fnocFunctionParameterProperty, model.createResource(from.getParameterId()));
+//        Resource compositionResource = model.createResource(BASE + "Composition#" + function.getName());
+//        compositionResource.addProperty(rdfTypeProperty, model.createResource(FNOC + "Composition"));
+//        FunctionComposition functionComposition = function.getFunctionComposition();
+//        List<CompositionMappingElement> functionCompositionMappings = functionComposition.getMappings();
+//        for (CompositionMappingElement compositionMappingElement : functionCompositionMappings) {
+//            addCompositionElement(model, compositionMappingElement, compositionResource);
+//        }
+//    }
+
+//    private static void addCompositionElement(Model model, CompositionMappingElement element, Resource compositionResource) {
+//        Resource mapResource = model.createResource();
+//        CompositionMappingPoint from = element.getFrom();
+//        CompositionMappingPoint to = element.getTo();
+////        if(from.isLiteral()){
+////            mapResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), "mapFromTerm"), from.getParameterId());
+////        }
+////        else{
+////            Resource mapFromResource = model.createResource();
+////            mapResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), "mapFrom"), mapFromResource);
+////            mapFromResource.addProperty(fnocConstituentFunctionProperty, model.createResource(from.getFunctionId()));
+////            if(from.isOutput()){
+////                mapFromResource.addProperty(fnocFunctionOutputProperty, model.createResource(from.getParameterId()));
+////            }else{
+////                mapFromResource.addProperty(fnocFunctionParameterProperty, model.createResource(from.getParameterId()));
+////            }
+////        }
+////        Resource mapToResource = model.createResource();
+////        mapResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), "mapTo"), mapToResource);
+////        mapToResource.addProperty(fnocConstituentFunctionProperty, model.createResource(to.getFunctionId()));
+////        if(to.isOutput()){
+////            mapToResource.addProperty(fnocFunctionOutputProperty, model.createResource(to.getParameterId()));
+////        }else{
+////            mapToResource.addProperty(fnocFunctionParameterProperty, model.createResource(to.getParameterId()));
+////        }
+//        addCompositionMappingPoint(model, from, mapResource, true);
+//        addCompositionMappingPoint(model, to, mapResource, false);
+//        compositionResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), "composedOf"), mapResource);
+//    }
+
+//    private static void addCompositionMappingPoint(Model model, CompositionMappingPoint compositionMappingPoint, Resource mapResource, boolean startPoint) {
+//        if (!startPoint && compositionMappingPoint.isLiteral()) {
+//            throw new RuntimeException("can't happen");
+//        }
+//        if (compositionMappingPoint.isLiteral()) {
+//            mapResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), "mapFromTerm"), compositionMappingPoint.getParameterId());
+//        } else {
+//            Resource pointResource = model.createResource();
+//            mapResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), startPoint ? "mapFrom" : "mapTo"), pointResource);
+//            pointResource.addProperty(fnocConstituentFunctionProperty, model.createResource(compositionMappingPoint.getFunctionId()));
+//            if (compositionMappingPoint.isOutput()) {
+//                pointResource.addProperty(fnocFunctionOutputProperty, model.createResource(compositionMappingPoint.getParameterId()));
+//            } else {
+//                pointResource.addProperty(fnocFunctionParameterProperty, model.createResource(compositionMappingPoint.getParameterId()));
 //            }
 //        }
-//        Resource mapToResource = model.createResource();
-//        mapResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), "mapTo"), mapToResource);
-//        mapToResource.addProperty(fnocConstituentFunctionProperty, model.createResource(to.getFunctionId()));
-//        if(to.isOutput()){
-//            mapToResource.addProperty(fnocFunctionOutputProperty, model.createResource(to.getParameterId()));
-//        }else{
-//            mapToResource.addProperty(fnocFunctionParameterProperty, model.createResource(to.getParameterId()));
-//        }
-        addCompositionMappingPoint(model, from, mapResource, true);
-        addCompositionMappingPoint(model, to, mapResource, false);
-        compositionResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), "composedOf"), mapResource);
-    }
-
-    private static void addCompositionMappingPoint(Model model, CompositionMappingPoint compositionMappingPoint, Resource mapResource, boolean startPoint) {
-        if (!startPoint && compositionMappingPoint.isLiteral()) {
-            throw new RuntimeException("can't happen");
-        }
-        if (compositionMappingPoint.isLiteral()) {
-            mapResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), "mapFromTerm"), compositionMappingPoint.getParameterId());
-        } else {
-            Resource pointResource = model.createResource();
-            mapResource.addProperty(ResourceFactory.createProperty(FNOC.toString(), startPoint ? "mapFrom" : "mapTo"), pointResource);
-            pointResource.addProperty(fnocConstituentFunctionProperty, model.createResource(compositionMappingPoint.getFunctionId()));
-            if (compositionMappingPoint.isOutput()) {
-                pointResource.addProperty(fnocFunctionOutputProperty, model.createResource(compositionMappingPoint.getParameterId()));
-            } else {
-                pointResource.addProperty(fnocFunctionParameterProperty, model.createResource(compositionMappingPoint.getParameterId()));
-            }
-        }
-    }
+//    }
 
     public static String generateDescription(Model model, Method method) {
         logger.debug("name: {}", method.getName()); // name
@@ -268,6 +267,7 @@ public class DescriptionGenerator {
         addReturnTypeAndExceptions(model, function, functionResource);
         if (function.isComposite()) {
             // addComposition(model, function);
+            logger.warn("Function composition not implemented yet! Skipping function {} ({})", function.getId(), function.getName());
         } else {
             addMapping(model, function, functionResource);
         }

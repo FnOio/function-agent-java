@@ -6,13 +6,13 @@ import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.ParameterNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions;
 import be.ugent.idlab.knows.misc.FileFinder;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -24,7 +24,7 @@ import java.util.Map;
 
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.IDLABFN;
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * <p>
@@ -68,7 +68,7 @@ public class AgentTest {
 
     @Test
     public void testGrelClassesOnClassPathRemoteFnODoc() throws Exception {
-        Agent agent = AgentFactory.createFromFnO("https://users.ugent.be/~bjdmeest/function/grel.ttl", "grel_java_mapping.ttl");
+        Agent agent = AgentFactory.createFromFnO("https://raw.githubusercontent.com/FnOio/grel-functions-fno/752738bd613614947105f1b32859d1cb1f0bcf20/grel.ttl", "grel_java_mapping.ttl");
         executeGrel(agent);
     }
 
@@ -83,7 +83,7 @@ public class AgentTest {
 
         // execute the function
         Object result = agent.execute("http://users.ugent.be/~bjdmeest/function/grel.ttl#boolean_and", arguments);
-        assertFalse("\"false\" | \"false\" should be false", (Boolean) result);
+        assertFalse((Boolean) result, "\"false\" | \"false\" should be false");
     }
 
     @Test
@@ -131,7 +131,7 @@ public class AgentTest {
 
         // Execute the array_sum function
         Object result = agent.execute("http://users.ugent.be/~bjdmeest/function/grel.ttl#array_sum", arguments);
-        assertEquals("1 + 4 should be 5", 5, result);
+        assertEquals(5, result, "1 + 4 should be 5");
     }
 
     private void execute(final Agent agent) throws Exception {
@@ -142,7 +142,7 @@ public class AgentTest {
 
         // execute the function
         Object result = agent.execute(EX + "sum", arguments);
-        assertEquals("5 + 1 should be 6", 6L, result);
+        assertEquals(6L, result, "5 + 1 should be 6");
     }
 
     private void executeGrel(final Agent agent) throws Exception {
@@ -153,7 +153,7 @@ public class AgentTest {
 
         // execute the function
         Object result = agent.execute("http://users.ugent.be/~bjdmeest/function/grel.ttl#boolean_or", arguments);
-        assertTrue("false | true should be true", (Boolean) result);
+        assertTrue((Boolean) result, "false | true should be true");
 
     }
 
@@ -169,7 +169,7 @@ public class AgentTest {
 
         Object result = agent.execute(FNS + "sum3", arguments);
 
-        assertEquals("1 + 2 + 3 should be 6", 6L, result);
+        assertEquals(6L, result, "1 + 2 + 3 should be 6");
     }
 
     @Test
@@ -179,7 +179,7 @@ public class AgentTest {
         Arguments arguments = new Arguments().add(FNS + "b10", "5");
 
         Object result = agent.execute(FNS + "add10", arguments);
-        assertEquals("5 + 10 should be 15", 15L, result);
+        assertEquals(15L, result, "5 + 10 should be 15");
     }
 
     @Test
@@ -192,7 +192,7 @@ public class AgentTest {
                 .add(EX + "p_int3", 3)
                 .add(EX + "p_int4", 5);
         Object result = agent.execute(FNS + "computation", arguments);
-        assertEquals("4*(2+3^5) should be 980", 980L, result);
+        assertEquals(980L, result, "4*(2+3^5) should be 980");
     }
 
     @Test
@@ -205,7 +205,7 @@ public class AgentTest {
                 .add(EX + "p_int2", 5);
 
         Object result = agent.execute(FNS + "squareOfSum", arguments);
-        assertEquals("(4+5)² should be ", 81L, result);
+        assertEquals(81L, result, "(4+5)² should be 81");
     }
 
     @Test
@@ -216,12 +216,12 @@ public class AgentTest {
         Arguments arguments = new Arguments()
                 .add(EX + "p_int1", "1");
         Object result = agent.execute(FNS + "identityInteger", arguments);
-        assertEquals("Identity function should return input", 1L, result);
+        assertEquals(1L, result, "Identity function should return input");
 
         arguments = new Arguments()
                 .add(EX + "p_int1", "2");
         result = agent.execute(FNS + "identityInteger", arguments);
-        assertEquals("Identity function should return input", 2L, result);
+        assertEquals(2L, result, "Identity function should return input");
 
     }
 
@@ -230,7 +230,7 @@ public class AgentTest {
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "identityInteger.ttl", "cyclic.ttl");
         Arguments arguments = new Arguments()
                 .add(EX + "p_int1", "1");
-        assertThrows("expected an exception to be thrown", InstantiationException.class, () -> agent.execute(FNS + "cyclicFunction", arguments));
+        assertThrows(InstantiationException.class, () -> agent.execute(FNS + "cyclicFunction", arguments), "expected an exception to be thrown");
     }
 
     @Test
@@ -240,15 +240,15 @@ public class AgentTest {
                 .add(EX + "p_int1", 1)
                 .add(EX + "p_int2", 2);
         Object result = agent.execute(FNS + "sumAlias", arguments);
-        assertEquals("alias should work as original function", 3L, result);
+        assertEquals(3L, result, "alias should work as original function");
     }
 
     @Test
-    public void testThrowExceptionForNonExistingFunction() throws Exception {
+    public void testThrowExceptionForNonExistingFunction() throws FnOException {
         final Agent agent = AgentFactory.createFromFnO("badFunction.ttl", "generalFunctions.ttl");
         Arguments arguments = new Arguments()
                 .add(EX + "p_int1", 1);
-        assertThrows("expected an exception", InstantiationException.class, () -> agent.execute(FNS + "bad", arguments));
+        assertThrows(Exception.class, () -> agent.execute(FNS + "bad", arguments), "expected an exception");
     }
 
     @Test
@@ -256,7 +256,7 @@ public class AgentTest {
         final Agent agent = AgentFactory.createFromFnO("badParameter.ttl", "generalFunctions.ttl");
         Arguments arguments = new Arguments()
                 .add(EX + "p_int1", 1);
-        assertThrows("expected an exception", InstantiationException.class, () -> agent.execute(FNS + "bad", arguments));
+        assertThrows(InstantiationException.class, () -> agent.execute(FNS + "bad", arguments), "expected an exception");
     }
 
     @Test
@@ -270,11 +270,11 @@ public class AgentTest {
 
         Object result = agent.execute(FNS + "sum3", arguments, true);
 
-        assertEquals("1 + 2 + 3 should be 6", 6L, result);
+        assertEquals(6L, result, "1 + 2 + 3 should be 6");
         URL file = FileFinder.findFile("test.txt");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(file.openStream()));
         String line = bufferedReader.readLine();
-        assertEquals("print effect did not trigger", 6, Integer.parseInt(line));
+        assertEquals(6, Integer.parseInt(line), "print effect did not trigger");
 
     }
 
@@ -285,7 +285,7 @@ public class AgentTest {
         Arguments arguments = new Arguments().add(FNS + "b10", "5");
 
         Object result = agent.execute(FNS + "add10", arguments, true);
-        assertEquals("5 + 10 should be 15", 15L, result);
+        assertEquals(15L, result, "5 + 10 should be 15");
     }
 
     @Test
@@ -298,7 +298,7 @@ public class AgentTest {
                 .add(EX + "p_int3", 3)
                 .add(EX + "p_int4", 5);
         Object result = agent.execute(FNS + "computation", arguments, true);
-        assertEquals("4*(2+3^5) should be 980", 980L, result);
+        assertEquals(980L, result, "4*(2+3^5) should be 980");
     }
 
     @Test
@@ -311,7 +311,7 @@ public class AgentTest {
                 .add(EX + "p_int2", 5);
 
         Object result = agent.execute(FNS + "squareOfSum", arguments, true);
-        assertEquals("(4+5)² should be ", 81L, result);
+        assertEquals(81L, result, "(4+5)² should be 81");
     }
 
     @Test
@@ -324,11 +324,11 @@ public class AgentTest {
                 .add(FNS + "c", "3");
         Object result = agent.execute(FNS + "complexSidePath", arguments, true);
 
-        assertEquals("1 + 2 + 3 should be 6", 6L, result);
+        assertEquals(6L, result, "1 + 2 + 3 should be 6");
         URL file = FileFinder.findFile("test0.txt");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(file.openStream()));
         String line = bufferedReader.readLine();
-        assertEquals("print effect did not trigger", 12L, Integer.parseInt(line));
+        assertEquals(12L, Integer.parseInt(line), "print effect did not trigger");
     }
 
     @Test
@@ -336,7 +336,7 @@ public class AgentTest {
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "add10PartialApplication.ttl");
         Arguments arguments = new Arguments().add(EX + "p_int2", 15);
         Object result = agent.execute(FNS + "add10", arguments);
-        assertEquals("15 + 10 should be 25", 25L, result);
+        assertEquals(25L, result, "15 + 10 should be 25");
     }
 
     @Test
@@ -344,17 +344,17 @@ public class AgentTest {
         final Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "add10PartialApplicationWithComposition.ttl", "sum-composition.ttl");
         Arguments arguments = new Arguments().add(FNS + "a", 15);
         Object result = agent.execute(FNS + "add10", arguments);
-        assertEquals("15 + 10 should be 25", 25L, result);
+        assertEquals(25L, result, "15 + 10 should be 25");
     }
 
     @Test
     public void testPartialApplicationThrowsExceptionNonExistingFunction() {
-        assertThrows("expected an exception", FunctionNotFoundException.class, () -> AgentFactory.createFromFnO("generalFunctions.ttl", "badPartialApplicationFunction.ttl"));
+        assertThrows(FunctionNotFoundException.class, () -> AgentFactory.createFromFnO("generalFunctions.ttl", "badPartialApplicationFunction.ttl"), "expected an exception");
     }
 
     @Test
     public void testPartialApplicationThrowsExceptionNonExistingParameter() {
-        assertThrows("expected an exception", ParameterNotFoundException.class, () -> AgentFactory.createFromFnO("generalFunctions.ttl", "badPartialApplicationParameter.ttl"));
+        assertThrows(ParameterNotFoundException.class, () -> AgentFactory.createFromFnO("generalFunctions.ttl", "badPartialApplicationParameter.ttl"), "expected an exception");
     }
 
     @Test
@@ -362,7 +362,7 @@ public class AgentTest {
         final Agent agent = AgentFactory.createFromFnO("partialApplicationNoMappings.ttl", "generalFunctions.ttl");
         Arguments arguments = new Arguments().add(EX + "p_int1", 5).add(EX + "p_int2", 15);
         Object result = agent.execute(FNS + "add10", arguments);
-        assertEquals("15 + 5 should be 20", 20L, result);
+        assertEquals(20L, result, "15 + 5 should be 20");
     }
 
     @Test
@@ -384,7 +384,7 @@ public class AgentTest {
         Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
         List<String> correct = new ArrayList<>();
         correct.add("a");
-        assertEquals("should be a list with element a", correct, result );
+        assertEquals(correct, result, "should be a list with element a");
     }
 
     @Test
@@ -397,7 +397,7 @@ public class AgentTest {
         List<String> correct = new ArrayList<>();
         correct.add("a");
         correct.add("b");
-        assertEquals("should be a list with elements a and b", correct, result );
+        assertEquals(correct, result, "should be a list with elements a and b");
     }
 
     @Test
@@ -408,7 +408,7 @@ public class AgentTest {
                 .add(RDF+"_2", "b")
                 .add(RDF+"_4", "d");
 
-        assertThrows("expected exception for missing _3 parameter", AgentException.class,() -> agent.execute(IDLABFN+"makeListFromSeq", arguments));
+        assertThrows(AgentException.class,() -> agent.execute(IDLABFN+"makeListFromSeq", arguments), "expected exception for missing _3 parameter");
     }
 
     @Test
@@ -419,7 +419,7 @@ public class AgentTest {
         Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
         List<String> correct = new ArrayList<>();
         correct.add("a");
-        assertEquals("should be a list with element a", correct, result );
+        assertEquals(correct, result, "should be a list with element a");
     }
 
     @Test
@@ -432,7 +432,7 @@ public class AgentTest {
         List<String> correct = new ArrayList<>();
         correct.add("a");
         correct.add("b");
-        assertEquals("should be a list with elements a and b", correct, result );
+        assertEquals(correct, result, "should be a list with elements a and b");
     }
 
     @Test
@@ -444,7 +444,7 @@ public class AgentTest {
         Object result = agent.execute(IDLABFN+"makeListFromSeq", arguments);
         List<String> correct = new ArrayList<>();
         correct.add("x");
-        assertEquals("should be a list with element x", correct, result );
+        assertEquals(correct, result, "should be a list with element x");
     }
 
     @Test
@@ -453,7 +453,7 @@ public class AgentTest {
         Arguments arguments = new Arguments()
                 .add(EX+"p_int1", "5")
                 .add(EX+"p_int2", "4");
-        assertEquals("expected 90", 90L, agent.execute(FNS+"comp", arguments));
+        assertEquals(90L, agent.execute(FNS+"comp", arguments), "expected 90");
     }
 
     @Test
@@ -462,39 +462,39 @@ public class AgentTest {
         Arguments arguments = new Arguments()
                 .add(EX+"p_int1", "5")
                 .add(EX+"p_int2", "4");
-        assertEquals("expected 28", 28L, agent.execute(FNS+"comp", arguments));
+        assertEquals(28L, agent.execute(FNS+"comp", arguments), "expected 28");
     }
 
     @Test
-    public void loadNonStaticFunctionThrowsException() throws Exception {
-        final Agent agent = AgentFactory.createFromFnO();
-        assertThrows("Expected thrown exception", Exception.class, () -> agent.loadFunction(this.getClass().getMethods()[0])); // all test methods are non static
+    public void loadNonStaticFunctionThrowsException() throws FnOException {
+        final AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO();
+        assertThrows(Exception.class, () -> agent.loadFunction(this.getClass().getMethods()[0])); // all test methods are non static
 
     }
 
     @Test
     public void loadJavaFunctionTest() throws Exception {
-        final Agent agent = AgentFactory.createFromFnO();
+        final AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO();
         String functionId = agent.loadFunction(InternalTestFunctions.class.getMethod("sum", long.class, long.class));
         List<String> list = agent.getParameterPredicates(functionId);
         Arguments args = new Arguments()
                 .add(list.get(0), 5)
                 .add(list.get(1), 6);
         Object result = agent.execute(functionId, args);
-        Assert.assertEquals("5 + 6 is 11", 11L, result);
+        assertEquals(11L, result, "5 + 6 is 11");
     }
 
     @Test
     public void testWriteModel() throws Exception {
-        Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl");
+        AgentImpl agent = (AgentImpl) AgentFactory.createFromFnO("generalFunctions.ttl");
         agent.writeModel("testFileWrite.ttl");
-        agent = AgentFactory.createFromFnO("testFileWrite.ttl");
+        agent = (AgentImpl) AgentFactory.createFromFnO("testFileWrite.ttl");
         execute(agent);
     }
 
     @Test
     public void testWriteExecutionToFile() throws Exception {
-        Agent agent = AgentFactory.createFromFnO("internalTestFunctions.ttl");
+        AgentImpl agent = (AgentImpl)AgentFactory.createFromFnO("internalTestFunctions.ttl");
         // prepare the parameters for the function
         Arguments arguments = new Arguments().add(EX + "p_int1", "5").add(EX + "p_int2", "1");
 

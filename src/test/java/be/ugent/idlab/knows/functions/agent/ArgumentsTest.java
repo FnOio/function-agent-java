@@ -1,10 +1,10 @@
 package be.ugent.idlab.knows.functions.agent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>

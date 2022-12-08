@@ -1,6 +1,7 @@
 package be.ugent.idlab.knows.functions.agent.dataType;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.nio.Buffer;
@@ -8,7 +9,7 @@ import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -23,7 +24,7 @@ public class DataTypeConverterTest {
         DataTypeConverter<?> listConverter = converterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
         List<String> testList = Arrays.asList("One", "Two", "Three");
         Object result = listConverter.convert(testList);
-        assertEquals("Lists are not the same", testList, result);
+        assertEquals(testList, result, "Lists are not the same");
     }
 
     @Test
@@ -32,26 +33,26 @@ public class DataTypeConverterTest {
         String[] testArray = new String[]{"One", "Two", "Three"};
         Object result = listConverter.convert(testArray);
         List<String> testList = Arrays.asList("One", "Two", "Three");
-        assertEquals("Arrays are not the same", testList, result);
+        assertEquals(testList, result, "Arrays are not the same");
     }
 
     @Test
     public void testAbstractDataTypeConverter() {
-        DataTypeConverter<CharBuffer> at = new DataTypeConverter<CharBuffer>(CharBuffer.class, DataTypeConverter.TypeCategory.PRIMITIVE) {
+        DataTypeConverter<CharBuffer> at = new DataTypeConverter<>(CharBuffer.class, DataTypeConverter.TypeCategory.PRIMITIVE) {
             @Override
             public CharBuffer convert(Object value) {
                 return null;
             }
         };
-        assertTrue("Buffer should be a superclass of CharBuffer", at.isSubTypeOf(Buffer.class));
+        assertTrue(at.isSubTypeOf(Buffer.class), "Buffer should be a superclass of CharBuffer");
 
-        DataTypeConverter<Appendable> ad = new DataTypeConverter<Appendable>(Appendable.class, DataTypeConverter.TypeCategory.PRIMITIVE) {
+        DataTypeConverter<Appendable> ad = new DataTypeConverter<>(Appendable.class, DataTypeConverter.TypeCategory.PRIMITIVE) {
             @Override
             public Appendable convert(Object value) {
                 return null;
             }
         };
-        assertTrue("StringWriter should be a subclass of Appendable", ad.isSuperTypeOf(StringWriter.class));
+        assertTrue(ad.isSuperTypeOf(StringWriter.class), "StringWriter should be a subclass of Appendable");
     }
 
     @Test
