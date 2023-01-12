@@ -1,11 +1,14 @@
 package be.ugent.idlab.knows.functions.agent;
 
 /**
+ * An Agent executes functions.
+ * <br>
+ * An Agent is {@link AutoCloseable}. An implementation should close loaded function libraries.
  * <p>Copyright 2021 IDLab (Ghent University - imec)</p>
  *
  * @author Gerald Haesendonck
  */
-public interface Agent {
+public interface Agent extends AutoCloseable {
     /**
      * Executes the function with a given id and given arguments.
      * @param functionId    The unique identifier of a function.

@@ -250,4 +250,9 @@ public class AgentImpl implements Agent {
             RDFDataMgr.write(outputStream, model, Lang.TURTLE);
         }
     }
+
+    @Override
+    public void close() {
+        instantiator.close();
+    }
 }
