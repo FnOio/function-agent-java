@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+- `Agent` is now `AutoCloseable`. This leads to `Instantiator` calling the `close()` method on loaded function library classes.
+
 ## [1.0.0] - 2022-12-08
 
 ### Changed
