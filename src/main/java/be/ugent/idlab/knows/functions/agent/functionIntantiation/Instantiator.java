@@ -480,4 +480,24 @@ public class Instantiator {
                     });
         }
     }
+
+    /**
+     * Calls `close()` on loaded function library classes.
+     */
+    public void close() {
+        this.className2ClassMap.values().forEach(clazz -> {
+            Method[] methods = clazz.getMethods();
+            for (Method method : methods) {
+                if (method.getName().equals("close") && method.getParameterCount() == 0) {
+                    try {
+                        logger.debug("Closing {}", clazz.getName());
+                        method.invoke(null);
+                    } catch (Throwable e) {
+                        logger.debug("Cannot close {}", clazz.getName());
+                    }
+                    break;
+                }
+            }
+        });
+    }
 }

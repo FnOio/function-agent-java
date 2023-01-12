@@ -15,6 +15,7 @@ import java.util.List;
  * @author Gerald Haesendonck
  */
 public class InternalTestFunctions {
+    private static boolean closed = false;
 
     private static final Logger logger = LoggerFactory.getLogger(InternalTestFunctions.class);
 
@@ -127,5 +128,17 @@ public class InternalTestFunctions {
     public static String concatSequence(final List<CharSequence> seq, final CharSequence delimiter) {
         final CharSequence sep = delimiter == null? "" : delimiter;
         return String.join(sep, seq);
+    }
+
+    public static void close() {
+        closed = true;
+    }
+
+    public static void close(final int number) {
+        logger.debug("This is number {}", number);
+    }
+
+    public static boolean isClosed() {
+        return closed;
     }
 }

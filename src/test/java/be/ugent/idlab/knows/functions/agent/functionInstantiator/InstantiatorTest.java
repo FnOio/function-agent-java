@@ -7,6 +7,7 @@ import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelP
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
+import be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -63,5 +64,24 @@ public class InstantiatorTest {
         Method rawListLen = instantiator.getMethod("http://example.org/rawListLen");
         Object result = rawListLen.invoke(null, anEmptyRawList);
         assertEquals(0L, result, "An empty list should have size 0");
+    }
+
+    @Test
+    public void testClose() throws FnOException, InstantiationException {
+        final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
+
+        // load function descriptions
+        FunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, "src/test/resources/internalTestFunctions.ttl");
+        Map<String, Function> functions = functionProvider.getFunctions();
+        Instantiator instantiator = new Instantiator(functions, dataTypeConverterProvider);
+
+        // first invoke a method to actually load the class
+        // without loading, it cannot be closed ;)
+        Method sum = instantiator.getMethod("http://example.org/sum");
+        assertEquals("sum", sum.getName());
+
+
+        instantiator.close();
+        assertTrue(InternalTestFunctions.isClosed());
     }
 }
