@@ -1,0 +1,41 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Function Agent
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Gerald
+    family-names: Haesendonck
+    email: gerald.haesendonck@ugent.be
+    orcid: 'https://orcid.org/0000-0003-1605-3855'
+    affiliation: >-
+      IDLab, Department of Electronics and Information
+      Systems, Ghent University – imec
+  - given-names: Ben
+    family-names: De Meester
+    email: ben.demeester@ugent.be
+    affiliation: >-
+      IDLab, Department of Electronics and Information
+      Systems, Ghent University – imec
+    orcid: 'https://orcid.org/0000-0003-0248-0987'
+repository-code: 'https://github.com/FnOio/function-agent-java'
+url: 'https://fno.io'
+abstract: >-
+  This library enables execution of semantically described
+  functions.
+
+
+  The idea is that when: software A needs a certain
+  functionality, and; software B provides that
+  functionality, and; there is a description of the
+  functionality and its implementation; then Function Agent
+  can be called from A to execute functions of B.
+
+
+  Describing functions can be done with the Function
+  Ontology (FnO.io), or by providing another function model.
+license: MIT
