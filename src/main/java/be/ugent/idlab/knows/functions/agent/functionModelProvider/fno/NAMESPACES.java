@@ -14,8 +14,7 @@ public enum NAMESPACES {
     FNOM("https://w3id.org/function/vocabulary/mapping#"),
     LIB("http://example.com/library#"),
     RDF("http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
-    IDLABFN("http://example.com/idlab/function/"),
-    IDLABFNM("http://example.com/idlab/function-mapping/")
+    IDLABFN("https://w3id.org/imec/idlab/function#"),
     ;
     private final String uri;
 

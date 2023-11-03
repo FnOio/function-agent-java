@@ -18,8 +18,8 @@
 @prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
 @prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
 
-@prefix idlab-fn: <http://example.com/idlab/function/> .
-@prefix idlab-fn-m: <http://example.com/idlab/function-mapping/> .
+@prefix idlab-fn: <https://w3id.org/imec/idlab/function#> .
+@prefix idlab-fn-m: <https://w3id.org/imec/idlab/function-mapping#> .
 
 
 idlab-fn:makeSeq a fno:Function ;
