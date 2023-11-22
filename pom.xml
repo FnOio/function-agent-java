@@ -6,7 +6,7 @@
 
     <groupId>be.ugent.idlab.knows</groupId>
     <artifactId>function-agent-java</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.2.0</version>
     <name>function-agent-java</name>
     <packaging>jar</packaging>
     <url>https://fno.io/</url>

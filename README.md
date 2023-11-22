@@ -109,6 +109,7 @@ public static void main(String[] args) {
     assert (result == 6l);
 }
 ```
+See also [AgentTest.java](src/test/java/be/ugent/idlab/knows/functions/agent/AgentTest.java).
 
 ## Download
 
@@ -118,35 +119,15 @@ Grab the latest [release](https://github.com/FnOio/function-agent-java/releases)
 
 ### Maven
 
-Use [JitPack](https://jitpack.io/) to include the latest version. In your `pom.xml` add
-the following repository:
+In your `pom.xml` add the following dependency:
 
 ```xml
-
-<repositories>
-    ...
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
+<dependency>
+    <groupId>be.ugent.idlab.knows</groupId>
+    <artifactId>function-agent-java</artifactId>
+    <version>1.2.0</version>
+</dependency>
 ```
-
-then add this dependency:
-
-```xml
-<dependencies>
-    ...
-    <dependency>
-        <groupId>com.github.fnoio</groupId>
-        <artifactId>function-agent-java</artifactId>
-        <version>v0.2.1</version>
-    </dependency>
-</dependencies>
-
-```
-
-See also [AgentTest.java](src/test/java/be/ugent/idlab/knows/functions/agent/AgentTest.java).
 
 ## Features
 
