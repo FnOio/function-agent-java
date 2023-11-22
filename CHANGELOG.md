@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+- Everything required to publish on Maven Central.
+
 ### Changed
 - Use new idlab-functions-java prefix in tests.
 

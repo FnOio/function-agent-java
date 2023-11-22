@@ -7,9 +7,42 @@
     <groupId>be.ugent.idlab.knows</groupId>
     <artifactId>function-agent-java</artifactId>
     <version>1.1.1-SNAPSHOT</version>
-
     <name>function-agent-java</name>
+    <packaging>jar</packaging>
     <url>https://fno.io/</url>
+    <description>
+        Execute dynamically loaded functions. An implementation using the Function Ontology (FnO)
+        to load functions is provided.
+    </description>
+    <licenses>
+        <license>
+            <name>The MIT License</name>
+            <url>https://gitlab.ilabt.imec.be/KNoWS/fno/lib/idlab-functions-java/-/raw/main/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:ssh://git@github.com:FnOio/function-agent-java.git</connection>
+        <url>https://github.com/FnOio/function-agent-java</url>
+    </scm>
+    <developers>
+        <developer>
+            <id>bjdmeest</id>
+            <name>Ben De Meester</name>
+            <email>ben.demeester@ugent.be</email>
+        </developer>
+        <developer>
+            <id>ghsnd</id>
+            <name>Gerald Haesendonck</name>
+            <email>gerald.haesendonck@ugent.be</email>
+        </developer>
+        <developer>
+            <id>robbe0x00</id>
+            <name>Robbe Van rijsselberghe</name>
+        </developer>
+    </developers>
+
+
 
     <properties>
         <commons.version>4.4</commons.version>
@@ -21,8 +54,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- This is the language level, it is recommended to use the latests LTS JVM to build / run it -->
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <repositories>
@@ -175,4 +208,79 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+
+        <!-- Profile used to release to Maven central repo -->
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <!-- Publish on Maven central repository -->
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <!-- be sure to use the latest version !! -->
+                        <version>1.6.13</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+
+                    <!-- Generate Source jar -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Generate Javadoc jar -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Sign components with GPG -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <keyname>6861488FA42A028D5378AF8833C4D74DDB5F1B28</keyname>
+                                    <passphraseServerId>6861488FA42A028D5378AF8833C4D74DDB5F1B28</passphraseServerId>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
