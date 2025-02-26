@@ -59,7 +59,7 @@ public abstract class DataTypeConverter<T> {
         return superclasses.contains(className);
     }
 
-    private static Set<String> getSuperTypesOf(final Class<?> clazz) {
+    public static Set<String> getSuperTypesOf(final Class<?> clazz) {
 
         if (clazz == null) {
             return Collections.emptySet();

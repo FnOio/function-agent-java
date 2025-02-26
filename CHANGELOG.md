@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Fixed
 - Added `DefaultConverter` for parameters of type `Object`.
+- Made Function Agent compatible with Java 21.
 
 ## [1.2.0] - 2023-11-22
 

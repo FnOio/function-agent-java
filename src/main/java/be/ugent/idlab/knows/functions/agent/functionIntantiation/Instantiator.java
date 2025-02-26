@@ -416,8 +416,8 @@ public class Instantiator {
                                 expectedParameters.get(i).setTypeConverter(arrayConverter);
                             } else {
                                 // check if raw collection. If so, do nothing and use the DefaultDataTypeConverter. If not, we can't use the list converter.
-                                Class<?>[] interfaces = methodParameterClass.getInterfaces();
-                                if (!Arrays.asList(interfaces).contains(Collection.class)) {
+                                Set<String> interfaces = DataTypeConverter.getSuperTypesOf(methodParameterClass);
+                                if (!interfaces.contains(Collection.class.getName())) {
                                     throw new MethodNotFoundException("No suitable data type converter found for class '" + clazz.getName() + "', method '" + methodName + "', parameter '"
                                             + expectedParameters.get(i).getName() + "' which should be of type '" + parameterType.getTypeName() + "'.");
                                 }
