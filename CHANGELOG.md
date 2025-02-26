@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## [1.2.1] - 2025-02-26
+
 ## Fixed
 - Added `DefaultConverter` for parameters of type `Object`.
 - Made Function Agent compatible with Java 21.
@@ -96,6 +98,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.0.1] - 2022-03-25
 
+[1.2.1]: https://github.com/FnOio/function-agent-java/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/FnOio/function-agent-java/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/FnOio/function-agent-java/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/FnOio/function-agent-java/compare/v0.2.1...v1.0.0

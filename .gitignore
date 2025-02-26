@@ -3,3 +3,4 @@
 target/
 test*.txt
 test*.ttl
+pom.xml.versionsBackup
