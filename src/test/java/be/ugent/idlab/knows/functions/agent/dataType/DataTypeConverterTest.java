@@ -37,6 +37,15 @@ public class DataTypeConverterTest {
     }
 
     @Test
+    public void testObjectList() throws DataTypeConverterException {
+        DataTypeConverter<?> listConverter = converterProvider.getDataTypeConverter("http://www.w3.org/1999/02/22-rdf-syntax-ns#List");
+        Object[] testArray = new Object[]{"One", "Two", "Three"};
+        Object result = listConverter.convert(testArray);
+        List<Object> testList = Arrays.asList("One", "Two", "Three");
+        assertEquals(testList, result, "Arrays are not the same");
+    }
+
+    @Test
     public void testAbstractDataTypeConverter() {
         DataTypeConverter<CharBuffer> at = new DataTypeConverter<>(CharBuffer.class, DataTypeConverter.TypeCategory.PRIMITIVE) {
             @Override

@@ -56,6 +56,7 @@ public class DataTypeConverterProvider {
     }
 
     private void addJavaConverters() {
+        nameToConverter.put(Object.class.getName(), new DefaultDataTypeConverter());
         nameToConverter.put(Byte.class.getName(), new ByteConverter());
         nameToConverter.put(byte.class.getName(), new ByteConverter());
         nameToConverter.put(Character.class.getName(), new CharacterConverter());

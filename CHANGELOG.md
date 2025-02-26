@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## Fixed
+- Added `DefaultConverter` for parameters of type `Object`.
+
 ## [1.2.0] - 2023-11-22
 
 ### Added
