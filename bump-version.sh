@@ -35,8 +35,13 @@ then
 	changefrog -n $VERSION
 fi
 
-tagname="v$VERSION"
-if [ ! "$(yes_or_no 'Do you also want to commit the changes, create a git tag $tagname and push it?')" ]
+if [[ $VERSION == testrelease-* ]] ; then
+	tagname=$VERSION
+else
+	tagname="v$VERSION"
+fi
+
+if [ ! "$(yes_or_no Do you also want to commit the changes, create a git tag $tagname and push it?)" ]
 then
 	git add CHANGELOG.md README.md pom.xml
 	git commit -m "Update version to $VERSION"
