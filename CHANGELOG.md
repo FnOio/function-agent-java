@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated JUnit to 5.10.2
 - Updated grel-functions-java to v0.10.0
 - Updated Maven build plugins
+- Publishing: switched to new Maven Central repository
 
 ## [1.2.1] - 2025-02-26
 
