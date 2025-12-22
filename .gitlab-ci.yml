@@ -38,12 +38,7 @@ cache:
     - main
     - development
 
-# Test using JDK17
-test:jdk17:
-  <<: *test
-  image: maven:3-eclipse-temurin-17-alpine
-
-# Test using JDK17
+# Test using JDK21
 test:jdk21:
   <<: *test
   image: maven:3-eclipse-temurin-21-alpine
