@@ -125,7 +125,7 @@ In your `pom.xml` add the following dependency:
 <dependency>
     <groupId>be.ugent.idlab.knows</groupId>
     <artifactId>function-agent-java</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
 </dependency>
 ```
 
