@@ -6,15 +6,13 @@ import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelP
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
 import be.ugent.idlab.knows.functions.agent.model.*;
 import be.ugent.idlab.knows.misc.FileFinder;
-import org.apache.jena.ext.com.google.common.io.CharSource;
-import org.apache.jena.ext.com.google.common.io.Files;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,10 +49,10 @@ public class FnOFunctionProviderTest {
 
         // read internalTestFunctions.ttl as String
         URL itUrl = FileFinder.findFile("internalTestFunctions.ttl");
-        CharSource fnoSource = Files.asCharSource(new File(itUrl.toURI()), StandardCharsets.UTF_8);
+        String fnoSource = Files.readString(Path.of(itUrl.getFile()));
 
         // pass it to the function model provider
-        FnOFunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, fnoSource.read());
+        FnOFunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, fnoSource);
         checkSuccessFunctions(functionProvider.getFunctions().values());
     }
 

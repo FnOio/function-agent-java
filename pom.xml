@@ -45,12 +45,10 @@
 
 
     <properties>
-        <commons.version>4.4</commons.version>
-        <jena.version>4.6.1</jena.version>
+        <jena.version>4.9.0</jena.version>
         <slf4j.version>2.0.5</slf4j.version>
-        <junit.version>5.9.1</junit.version>
-        <lombok.version>1.18.36</lombok.version>
-        <grel.java.version>v0.9.0</grel.java.version>
+        <junit.version>5.10.2</junit.version>
+        <grel.java.version>v0.10.0</grel.java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- This is the language level, it is recommended to use the latest LTS JVM to build / run it -->
@@ -84,12 +82,6 @@
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
             <version>${jena.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>${commons.version}</version>
         </dependency>
 
         <!-- Unit test framework -->

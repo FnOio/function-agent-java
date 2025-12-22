@@ -11,7 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Required Java language is 21
 
 ### Fixed
-- Refactoring: removed dependency on Project Lombok; replaced data classes with records where possible.
+- Removed dependency on Project Lombok; replaced data classes with records where possible.
+- Removed dependency on commons-collections-4; use Java built-in to read a file.
+- Updated jena-arq to 4.9.0
+- Updated JUnit to 5.10.2
+- Updated grel-functions-java to v0.10.0
+- Updated Maven build plugins
 
 ## [1.2.1] - 2025-02-26
 
