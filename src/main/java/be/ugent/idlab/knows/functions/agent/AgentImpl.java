@@ -118,8 +118,14 @@ public class AgentImpl implements Agent {
                     // https://fno.io/spec/#fn-parameter
                     for (int i = 0; i < max; i++) {
                         int finalI = i+1;
-                        Object value = arguments.get(RDF+"_"+(finalI)).stream().findFirst().orElseThrow(() -> new MissingRDFSeqIndexException("no parameter found for _" + (finalI)));
-                        values[i] = value;
+                        Collection<Object> parameter_values = arguments.get(RDF+"_"+(finalI));
+                        if (parameter_values.isEmpty()) {
+                            throw new MissingRDFSeqIndexException("no parameter found for _" + (finalI));
+                        } else if (parameter_values.size() == 1) {
+                            values[i] = parameter_values.iterator().next();
+                        } else {
+                            values[i] = parameter_values;
+                        }
                     }
                     valuesInOrder.add(argumentParameter.getTypeConverter().convert(values));
                 }

@@ -505,6 +505,22 @@ public class AgentTest {
     }
 
     @Test
+    public void rdfSeqTestElementsAreLists() throws Exception {
+        Object result;
+        try (Agent agent = AgentFactory.createFromFnO("rdfSeq.ttl")) {
+            Arguments arguments = new Arguments()
+                    .add(RDF + "_2", List.of(1, 2))
+                    .add(RDF + "_1", List.of("3", "4", "5"));
+            result = agent.execute(IDLABFN + "makeListFromSeq", arguments);
+        }
+        List<?> correct = List.of(
+                List.of("3", "4", "5"),
+                List.of(1, 2)
+        );
+        assertEquals(correct, result, "should be a list with elements a and b");
+    }
+
+    @Test
     public void testExtraDependencies1() throws Exception {
         try (Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "weirdComposition1.ttl")) {
             Arguments arguments = new Arguments()
