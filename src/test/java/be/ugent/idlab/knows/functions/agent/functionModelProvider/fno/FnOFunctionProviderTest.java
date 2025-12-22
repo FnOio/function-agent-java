@@ -98,15 +98,15 @@ public class FnOFunctionProviderTest {
 
         // check mapping
         FunctionMapping mapping = sumFunction.getFunctionMapping();
-        assertEquals("http://example.org/sum", mapping.getFunctionId(), "wrong function id for mapping");
+        assertEquals("http://example.org/sum", mapping.functionId(), "wrong function id for mapping");
 
-        MethodMapping methodMapping = mapping.getMethodMapping();
-        assertEquals("sum", methodMapping.getMethodName(), "Wrong method name");
-        assertEquals("https://w3id.org/function/vocabulary/mapping#StringMethodMapping", methodMapping.getType(), "Wrong method type");
+        MethodMapping methodMapping = mapping.methodMapping();
+        assertEquals("sum", methodMapping.methodName(), "Wrong method name");
+        assertEquals("https://w3id.org/function/vocabulary/mapping#StringMethodMapping", methodMapping.type(), "Wrong method type");
 
-        Implementation implementation = mapping.getImplementation();
-        assertEquals("be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions", implementation.getClassName(), "Wrong implementation class name");
-        assertEquals("", implementation.getLocation(), "Implementation: location should be empty.");
+        Implementation implementation = mapping.implementation();
+        assertEquals("be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions", implementation.className(), "Wrong implementation class name");
+        assertEquals("", implementation.location(), "Implementation: location should be empty.");
     }
 
     @Test
@@ -119,7 +119,7 @@ public class FnOFunctionProviderTest {
         // now check
         functionProvider.getFunctions().values().forEach(function -> {
             String functionId = function.getId();
-            String location = function.getFunctionMapping().getImplementation().getLocation();
+            String location = function.getFunctionMapping().implementation().location();
             assertEquals(newLocation, location, "Wrong location of function '" + functionId + "'.");
         });
     }
@@ -134,7 +134,7 @@ public class FnOFunctionProviderTest {
         // now check
         functionProvider.getFunctions().values().forEach(function -> {
             String functionId = function.getId();
-            String location = function.getFunctionMapping().getImplementation().getLocation();
+            String location = function.getFunctionMapping().implementation().location();
             assertEquals("AaabimFunctions.jar", location, "Wrong location of function '" + functionId + "'.");
         });
     }

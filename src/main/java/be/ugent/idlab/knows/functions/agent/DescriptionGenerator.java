@@ -161,18 +161,18 @@ public class DescriptionGenerator {
             return;
         }
         FunctionMapping functionMapping = function.getFunctionMapping();
-        MethodMapping methodMapping = functionMapping.getMethodMapping();
-        Implementation implementation = functionMapping.getImplementation();
-        Resource classResource = model.createResource(BASE + "JavaClass#" + implementation.getClassName());
+        MethodMapping methodMapping = functionMapping.methodMapping();
+        Implementation implementation = functionMapping.implementation();
+        Resource classResource = model.createResource(BASE + "JavaClass#" + implementation.className());
         classResource.addProperty(rdfTypeProperty, model.createResource(FNOI + "JavaClass"));
-        classResource.addProperty(fnoiClassNameProperty, implementation.getClassName());
+        classResource.addProperty(fnoiClassNameProperty, implementation.className());
         Resource mappingResource = model.createResource(function.getId() + "Mapping");
         mappingResource.addProperty(rdfTypeProperty, model.createResource(FNO + "Mapping"));
         mappingResource.addProperty(fnoFunctionProperty, functionResource);
         mappingResource.addProperty(fnoImplementationProperty, classResource);
         Resource methodMappingResource = model.createResource();
-        methodMappingResource.addProperty(rdfTypeProperty, model.createResource(methodMapping.getType()));
-        methodMappingResource.addProperty(fnomMethodNameProperty, methodMapping.getMethodName());
+        methodMappingResource.addProperty(rdfTypeProperty, model.createResource(methodMapping.type()));
+        methodMappingResource.addProperty(fnomMethodNameProperty, methodMapping.methodName());
         mappingResource.addProperty(fnoMethodMappingProperty, methodMappingResource);
     }
 

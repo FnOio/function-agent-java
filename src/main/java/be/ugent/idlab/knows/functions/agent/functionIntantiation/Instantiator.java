@@ -6,9 +6,9 @@ import be.ugent.idlab.knows.functions.agent.dataType.ArrayConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.CollectionConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.*;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.ClassNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.*;
 import be.ugent.idlab.knows.functions.agent.model.*;
 import be.ugent.idlab.knows.misc.FileFinder;
 import org.apache.commons.collections4.MultiValuedMap;
@@ -80,14 +80,14 @@ public class Instantiator {
             final Function function = id2functionMap.get(functionId);
             final FunctionMapping mapping = function.getFunctionMapping();
 
-            final String location = mapping.getImplementation().getLocation();
+            final String location = mapping.implementation().location();
 
-            final String className = mapping.getImplementation().getClassName();
+            final String className = mapping.implementation().className();
             Class<?> clazz = getClass(className, location);
             logger.debug("Found class {}", clazz);
 
             // now get the method
-            final String methodName = mapping.getMethodMapping().getMethodName();
+            final String methodName = mapping.methodMapping().methodName();
             final List<Parameter> parameters = function.getArgumentParameters();
             Method method;
             try {
@@ -143,12 +143,12 @@ public class Instantiator {
 
         // function dependencies and parameter maps
         for(CompositionMappingElement el : functionComposition.getMappings()){
-            CompositionMappingPoint from = el.getFrom();
-            CompositionMappingPoint to = el.getTo();
+            CompositionMappingPoint from = el.from();
+            CompositionMappingPoint to = el.to();
             if(from.isLiteral()){
-                Map<String, Object> functionValues = values.getOrDefault(to.getFunctionId(), new HashMap<>());
-                functionValues.put(to.getParameterId(), from.getParameterId());
-                values.put(to.getFunctionId(), functionValues);
+                Map<String, Object> functionValues = values.getOrDefault(to.functionId(), new HashMap<>());
+                functionValues.put(to.parameterId(), from.parameterId());
+                values.put(to.functionId(), functionValues);
                 continue;
             }
 
@@ -157,14 +157,14 @@ public class Instantiator {
             checkFunction(to);
 
             parametermap.put(
-                    new FunctionFieldPair(to.getFunctionId(), to.getParameterId()),
-                    new FunctionFieldPair(from.getFunctionId(), from.getParameterId())
+                    new FunctionFieldPair(to.functionId(), to.parameterId()),
+                    new FunctionFieldPair(from.functionId(), from.parameterId())
             );
 
             // add function dependencies
             // if the source value is an output, the target function is dependent on the source function
             if(from.isOutput()){
-                dependencies.put(to.getFunctionId(), from.getFunctionId());
+                dependencies.put(to.functionId(), from.functionId());
             }
         }
 
@@ -270,7 +270,7 @@ public class Instantiator {
                         arguments = arguments.add(p.getId(), values.get(f).get(p.getId()));
                     }
                     for (FunctionFieldPair functionFieldPair: ffpc) {
-                        arguments = arguments.add(p.getId(), values.get(functionFieldPair.getFunction()).get(functionFieldPair.getField()));
+                        arguments = arguments.add(p.getId(), values.get(functionFieldPair.function()).get(functionFieldPair.field()));
                     }
                 }
                 Object result = agent.execute(f, arguments);
@@ -281,7 +281,7 @@ public class Instantiator {
             // for java, we get the first returnparameter to use to get the output of the function
             Collection<FunctionFieldPair> returnFfp = parametermap.get(new FunctionFieldPair(functionId, function.getReturnParameters().get(0).getId()));
             List<Object> returnList = new ArrayList<>();
-            returnFfp.forEach((FunctionFieldPair functionFieldPair) -> returnList.add(values.get(functionFieldPair.getFunction()).get(functionFieldPair.getField())));
+            returnFfp.forEach((FunctionFieldPair functionFieldPair) -> returnList.add(values.get(functionFieldPair.function()).get(functionFieldPair.field())));
             return returnList.get(0);
         };
         // cache the constructed function
@@ -290,20 +290,20 @@ public class Instantiator {
     }
 
     private void checkFunction(CompositionMappingPoint compositionMappingPoint) throws InstantiationException{
-        Function fromFunction = id2functionMap.get(compositionMappingPoint.getFunctionId());
+        Function fromFunction = id2functionMap.get(compositionMappingPoint.functionId());
         if(Objects.isNull(fromFunction)){
-            throw new CompositionReferenceException("the used function " + compositionMappingPoint.getFunctionId() + " could not be found");
+            throw new CompositionReferenceException("the used function " + compositionMappingPoint.functionId() + " could not be found");
         }
         List<Parameter> fromInputParameters = fromFunction.getArgumentParameters();
         List<Parameter> fromReturnParameters = fromFunction.getReturnParameters();
-        String parameterId = compositionMappingPoint.getParameterId();
+        String parameterId = compositionMappingPoint.parameterId();
         // parameter not in input parameters or in return parameters
         if(
                 fromInputParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, parameterId))
                         &&
                         fromReturnParameters.stream().map(Parameter::getId).noneMatch(id -> Objects.equals(id, parameterId))
         ){
-            throw new CompositionReferenceException("the used parameter " + parameterId + " of function " + compositionMappingPoint.getFunctionId() + " could not be found");
+            throw new CompositionReferenceException("the used parameter " + parameterId + " of function " + compositionMappingPoint.functionId() + " could not be found");
 
         }
     }

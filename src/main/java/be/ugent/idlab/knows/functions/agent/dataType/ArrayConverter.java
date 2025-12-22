@@ -1,7 +1,5 @@
 package be.ugent.idlab.knows.functions.agent.dataType;
 
-import lombok.Getter;
-
 import java.lang.reflect.Array;
 import java.util.Collection;
 
@@ -11,7 +9,6 @@ import java.util.Collection;
  * @author Gerald Haesendonck
  */
 public class ArrayConverter extends DataTypeConverter<Object[]> {
-    @Getter
     private DataTypeConverter<?> argumentTypeConverter = new DefaultDataTypeConverter();
 
     public ArrayConverter() {
@@ -24,6 +21,10 @@ public class ArrayConverter extends DataTypeConverter<Object[]> {
         Object[] typeArray = initArray(0);
         setTypeClass(typeArray.getClass());
 
+    }
+
+    public DataTypeConverter<?> getArgumentTypeConverter() {
+        return argumentTypeConverter;
     }
 
     @Override

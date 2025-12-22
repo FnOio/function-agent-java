@@ -248,9 +248,8 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
                 throw new ParameterNotFoundException("Predicate of provided parameter " + parameterURI +" of function "+ originalFunction.getURI() + " not found");
             }
             parametersToRemove.add(parameterPredicate);
-            CompositionMappingPoint from = new CompositionMappingPoint("", term.getString(), false);
-            from.setLiteral(true);
-            CompositionMappingPoint to = new CompositionMappingPoint(originalFunction.getURI(), parameterPredicate, false);
+            CompositionMappingPoint from = new CompositionMappingPoint("", term.getString(), false, true);
+            CompositionMappingPoint to = new CompositionMappingPoint(originalFunction.getURI(), parameterPredicate, false, false);
             CompositionMappingElement element = new CompositionMappingElement(from, to);
             composition.addMapping(element);
         }
@@ -264,15 +263,15 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         // add remaining parameters to the composition to just pass values
         newParameters = newParameters.stream().filter(p -> !parametersToRemove.contains(p.getId())).collect(Collectors.toList());
         for (Parameter p : newParameters) {
-            CompositionMappingPoint from = new CompositionMappingPoint(functionId, p.getId(), false);
-            CompositionMappingPoint to = new CompositionMappingPoint(originalFunction.getURI(), p.getId(), false);
+            CompositionMappingPoint from = new CompositionMappingPoint(functionId, p.getId(), false, false);
+            CompositionMappingPoint to = new CompositionMappingPoint(originalFunction.getURI(), p.getId(), false, false);
             CompositionMappingElement element = new CompositionMappingElement(from, to);
             composition.addMapping(element);
         }
         // map all return parameters
         for (Parameter p : original.getReturnParameters()) {
-            CompositionMappingPoint from = new CompositionMappingPoint(originalFunction.getURI(), p.getId(), true);
-            CompositionMappingPoint to = new CompositionMappingPoint(functionId, p.getId(), false);
+            CompositionMappingPoint from = new CompositionMappingPoint(originalFunction.getURI(), p.getId(), true, false);
+            CompositionMappingPoint to = new CompositionMappingPoint(functionId, p.getId(), false, false);
             CompositionMappingElement element = new CompositionMappingElement(from, to);
             composition.addMapping(element);
         }
@@ -323,8 +322,8 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         List<Resource> mappings = getObjectResources(functionCompositionResource, FNOC + "composedOf");
         for(Resource r : mappings){
             final CompositionMappingElement point = parseCompositionMapElement(r);
-            if(point.getTo().isOutput()){
-                composition.setFunctionId(point.getTo().getFunctionId());
+            if(point.to().isOutput()){
+                composition.setFunctionId(point.to().functionId());
             }
             if(!composition.addMapping(point)){
                 logger.debug("duplicate mapping rule found for {}", functionCompositionResource.getURI());
@@ -432,13 +431,12 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
                 isOutput = true;
             }
             String predicateURI = parameterURItoPredicate.get(startingPointParameter.orElseThrow(() -> new MappingParameterNotFoundException("starting point: no output predicate found for mapping with constituent function " + startingPointFunction.getURI()){}));
-            return new CompositionMappingPoint(startingPointFunction.getURI(), predicateURI, isOutput);
+            return new CompositionMappingPoint(startingPointFunction.getURI(), predicateURI, isOutput, false);
         }
         else{ // try to find a fnoc:mapFromTerm
             final Literal literal = getLiteral(element, FNOC+"mapFromTerm")
                     .orElseThrow(() -> new CompositionStartingPointNotFound("No composition starting point found for " + element.getId()){});
-            CompositionMappingPoint cmp = new CompositionMappingPoint("", literal.getString(), false);
-            cmp.setLiteral(true);
+            CompositionMappingPoint cmp = new CompositionMappingPoint("", literal.getString(), false, true);
             return cmp;
         }
     }
@@ -462,7 +460,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
             isOutput = true;
         }
         String predicateURI = parameterURItoPredicate.get(parameterId.orElseThrow( () -> new MappingParameterNotFoundException("mapping end point: no parameter found for constituent function "+id){}));
-        return new CompositionMappingPoint(id, predicateURI, isOutput);
+        return new CompositionMappingPoint(id, predicateURI, isOutput, false);
     }
     /**
      * Searches the FnO document for fnoc:applies resources and adds them to the function list as aliases

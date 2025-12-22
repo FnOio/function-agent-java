@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Changed
+- Required Java language is 21
+
+### Fixed
+- Refactoring: removed dependency on Project Lombok; replaced data classes with records where possible.
+
 ## [1.2.1] - 2025-02-26
 
 ## Fixed
