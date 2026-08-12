@@ -1,11 +1,11 @@
 package be.ugent.idlab.knows.functions.internalfunctions;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -128,6 +128,14 @@ public class InternalTestFunctions {
     public static String concatSequence(final List<CharSequence> seq, final CharSequence delimiter) {
         final CharSequence sep = delimiter == null? "" : delimiter;
         return String.join(sep, seq);
+    }
+
+    public static String substringOptional(final String value, final Long from) {
+        return value.substring(from.intValue());
+    }
+
+    public static String substringOptional(final String value, final Long from, final Long to) {
+        return value.substring(from.intValue(), to.intValue());
     }
 
     public static void close() {

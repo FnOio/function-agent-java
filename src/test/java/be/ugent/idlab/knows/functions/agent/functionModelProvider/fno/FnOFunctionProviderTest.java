@@ -1,21 +1,33 @@
 package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno;
 
-import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
-import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
-import be.ugent.idlab.knows.functions.agent.model.*;
-import be.ugent.idlab.knows.misc.FileFinder;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
+import be.ugent.idlab.knows.functions.agent.model.Function;
+import be.ugent.idlab.knows.functions.agent.model.FunctionMapping;
+import be.ugent.idlab.knows.functions.agent.model.Implementation;
+import be.ugent.idlab.knows.functions.agent.model.MethodMapping;
+import be.ugent.idlab.knows.functions.agent.model.Parameter;
+import be.ugent.idlab.knows.misc.FileFinder;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>
@@ -49,7 +61,7 @@ public class FnOFunctionProviderTest {
 
         // read internalTestFunctions.ttl as String
         URL itUrl = FileFinder.findFile("internalTestFunctions.ttl");
-        String fnoSource = Files.readString(Path.of(itUrl.getFile()));
+        String fnoSource = Files.readString(Paths.get(itUrl.toURI()));
 
         // pass it to the function model provider
         FnOFunctionModelProvider functionProvider = new FnOFunctionModelProvider(dataTypeConverterProvider, fnoSource);

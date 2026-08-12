@@ -1,13 +1,19 @@
 package be.ugent.idlab.knows.functions.agent;
 
-import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
-import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterException;
-import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
-import be.ugent.idlab.knows.functions.agent.exception.MissingRDFSeqIndexException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.MethodNotFoundException;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
-import be.ugent.idlab.knows.functions.agent.model.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -17,17 +23,21 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.*;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterException;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
+import be.ugent.idlab.knows.functions.agent.exception.MissingRDFSeqIndexException;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.MethodNotFoundException;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.DCTERMS;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.FNO;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
+import be.ugent.idlab.knows.functions.agent.model.Function;
+import be.ugent.idlab.knows.functions.agent.model.FunctionMapping;
+import be.ugent.idlab.knows.functions.agent.model.Implementation;
+import be.ugent.idlab.knows.functions.agent.model.MethodMapping;
+import be.ugent.idlab.knows.functions.agent.model.Parameter;
 
 /**
  * <p>
@@ -82,14 +92,26 @@ public class AgentImpl implements Agent {
             List<Object> values = getParameterValues(functionId, arguments, function);
             return instantiator.getCompositeMethod(functionId, debug).apply(this, values.toArray());
         } else {
-            Method method = instantiator.getMethod(functionId);
+            int invocationArity = getInvocationArity(function, arguments);
+            Method method = instantiator.getMethod(functionId, invocationArity);
             if (method != null) {
                 List<Object> values = getParameterValues(functionId, arguments, function);
-                return method.invoke(null, values.toArray());
+                return method.invoke(null, values.subList(0, invocationArity).toArray());
             } else {
                 throw new MethodNotFoundException("No method found for function " + function.getId() + " (" + function.getName() + ')');
             }
         }
+    }
+
+    private int getInvocationArity(final Function function, final Arguments arguments) {
+        int invocationArity = function.getArgumentParameters().size();
+        final List<Parameter> parameters = function.getArgumentParameters();
+
+        while (invocationArity > 0 && arguments.get(parameters.get(invocationArity - 1).getId()).isEmpty() && !parameters.get(invocationArity - 1).isRequired()) {
+            invocationArity--;
+        }
+
+        return invocationArity;
     }
 
     private List<Object> getParameterValues(String functionId, Arguments arguments, Function function) throws MissingRDFSeqIndexException, DataTypeConverterException {
@@ -138,8 +160,15 @@ public class AgentImpl implements Agent {
                     logger.debug("No value found for parameter '{}' in function {}. Considering it to be 'null'.", argumentParameter.getId(), functionId);
                     valuesInOrder.add(null);
                 } else {
-                    Object convertedValue = argumentParameter.getTypeConverter().convert(valueCollection.stream().findFirst()
-                            .orElseThrow(() -> new IllegalArgumentException("Value expected for parameter '" + argumentParameter.getId() + "' in function '" + functionId + "'.")));
+                    if (valueCollection.size() > 1) {
+                        throw new IllegalArgumentException("Multiple values found for non-collection parameter '" + argumentParameter.getId() + "' in function '" + functionId + "'.");
+                    }
+                    final Object rawValue = valueCollection.iterator().next();
+                    if (rawValue == null) {
+                        valuesInOrder.add(null);
+                        continue;
+                    }
+                    Object convertedValue = argumentParameter.getTypeConverter().convert(rawValue);
                     valuesInOrder.add(convertedValue);
                 }
             }

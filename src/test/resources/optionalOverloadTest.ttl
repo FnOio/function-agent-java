@@ -1,0 +1,49 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fno:     <https://w3id.org/function/ontology#> .
+@prefix fnoi:    <https://w3id.org/function/vocabulary/implementation#> .
+@prefix fnom:    <https://w3id.org/function/vocabulary/mapping#> .
+@prefix ex:      <http://example.org/> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xs:      <http://www.w3.org/2001/XMLSchema#> .
+
+ex:substringOptional a fno:Function ;
+  fno:name "substring with optional end index" ;
+  rdfs:label "substring with optional end index" ;
+  dcterms:description "Returns a substring with an optional end index" ;
+  fno:expects ( ex:stringValue ex:fromIndex ex:toIndex ) ;
+  fno:returns ( ex:stringOut ) .
+
+ex:substringOptionalMapping a fno:Mapping ;
+  fno:function ex:substringOptional ;
+  fno:implementation ex:internalTestFunctions ;
+  fno:methodMapping [ a fnom:StringMethodMapping ; fnom:method-name "substringOptional" ] .
+
+ex:stringValue a fno:Parameter ;
+    fno:name "string value" ;
+    rdfs:label "string value" ;
+    fno:predicate ex:p_string ;
+    fno:type xs:string ;
+    fno:required "true"^^xs:boolean .
+
+ex:fromIndex a fno:Parameter ;
+    fno:name "from index" ;
+    rdfs:label "from index" ;
+    fno:predicate ex:p_int1 ;
+    fno:type xs:integer ;
+    fno:required "true"^^xs:boolean .
+
+ex:toIndex a fno:Parameter ;
+    fno:name "to index" ;
+    rdfs:label "to index" ;
+    fno:predicate ex:p_int2 ;
+    fno:type xs:integer ;
+    fno:required "false"^^xs:boolean .
+
+ex:stringOut a fno:Output ;
+    fno:name "string output" ;
+    rdfs:label "string output" ;
+    fno:predicate ex:o_string ;
+    fno:type xs:string .
+
+ex:internalTestFunctions a fnoi:JavaClass ;
+  fnoi:class-name "be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions" .

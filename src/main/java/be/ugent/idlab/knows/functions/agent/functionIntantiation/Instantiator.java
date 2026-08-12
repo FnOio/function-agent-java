@@ -1,21 +1,5 @@
 package be.ugent.idlab.knows.functions.agent.functionIntantiation;
 
-import be.ugent.idlab.knows.functions.agent.Agent;
-import be.ugent.idlab.knows.functions.agent.Arguments;
-import be.ugent.idlab.knows.functions.agent.dataType.ArrayConverter;
-import be.ugent.idlab.knows.functions.agent.dataType.CollectionConverter;
-import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
-import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.*;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.ClassNotFoundException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
-import be.ugent.idlab.knows.functions.agent.model.*;
-import be.ugent.idlab.knows.misc.FileFinder;
-import org.apache.commons.collections4.MultiValuedMap;
-import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -24,10 +8,46 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
+
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import be.ugent.idlab.knows.functions.agent.Agent;
+import be.ugent.idlab.knows.functions.agent.Arguments;
+import be.ugent.idlab.knows.functions.agent.dataType.ArrayConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.CollectionConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.ClassNotFoundException;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.CompositionReferenceException;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.CyclicDependencyException;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.FunctionNotFoundException;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.MethodNotFoundException;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.NotACompositeFunctionException;
+import be.ugent.idlab.knows.functions.agent.model.CompositionMappingElement;
+import be.ugent.idlab.knows.functions.agent.model.CompositionMappingPoint;
+import be.ugent.idlab.knows.functions.agent.model.Function;
+import be.ugent.idlab.knows.functions.agent.model.FunctionComposition;
+import be.ugent.idlab.knows.functions.agent.model.FunctionFieldPair;
+import be.ugent.idlab.knows.functions.agent.model.FunctionMapping;
+import be.ugent.idlab.knows.functions.agent.model.Parameter;
+import be.ugent.idlab.knows.misc.FileFinder;
 
 /**
  * An Instantiator tries to find an implementation (Java Method for now) for any given {@link Function}.
@@ -43,7 +63,7 @@ public class Instantiator {
 
     private final Map<String, Function> id2functionMap;
 
-    // a 'cache' of Methods associated with function ids.
+    // a 'cache' of Methods associated with function ids and invocation arity.
     private final Map<String, Method> id2MethodMap = new HashMap<>();
 
     // a 'cache' for constructed composition methods.
@@ -71,10 +91,19 @@ public class Instantiator {
      * @throws InstantiationException   Something goes wrong finding a method. A subclass of this exception gives more details aboud what goes wrong.
      */
     public Method getMethod(final String functionId) throws InstantiationException {
+        final Function function = id2functionMap.get(functionId);
+        if (function == null) {
+            throw new FunctionNotFoundException("No function found with id " + functionId);
+        }
+        return getMethod(functionId, function.getArgumentParameters().size());
+    }
+
+    public Method getMethod(final String functionId, final int parameterCount) throws InstantiationException {
         logger.debug("Getting instantiation for {}", functionId);
-        if (id2MethodMap.containsKey(functionId)) {
-            logger.debug("Method for {} found in cache.", functionId);
-            return id2MethodMap.get(functionId);
+        final String cacheKey = functionId + '#' + parameterCount;
+        if (id2MethodMap.containsKey(cacheKey)) {
+            logger.debug("Method for {} with arity {} found in cache.", functionId, parameterCount);
+            return id2MethodMap.get(cacheKey);
         }
         if (id2functionMap.containsKey(functionId)) {
             final Function function = id2functionMap.get(functionId);
@@ -89,12 +118,20 @@ public class Instantiator {
             // now get the method
             final String methodName = mapping.methodMapping().methodName();
             final List<Parameter> parameters = function.getArgumentParameters();
+            if (parameterCount > parameters.size()) {
+                throw new MethodNotFoundException("No suitable method '" + methodName + "' with " + parameterCount + " parameters found in class '" + clazz.getName() + "'.");
+            }
+            for (int i = parameterCount; i < parameters.size(); i++) {
+                if (parameters.get(i).isRequired()) {
+                    throw new MethodNotFoundException("No suitable method '" + methodName + "' with " + parameterCount + " parameters found in class '" + clazz.getName() + "' because required parameters would be omitted.");
+                }
+            }
             Method method;
             try {
                 Parameter p = function.getReturnParameters().size() == 0 ? new Parameter("","", this.dataTypeConverterProvider.getDataTypeConverter("void"), true) : function.getReturnParameters().get(0);
-                method = getMethod(clazz, methodName, parameters, p);
+                method = getMethod(clazz, methodName, parameters.subList(0, parameterCount), p);
                 logger.debug("Found method {}", method.getName());
-                id2MethodMap.put(functionId, method);
+                id2MethodMap.put(cacheKey, method);
                 return method;
             } catch (java.lang.ClassNotFoundException e) {
                 throw new ClassNotFoundException(e.getMessage());

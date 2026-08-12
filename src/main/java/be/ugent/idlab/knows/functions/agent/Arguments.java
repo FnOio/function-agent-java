@@ -62,7 +62,7 @@ public class Arguments {
                 .append("('")
                 .append(entry.getKey())
                 .append("' -> '")
-                .append(entry.getValue().toString())
+                .append(String.valueOf(entry.getValue()))
                 .append("')"));
         return str.toString();
     }

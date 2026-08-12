@@ -1,19 +1,5 @@
 package be.ugent.idlab.knows.functions.agent;
 
-import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
-import be.ugent.idlab.knows.functions.agent.exception.AgentException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.ParameterNotFoundException;
-import be.ugent.idlab.knows.functions.agent.model.Function;
-import be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions;
-import be.ugent.idlab.knows.misc.FileFinder;
-import org.junit.jupiter.api.Test;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -22,9 +8,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+
+import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
+import be.ugent.idlab.knows.functions.agent.exception.AgentException;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.Instantiator;
+import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.IDLABFN;
 import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
-import static org.junit.jupiter.api.Assertions.*;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.ParameterNotFoundException;
+import be.ugent.idlab.knows.functions.agent.model.Function;
+import be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions;
+import be.ugent.idlab.knows.misc.FileFinder;
 
 /**
  * <p>
@@ -84,6 +89,49 @@ public class AgentTest {
             // execute the function
             Object result = agent.execute("http://users.ugent.be/~bjdmeest/function/grel.ttl#boolean_and", arguments);
             assertFalse((Boolean) result, "\"false\" | \"false\" should be false");
+        }
+    }
+
+    @Test
+    public void testOptionalParameterUsesShorterOverloadWhenOmitted() throws Exception {
+        Object result;
+        try (Agent agent = AgentFactory.createFromFnO("optionalOverloadTest.ttl")) {
+            Arguments arguments = new Arguments()
+                    .add(EX + "p_string", "abcdef")
+                    .add(EX + "p_int1", 2);
+
+            result = agent.execute(EX + "substringOptional", arguments);
+        }
+
+        assertEquals("cdef", result, "Omitted optional parameter should dispatch to the two-argument overload");
+    }
+
+    @Test
+    public void testOptionalParameterAtEndOfStringReturnsEmptyString() throws Exception {
+        Object result;
+        try (Agent agent = AgentFactory.createFromFnO("optionalOverloadTest.ttl")) {
+            Arguments arguments = new Arguments()
+                    .add(EX + "p_string", "Venus")
+                    .add(EX + "p_int1", 5);
+
+            result = agent.execute(EX + "substringOptional", arguments);
+        }
+
+        assertNotNull(result, "substring(\"Venus\", 5) should not return null");
+        assertEquals("", result, "substring(\"Venus\", 5) should return an empty string");
+    }
+
+    @Test
+    public void testMultipleValuesForScalarParameterThrows() throws Exception {
+        try (Agent agent = AgentFactory.createFromFnO("optionalOverloadTest.ttl")) {
+            Arguments arguments = new Arguments()
+                    .add(EX + "p_string", "Venus")
+                    .add(EX + "p_string", "Mars")
+                    .add(EX + "p_int1", 2);
+
+            assertThrows(IllegalArgumentException.class,
+                    () -> agent.execute(EX + "substringOptional", arguments),
+                    "Multiple values for a scalar parameter should be rejected");
         }
     }
 
