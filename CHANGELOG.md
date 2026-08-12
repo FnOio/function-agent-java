@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+- Regression tests for optional-parameter overload handling and scalar argument validation.
+
+### Changed
+- Non-collection parameters now reject multiple supplied values instead of silently taking the first one.
+
+### Fixed
+- Omitted trailing optional parameters now resolve to the matching shorter Java overload when available.
+
 ## [1.3.0] - 2025-12-22
 
 ### Changed
