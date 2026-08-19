@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Omitted trailing optional parameters now resolve to the matching shorter Java overload when available.
+- Updated dependencies to latest stable versions: jena-arq 4.9.0, JUnit 5.10.2, grel-functions-java v0.10.0.
 
 ## [1.3.0] - 2025-12-22
 
