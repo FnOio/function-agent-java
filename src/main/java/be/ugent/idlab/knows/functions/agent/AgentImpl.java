@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import be.ugent.idlab.knows.functions.agent.model.fno.FnOParameter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -103,6 +104,11 @@ public class AgentImpl implements Agent {
         }
     }
 
+    @Override
+    public Map<String, Function> getFunctions() {
+        return functionId2Function;
+    }
+
     private int getInvocationArity(final Function function, final Arguments arguments) {
         int invocationArity = function.getArgumentParameters().size();
         final List<Parameter> parameters = function.getArgumentParameters();
@@ -117,11 +123,16 @@ public class AgentImpl implements Agent {
     private List<Object> getParameterValues(String functionId, Arguments arguments, Function function) throws MissingRDFSeqIndexException, DataTypeConverterException {
         final List<Object> valuesInOrder = new ArrayList<>(arguments.size());
         for (Parameter argumentParameter : function.getArgumentParameters()) {
-            logger.debug("finding value for parameter {}", argumentParameter.getId());
-            Collection<Object> valueCollection = arguments.get(argumentParameter.getId());
+            final String parameterId = argumentParameter.getId();
+            logger.debug("finding value for parameter {}", parameterId);
+            Collection<Object> valueCollection = arguments.get(parameterId);
+            if (valueCollection.isEmpty() && argumentParameter instanceof FnOParameter) {
+                // try to find the parameter by its resource id; this is being used in RML-FNML
+                valueCollection = arguments.get(((FnOParameter) argumentParameter).getResourceId());
+            }
             if (argumentParameter.getTypeConverter().getTypeCategory() == DataTypeConverter.TypeCategory.COLLECTION) {
                 logger.debug("got collection argument!");
-                if((RDF+"_nnn").equals(argumentParameter.getId())){
+                if((RDF+"_nnn").equals(parameterId)){
                     logger.debug("found sequential parameter (_nnn), looking for values");
                     // get the highest available sequence index
                     Optional<Integer> optionalInteger = arguments.getArgumentNames().stream()
@@ -129,7 +140,7 @@ public class AgentImpl implements Agent {
                             .map(i -> Integer.parseInt(i.substring(RDF.toString().length()+1)))
                             .max(Integer::compareTo);
 
-                    if(!optionalInteger.isPresent()){ // no parameters of type _nnn available
+                    if(optionalInteger.isEmpty()){ // no parameters of type _nnn available
                         valuesInOrder.add(null);
                         continue;
                     }
@@ -197,7 +208,7 @@ public class AgentImpl implements Agent {
         if (function.getReturnParameters().isEmpty()) {
             executionResource.addLiteral(ResourceFactory.createProperty(DCTERMS.toString(), "description"), "Function has no output");
         } else {
-            executionResource.addLiteral(ResourceFactory.createProperty(function.getReturnParameters().get(0).getId()), result.toString());
+            executionResource.addLiteral(ResourceFactory.createProperty(function.getReturnParameters().getFirst().getId()), result.toString());
         }
         printModel(model, filename);
     }

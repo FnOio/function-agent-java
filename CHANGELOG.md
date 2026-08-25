@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+- `Agent`: added `getFunctions` method to retrieve all loaded functions.
+- Added class `FnOParameter`, a subclass of `Parameter` which holds a resource URI and a return type URI. Each parameter
+  of a function provided by the `FnOFunctionModelProvider` is now an instance of `FnOParameter`.
+
 ## [1.4.0] - 2026-08-19
 
 ### Added

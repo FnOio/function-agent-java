@@ -128,7 +128,7 @@ public class Instantiator {
             }
             Method method;
             try {
-                Parameter p = function.getReturnParameters().size() == 0 ? new Parameter("","", this.dataTypeConverterProvider.getDataTypeConverter("void"), true) : function.getReturnParameters().get(0);
+                Parameter p = function.getReturnParameters().isEmpty() ? new Parameter("","", this.dataTypeConverterProvider.getDataTypeConverter("void"), true) : function.getReturnParameters().getFirst();
                 method = getMethod(clazz, methodName, parameters.subList(0, parameterCount), p);
                 logger.debug("Found method {}", method.getName());
                 id2MethodMap.put(cacheKey, method);

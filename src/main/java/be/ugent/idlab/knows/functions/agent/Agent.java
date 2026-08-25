@@ -1,5 +1,9 @@
 package be.ugent.idlab.knows.functions.agent;
 
+import be.ugent.idlab.knows.functions.agent.model.Function;
+
+import java.util.Map;
+
 /**
  * An Agent executes functions.
  * <br>
@@ -27,4 +31,12 @@ public interface Agent extends AutoCloseable {
      * @throws Exception    Something goes wrong looking up the function or executing it.
      */
     Object execute(final String functionId, final Arguments arguments, boolean debug) throws Exception;
+
+    /**
+     * Returns a map of all functions that this agent can execute.
+     *
+     * @return  A map of all functions that this agent can execute, where the key is the function id and the
+     *          value is the function.
+     */
+    Map<String, Function> getFunctions();
 }

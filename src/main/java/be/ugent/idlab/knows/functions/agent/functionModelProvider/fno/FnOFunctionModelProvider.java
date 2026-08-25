@@ -6,6 +6,7 @@ import be.ugent.idlab.knows.functions.agent.dataType.ListConverter;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.*;
 import be.ugent.idlab.knows.functions.agent.model.*;
+import be.ugent.idlab.knows.functions.agent.model.fno.FnOParameter;
 import be.ugent.idlab.knows.misc.FileFinder;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.Lang;
@@ -583,7 +584,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         boolean isRequired = getLiteralBoolean(parameterResource, FNO + "required").orElse(true);
         DataTypeConverter<?> typeConverter = predicateUri.equals(RDF+"_nnn") ? new ListConverter() : dataTypeConverterProvider.getDataTypeConverter(typeUri);
 
-        return new Parameter(name, predicateUri, typeConverter, isRequired);
+        return new FnOParameter(name, predicateUri, typeConverter, isRequired, parameterResource.getURI(), typeUri);
     }
 
     /**
