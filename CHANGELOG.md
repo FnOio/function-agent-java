@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## [1.5.1] - 2026-08-26
+
 ## [1.5.0] - 2026-08-25
 
 ### Fixed
@@ -134,6 +136,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.0.1] - 2022-03-25
 
+[1.5.1]: https://github.com/FnOio/function-agent-java/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/FnOio/function-agent-java/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/FnOio/function-agent-java/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/FnOio/function-agent-java/compare/v1.2.1...v1.3.0
