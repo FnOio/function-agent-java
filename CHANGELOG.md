@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.5.0] - 2026-08-25
 
+### Fixed
+- When calculating the number of parameters of a function given the arguments, take into account that FnO parameters might be referred to by their resource id.
+
 ### Added
 - `Agent`: added `getFunctions` method to retrieve all loaded functions.
 - Added class `FnOParameter`, a subclass of `Parameter` which holds a resource URI and a return type URI. Each parameter

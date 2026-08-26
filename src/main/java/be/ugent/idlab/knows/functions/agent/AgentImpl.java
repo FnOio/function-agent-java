@@ -113,7 +113,20 @@ public class AgentImpl implements Agent {
         int invocationArity = function.getArgumentParameters().size();
         final List<Parameter> parameters = function.getArgumentParameters();
 
-        while (invocationArity > 0 && arguments.get(parameters.get(invocationArity - 1).getId()).isEmpty() && !parameters.get(invocationArity - 1).isRequired()) {
+        // This assumes optional parameters are at the end of the parameter list.
+        while (invocationArity > 0) {
+            final Parameter parameter = parameters.get(invocationArity - 1);
+            final String parameterId = parameter.getId();
+            Collection<Object> valueCollection = arguments.get(parameterId);
+            if (valueCollection.isEmpty()) {
+                final String parameterResourceId = parameter instanceof FnOParameter ? ((FnOParameter) parameter).getResourceId() : null;
+                if (parameterResourceId != null) {
+                    valueCollection = arguments.get(parameterResourceId);
+                }
+            }
+            if (!valueCollection.isEmpty() || parameter.isRequired()) {
+                break;
+            }
             invocationArity--;
         }
 
