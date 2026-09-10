@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Changed
+- Don't build fat jar.
+
 ## [1.5.1] - 2026-08-26
 
 ## [1.5.0] - 2026-08-25
