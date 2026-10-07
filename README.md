@@ -155,9 +155,9 @@ If all functions need execution, set the debug flag of the `Agent`.
 
 ### Constructing compositions
 
-A composition is represented internally as a lambda of type [ThrowableFunction](./src/main/java/be/ugent/idlab/knows/functions/agent/functionIntantiation/ThrowableFunction.java).
+A composition is represented internally as a lambda of type [ThrowableFunction](./src/main/java/be/ugent/idlab/knows/functions/agent/functionInstantiation/ThrowableFunction.java).
 This interface requires an `Agent` to be passed. This is to evaluate the functions the composition depends upon.
-The lambda is built at [getCompositeMethod](./src/main/java/be/ugent/idlab/knows/functions/agent/functionIntantiation/Instantiator.java).
+The lambda is built at [getCompositeMethod](./src/main/java/be/ugent/idlab/knows/functions/agent/functionInstantiation/Instantiator.java).
 This lambda is built based on the composition and is constructed using the following steps:
 
 1. Initialise and do safety checks

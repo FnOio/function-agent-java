@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.functionIntantiation.exception;
+package be.ugent.idlab.knows.functions.agent.functionInstantiation.exception;
 
 /**
  * Thrown when there is a cycle in the Composition mappings of a function composition

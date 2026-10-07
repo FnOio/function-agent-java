@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.functionIntantiation.exception;
+package be.ugent.idlab.knows.functions.agent.functionInstantiation.exception;
 
 /**
  * Something goes wrong instantiating classes or methods using reflection

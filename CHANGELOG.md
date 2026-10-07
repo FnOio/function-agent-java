@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Don't build fat jar.
+- Breaking: the package `be.ugent.idlab.knows.functions.agent.functionIntantiation` is renamed to `functionInstantiation`; change the imports of `Instantiator`, `ThrowableFunction` and the `exception` classes accordingly.
 
 ## [1.5.1] - 2026-08-26
 

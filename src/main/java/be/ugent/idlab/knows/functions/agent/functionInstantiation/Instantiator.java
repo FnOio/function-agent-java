@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.functionIntantiation;
+package be.ugent.idlab.knows.functions.agent.functionInstantiation;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -33,13 +33,13 @@ import be.ugent.idlab.knows.functions.agent.dataType.ArrayConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.CollectionConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.ClassNotFoundException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.CompositionReferenceException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.CyclicDependencyException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.FunctionNotFoundException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.InstantiationException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.MethodNotFoundException;
-import be.ugent.idlab.knows.functions.agent.functionIntantiation.exception.NotACompositeFunctionException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.ClassNotFoundException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.CompositionReferenceException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.CyclicDependencyException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.FunctionNotFoundException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.InstantiationException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.MethodNotFoundException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.NotACompositeFunctionException;
 import be.ugent.idlab.knows.functions.agent.model.CompositionMappingElement;
 import be.ugent.idlab.knows.functions.agent.model.CompositionMappingPoint;
 import be.ugent.idlab.knows.functions.agent.model.Function;

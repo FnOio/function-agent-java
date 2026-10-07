@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.functionIntantiation.exception;
+package be.ugent.idlab.knows.functions.agent.functionInstantiation.exception;
 
 /**
  * Thrown when no {@link be.ugent.idlab.knows.functions.agent.model.Function} is found for a given function ID.

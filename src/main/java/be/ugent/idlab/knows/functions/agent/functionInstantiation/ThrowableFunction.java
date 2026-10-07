@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.functionIntantiation;
+package be.ugent.idlab.knows.functions.agent.functionInstantiation;
 
 import be.ugent.idlab.knows.functions.agent.Agent;
 

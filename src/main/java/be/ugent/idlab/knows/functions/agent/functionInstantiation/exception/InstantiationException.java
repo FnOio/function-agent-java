@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.functionIntantiation.exception;
+package be.ugent.idlab.knows.functions.agent.functionInstantiation.exception;
 
 /**
  * Thrown if something goes wrong instantiating the necessary classes to execute a function

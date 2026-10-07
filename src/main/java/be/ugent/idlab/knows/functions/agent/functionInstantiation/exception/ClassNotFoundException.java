@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.functions.agent.functionIntantiation.exception;
+package be.ugent.idlab.knows.functions.agent.functionInstantiation.exception;
 
 /**
  * Thrown when no class can be found for a given class ID
