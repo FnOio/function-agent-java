@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 
 ### Changed
+- `bump-version.sh` moves the version to the next patch `-SNAPSHOT` after a pushed release, replacing the manual "Prepare for next development cycle" commit.
 - Don't build fat jar.
 - Breaking: the package `be.ugent.idlab.knows.functions.agent.functionIntantiation` is renamed to `functionInstantiation`; change the imports of `Instantiator`, `ThrowableFunction` and the `exception` classes accordingly.
 
