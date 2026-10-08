@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## [2.0.0] - 2026-10-08
+
 ### Changed
 - **Breaking:** the package `be.ugent.idlab.knows.functions.agent.functionIntantiation` is renamed to `be.ugent.idlab.knows.functions.agent.functionInstantiation`; update the imports of `Instantiator`, `ThrowableFunction` and its `exception` classes.
 - **Breaking:** `FileFinder` moved from `be.ugent.idlab.knows.misc` to `be.ugent.idlab.knows.functions.agent.util`.
@@ -150,6 +152,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.0.1] - 2022-03-25
 
+[2.0.0]: https://github.com/FnOio/function-agent-java/compare/v1.5.1...v2.0.0
 [1.5.1]: https://github.com/FnOio/function-agent-java/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/FnOio/function-agent-java/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/FnOio/function-agent-java/compare/v1.3.0...v1.4.0

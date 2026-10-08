@@ -119,7 +119,7 @@ The library is published on Maven Central. In your `pom.xml` add the following d
 <dependency>
     <groupId>be.ugent.idlab.knows</groupId>
     <artifactId>function-agent-java</artifactId>
-    <version>1.5.1</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
