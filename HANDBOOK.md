@@ -88,4 +88,6 @@ Some tests write files into the working directory (the repository root when run 
 
 ## Release process
 
+Step-by-step instructions are in [RELEASE.md](RELEASE.md); this section explains the tooling.
+
 `bump-version.sh <version>` performs a release step interactively: it sets the version in `pom.xml` (`mvn versions:set`) and in the Maven snippet of `README.md`, optionally adds the version section to `CHANGELOG.md` with `changefrog`, and optionally commits, tags (`v<version>`, or the bare name for `testrelease-*`) and pushes. Finally, after a pushed release other than a `testrelease-*`, it moves the version to the next patch `-SNAPSHOT` (e.g. `1.5.2-SNAPSHOT` after `1.5.1`) and commits and pushes that as "Prepare for next development cycle". The `release` Maven profile builds source and Javadoc jars, signs them with GPG, and publishes to Maven Central through `central-publishing-maven-plugin`; the shared CI template runs that deployment.
