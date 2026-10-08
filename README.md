@@ -113,19 +113,13 @@ See also [AgentTest.java](src/test/java/be/ugent/idlab/knows/functions/agent/Age
 
 ## Download
 
-### Jar file
-
-Grab the latest [release](https://github.com/FnOio/function-agent-java/releases) from GitHub.
-
-### Maven
-
-In your `pom.xml` add the following dependency:
+The library is published on Maven Central. In your `pom.xml` add the following dependency:
 
 ```xml
 <dependency>
     <groupId>be.ugent.idlab.knows</groupId>
     <artifactId>function-agent-java</artifactId>
-    <version>1.5.2-SNAPSHOT</version>
+    <version>1.5.1</version>
 </dependency>
 ```
 

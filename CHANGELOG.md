@@ -7,13 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
-### Added
-- `RELEASE.md`: step-by-step instructions for publishing a release.
-
 ### Changed
-- `bump-version.sh` moves the version to the next patch `-SNAPSHOT` after a pushed release, replacing the manual "Prepare for next development cycle" commit.
-- Don't build fat jar.
-- Breaking: the package `be.ugent.idlab.knows.functions.agent.functionIntantiation` is renamed to `functionInstantiation`; change the imports of `Instantiator`, `ThrowableFunction` and the `exception` classes accordingly.
+- **Breaking:** the package `be.ugent.idlab.knows.functions.agent.functionIntantiation` is renamed to `be.ugent.idlab.knows.functions.agent.functionInstantiation`; update the imports of `Instantiator`, `ThrowableFunction` and its `exception` classes.
+- Release tooling: `RELEASE.md` documents the steps; `bump-version.sh` checks the version format and moves to the next patch `-SNAPSHOT` after a release.
+- `commons-collections4` and `jena-core` are declared dependencies.
+
+### Removed
+- The `jar-with-dependencies` artifact; dependencies resolve transitively from the POM.
 
 ## [1.5.1] - 2026-08-26
 

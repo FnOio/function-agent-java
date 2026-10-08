@@ -65,18 +65,18 @@ All packages live under `be.ugent.idlab.knows.functions.agent` unless noted.
 - **`exception`**: general agent exceptions.
 - **`be.ugent.idlab.knows.misc.FileFinder`**: resolves a path as a remote URL, then as a file relative to the working directory, then as a classpath resource.
 
-Runtime dependencies are `jena-arq` and `slf4j-api` only.
+Runtime dependencies are `jena-arq`, `jena-core`, `commons-collections4` and `slf4j-api`. `jena-core` shares the `jena.version` property with `jena-arq`.
 
 ## Build and test
 
-- Build: `mvn compile`; package: `mvn package` (plain jar, without bundled dependencies).
+- Build: `mvn compile`; `mvn package` builds the library jar.
 - Test: `mvn test`. CI (`.gitlab-ci.yml`) runs `mvn $MAVEN_CLI_OPTS test` on `maven:3-eclipse-temurin-21-alpine` for every branch except `main` and `development`, using `.m2/settings.xml`.
 - CI also includes the shared `rml/util/ci-templates` `CHANGELOG.gitlab-ci.yml` check (the `lint` stage), which requires `CHANGELOG.md` to be updated, and `Maven-Central.gitlab-ci.yml` for deployment.
-- Linter: SpotBugs 4.10.3 (`spotbugs-maven-plugin` 4.10.3.0, configured in `<pluginManagement>` as in MappingWeaver-java and not bound to a phase). Run `mvn compile spotbugs:check`. Known state: `spotbugs:check` reports 25 findings (mostly EI_EXPOSE_REP and EI_EXPOSE_REP2 in the model classes) and fails the build, so it runs on demand and CI does not run it. No formatter is configured.
+- Linter: SpotBugs 4.10.3 (`spotbugs-maven-plugin` 4.10.3.0, configured in `<pluginManagement>` as in MappingWeaver-java and not bound to a phase). Run `mvn compile spotbugs:check`. Known state: `spotbugs:check` reports 24 findings (mostly EI_EXPOSE_REP and EI_EXPOSE_REP2 in the model classes) and fails the build, so it runs on demand and CI does not run it. No formatter is configured.
 
-Test classes mirror the main packages: `AgentTest` (end-to-end execution, compositions, partial application, overloads, writing models), `ArgumentsTest`, `GeneratorTest`, `dataType/DataTypeConverterTest`, `functionInstantiator/InstantiatorTest`, `functionModelProvider/fno/FnOFunctionProviderTest`, and `misc/FileFinderTest` and `misc/JarFileTest`. `internalfunctions/InternalTestFunctions` holds the Java methods that test FnO documents map to.
+Test classes follow the main packages; the test package for `functionInstantiation` is `functionInstantiator`. They are `AgentTest` (end-to-end execution, compositions, partial application, overloads, writing models), `ArgumentsTest`, `GeneratorTest`, `dataType/DataTypeConverterTest`, `functionInstantiator/InstantiatorTest`, `functionModelProvider/fno/FnOFunctionProviderTest`, and `misc/FileFinderTest` and `misc/JarFileTest`. `internalfunctions/InternalTestFunctions` holds the Java methods that test FnO documents map to.
 
-Some tests write files into the working directory (the repository root when run with Maven): `test.txt` and `test0.txt` are produced by print side effects in `sum-composition.ttl` and `complex_side_path.ttl`, and `testFileWrite.ttl` and `testExecution.ttl` by `AgentTest.testWriteModel` and `testWriteExecutionToFile`. `.gitignore` excludes them (`test*.txt`, `test*.ttl`).
+Some tests write files into the working directory (the repository root when run with Maven): `test.txt` and `test0.txt` are produced by print side effects in `sum-composition.ttl` and `complex_side_path.ttl`, `test1.txt` by `AgentTest.functionWithoutReturnValue`, and `testFileWrite.ttl` and `testExecution.ttl` by `AgentTest.testWriteModel` and `testWriteExecutionToFile`. `.gitignore` excludes them (`test*.txt`, `test*.ttl`).
 
 ## Test resources
 
@@ -88,6 +88,6 @@ Some tests write files into the working directory (the repository root when run 
 
 ## Release process
 
-Step-by-step instructions are in [RELEASE.md](RELEASE.md); this section explains the tooling.
+Step-by-step instructions are in [RELEASE.md](RELEASE.md).
 
-`bump-version.sh <version>` performs a release step interactively: it sets the version in `pom.xml` (`mvn versions:set`) and in the Maven snippet of `README.md`, optionally adds the version section to `CHANGELOG.md` with `changefrog`, and optionally commits, tags (`v<version>`, or the bare name for `testrelease-*`) and pushes. Finally, after a pushed release other than a `testrelease-*`, it moves the version to the next patch `-SNAPSHOT` (e.g. `1.5.2-SNAPSHOT` after `1.5.1`) and commits and pushes that as "Prepare for next development cycle". The `release` Maven profile builds source and Javadoc jars, signs them with GPG, and publishes to Maven Central through `central-publishing-maven-plugin`; the shared CI template runs that deployment.
+`bump-version.sh` tags a release `v<version>`; a `testrelease-*` name is used as-is for the tag and gets no next `-SNAPSHOT`. The `release` Maven profile builds source and Javadoc jars, signs them with GPG, and publishes to Maven Central through `central-publishing-maven-plugin`; the shared CI template runs that deployment.
