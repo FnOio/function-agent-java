@@ -19,17 +19,18 @@ import org.junit.jupiter.api.Test;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.exception.AgentException;
 import be.ugent.idlab.knows.functions.agent.functionInstantiation.Instantiator;
-import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.InstantiationException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.FunctionInstantiationException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.FunctionNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
-import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.IDLABFN;
-import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.Namespaces.IDLABFN;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.Namespaces.RDF;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
-import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionNotFoundException;
+import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FunctionResourceNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.ParameterNotFoundException;
 import be.ugent.idlab.knows.functions.agent.model.Function;
 import be.ugent.idlab.knows.functions.internalfunctions.InternalTestFunctions;
-import be.ugent.idlab.knows.misc.FileFinder;
+import be.ugent.idlab.knows.functions.agent.util.FileFinder;
 
 /**
  * <p>
@@ -291,11 +292,18 @@ public class AgentTest {
     }
 
     @Test
+    public void testExecuteUnknownFunctionThrowsFunctionNotFoundException() throws Exception {
+        try (Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl")) {
+            assertThrows(FunctionNotFoundException.class, () -> agent.execute(FNS + "unknownFunction", new Arguments()), "expected an exception");
+        }
+    }
+
+    @Test
     public void testThrowExceptionForCyclicDependencies() throws Exception {
         try (Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "identityInteger.ttl", "cyclic.ttl")) {
             Arguments arguments = new Arguments()
                     .add(EX + "p_int1", "1");
-            assertThrows(InstantiationException.class, () -> agent.execute(FNS + "cyclicFunction", arguments), "expected an exception to be thrown");
+            assertThrows(FunctionInstantiationException.class, () -> agent.execute(FNS + "cyclicFunction", arguments), "expected an exception to be thrown");
         }
     }
 
@@ -325,7 +333,7 @@ public class AgentTest {
         try (Agent agent = AgentFactory.createFromFnO("badParameter.ttl", "generalFunctions.ttl")) {
             Arguments arguments = new Arguments()
                     .add(EX + "p_int1", 1);
-            assertThrows(InstantiationException.class, () -> agent.execute(FNS + "bad", arguments), "expected an exception");
+            assertThrows(FunctionInstantiationException.class, () -> agent.execute(FNS + "bad", arguments), "expected an exception");
         }
     }
 
@@ -433,7 +441,7 @@ public class AgentTest {
 
     @Test
     public void testPartialApplicationThrowsExceptionNonExistingFunction() {
-        assertThrows(FunctionNotFoundException.class, () -> {
+        assertThrows(FunctionResourceNotFoundException.class, () -> {
             Agent agent = AgentFactory.createFromFnO("generalFunctions.ttl", "badPartialApplicationFunction.ttl");
             agent.close();
         }, "expected an exception");

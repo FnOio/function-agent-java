@@ -6,7 +6,7 @@ package be.ugent.idlab.knows.functions.agent.functionInstantiation.exception;
  *
  * @author Gerald Haesendonck
  */
-public class ReflectionException extends InstantiationException {
+public class ReflectionException extends FunctionInstantiationException {
     public ReflectionException(String message) {
         super(message);
     }

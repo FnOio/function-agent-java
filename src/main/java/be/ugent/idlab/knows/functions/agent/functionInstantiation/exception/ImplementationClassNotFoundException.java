@@ -7,8 +7,8 @@ package be.ugent.idlab.knows.functions.agent.functionInstantiation.exception;
  *
  * @author Gerald Haesendonck
  */
-public class ClassNotFoundException extends InstantiationException {
-    public ClassNotFoundException(String message) {
+public class ImplementationClassNotFoundException extends FunctionInstantiationException {
+    public ImplementationClassNotFoundException(String message) {
         super(message);
     }
 }

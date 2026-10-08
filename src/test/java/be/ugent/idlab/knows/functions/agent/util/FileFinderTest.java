@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.misc;
+package be.ugent.idlab.knows.functions.agent.util;
 
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +28,7 @@ public class FileFinderTest {
 
     @Test
     public void testfindFileRelativeToWorkingDir() throws IOException {
-        final String path = "src/test/java/be/ugent/idlab/knows/misc/FileFinderTest.java";
+        final String path = "src/test/java/be/ugent/idlab/knows/functions/agent/util/FileFinderTest.java";
         URL url = FileFinder.findFileRelativeToWorkingDir(path);
         checkURL(url, path);
     }
@@ -42,7 +42,7 @@ public class FileFinderTest {
 
     @Test
     public void testFindFile_relative() throws IOException {
-        final String path = "src/test/java/be/ugent/idlab/knows/misc/FileFinderTest.java";
+        final String path = "src/test/java/be/ugent/idlab/knows/functions/agent/util/FileFinderTest.java";
         URL url = FileFinder.findFile(path);
         checkURL(url, path);
     }

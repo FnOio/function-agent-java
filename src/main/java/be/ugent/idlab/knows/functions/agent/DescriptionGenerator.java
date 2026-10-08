@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.*;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.Namespaces.*;
 
 public class DescriptionGenerator {
 

@@ -33,11 +33,11 @@ import be.ugent.idlab.knows.functions.agent.dataType.ArrayConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.CollectionConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverter;
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
-import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.ClassNotFoundException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.ImplementationClassNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.CompositionReferenceException;
 import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.CyclicDependencyException;
 import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.FunctionNotFoundException;
-import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.InstantiationException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.FunctionInstantiationException;
 import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.MethodNotFoundException;
 import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.NotACompositeFunctionException;
 import be.ugent.idlab.knows.functions.agent.model.CompositionMappingElement;
@@ -47,7 +47,7 @@ import be.ugent.idlab.knows.functions.agent.model.FunctionComposition;
 import be.ugent.idlab.knows.functions.agent.model.FunctionFieldPair;
 import be.ugent.idlab.knows.functions.agent.model.FunctionMapping;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
-import be.ugent.idlab.knows.misc.FileFinder;
+import be.ugent.idlab.knows.functions.agent.util.FileFinder;
 
 /**
  * An Instantiator tries to find an implementation (Java Method for now) for any given {@link Function}.
@@ -88,9 +88,9 @@ public class Instantiator {
      * Tries to get a method to execute the function with the given ID.
      * @param functionId    The identifier of the function for which a method has to be found.
      * @return              An executable method which is an implementation of the function with the given functionId.
-     * @throws InstantiationException   Something goes wrong finding a method. A subclass of this exception gives more details aboud what goes wrong.
+     * @throws FunctionInstantiationException   Something goes wrong finding a method. A subclass of this exception gives more details aboud what goes wrong.
      */
-    public Method getMethod(final String functionId) throws InstantiationException {
+    public Method getMethod(final String functionId) throws FunctionInstantiationException {
         final Function function = id2functionMap.get(functionId);
         if (function == null) {
             throw new FunctionNotFoundException("No function found with id " + functionId);
@@ -98,7 +98,7 @@ public class Instantiator {
         return getMethod(functionId, function.getArgumentParameters().size());
     }
 
-    public Method getMethod(final String functionId, final int parameterCount) throws InstantiationException {
+    public Method getMethod(final String functionId, final int parameterCount) throws FunctionInstantiationException {
         logger.debug("Getting instantiation for {}", functionId);
         final String cacheKey = functionId + '#' + parameterCount;
         if (id2MethodMap.containsKey(cacheKey)) {
@@ -134,7 +134,7 @@ public class Instantiator {
                 id2MethodMap.put(cacheKey, method);
                 return method;
             } catch (java.lang.ClassNotFoundException e) {
-                throw new ClassNotFoundException(e.getMessage());
+                throw new ImplementationClassNotFoundException(e.getMessage());
             }
         } else {
             throw new FunctionNotFoundException("No function found with id " + functionId);
@@ -145,9 +145,9 @@ public class Instantiator {
      * Generates a lambda that executes the composite method for the given function
      * @param functionId the name of the function for which the function composition must be generated
      * @return a lambda that is the composite function
-     * @throws InstantiationException if the given functionId is not a function composition, this function will throw an error
+     * @throws FunctionInstantiationException if the given functionId is not a function composition, this function will throw an error
      */
-    public ThrowableFunction getCompositeMethod(final String functionId, boolean debug) throws InstantiationException {
+    public ThrowableFunction getCompositeMethod(final String functionId, boolean debug) throws FunctionInstantiationException {
         logger.debug("constructing composite method for {}", functionId);
         if(id2CompositionLambdaMap.containsKey(functionId)){
             logger.debug("found composition for {} in cache!", functionId);
@@ -326,7 +326,7 @@ public class Instantiator {
         return returnFunction;
     }
 
-    private void checkFunction(CompositionMappingPoint compositionMappingPoint) throws InstantiationException{
+    private void checkFunction(CompositionMappingPoint compositionMappingPoint) throws FunctionInstantiationException{
         Function fromFunction = id2functionMap.get(compositionMappingPoint.functionId());
         if(Objects.isNull(fromFunction)){
             throw new CompositionReferenceException("the used function " + compositionMappingPoint.functionId() + " could not be found");
@@ -346,7 +346,7 @@ public class Instantiator {
     }
 
 
-    private void checkDependencyCycles(MultiValuedMap<String, String> globalDependencies) throws InstantiationException{
+    private void checkDependencyCycles(MultiValuedMap<String, String> globalDependencies) throws FunctionInstantiationException{
         for (String functionID : globalDependencies.keySet()) {
             if(globalDependencies.get(functionID).contains(functionID)) throw new CyclicDependencyException("Cycle detected in dependency of " + functionID);
         }
@@ -361,9 +361,9 @@ public class Instantiator {
      * @param className The name of the class to get the Class object for.
      * @param location  The location to search the class for, e.g. path to a Jar file, or a Java source file.
      * @return          The Class object associated with the class or interface with the given className.
-     * @throws ClassNotFoundException If no class could be found.
+     * @throws ImplementationClassNotFoundException If no class could be found.
      */
-    private Class<?> getClass(final String className, final String location) throws ClassNotFoundException {
+    private Class<?> getClass(final String className, final String location) throws ImplementationClassNotFoundException {
         logger.debug("Trying to find a Class for {}", className);
         // check if the class is in the cache
         if (className2ClassMap.containsKey(className)) {
@@ -392,7 +392,7 @@ public class Instantiator {
                 logger.warn("An error occurred trying to load classes of file '{}'. Note that only JAR files are supported at the moment.", locationUrl, ex);
             }
 
-            throw new ClassNotFoundException("No class found for " + className);
+            throw new ImplementationClassNotFoundException("No class found for " + className);
         }
     }
 

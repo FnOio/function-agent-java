@@ -1,4 +1,4 @@
-package be.ugent.idlab.knows.misc;
+package be.ugent.idlab.knows.functions.agent.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

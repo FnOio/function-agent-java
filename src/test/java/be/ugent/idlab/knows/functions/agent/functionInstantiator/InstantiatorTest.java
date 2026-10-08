@@ -2,7 +2,7 @@ package be.ugent.idlab.knows.functions.agent.functionInstantiator;
 
 import be.ugent.idlab.knows.functions.agent.dataType.DataTypeConverterProvider;
 import be.ugent.idlab.knows.functions.agent.functionInstantiation.Instantiator;
-import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.InstantiationException;
+import be.ugent.idlab.knows.functions.agent.functionInstantiation.exception.FunctionInstantiationException;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.FnOFunctionModelProvider;
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.FnOException;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class InstantiatorTest {
 
     @Test
-    public void testClassOnClasspath() throws InstantiationException, InvocationTargetException, IllegalAccessException, FnOException {
+    public void testClassOnClasspath() throws FunctionInstantiationException, InvocationTargetException, IllegalAccessException, FnOException {
         final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
 
         // load function descriptions
@@ -52,7 +52,7 @@ public class InstantiatorTest {
     }
 
     @Test
-    public void testRawListParameter() throws FnOException, InstantiationException, InvocationTargetException, IllegalAccessException {
+    public void testRawListParameter() throws FnOException, FunctionInstantiationException, InvocationTargetException, IllegalAccessException {
         final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
 
         // load function descriptions
@@ -67,7 +67,7 @@ public class InstantiatorTest {
     }
 
     @Test
-    public void testClose() throws FnOException, InstantiationException {
+    public void testClose() throws FnOException, FunctionInstantiationException {
         final DataTypeConverterProvider dataTypeConverterProvider = new DataTypeConverterProvider();
 
         // load function descriptions

@@ -4,12 +4,14 @@ Written for a CS student who wants to understand the Function Agent as code.
 
 ## Contents
 
-- [Preface](#preface)
-- [Agent request contract (for AI agents/LLMs)](#agent-request-contract-for-ai-agentsllms)
-- [Architecture and package layout](#architecture-and-package-layout)
-- [Build and test](#build-and-test)
-- [Test resources](#test-resources)
-- [Release process](#release-process)
+- [Function Agent (function-agent-java) Handbook](#function-agent-function-agent-java-handbook)
+  - [Contents](#contents)
+  - [Preface](#preface)
+  - [Agent request contract (for AI agents/LLMs)](#agent-request-contract-for-ai-agentsllms)
+  - [Architecture and package layout](#architecture-and-package-layout)
+  - [Build and test](#build-and-test)
+  - [Test resources](#test-resources)
+  - [Release process](#release-process)
 
 ## Preface
 
@@ -18,7 +20,7 @@ The Function Agent is a Java library that executes semantically described functi
 The project is a library: it has no command-line interface and no main entry point. It runs on the JVM only, keeps no state between calls, and supports compositions without recursion (see "Current limitations" in `README.md`).
 
 - Maven coordinates: `be.ugent.idlab.knows:function-agent-java` (see `pom.xml`); Java 21.
-- Source: `src/main/java/be/ugent/idlab/knows/functions/agent/` plus the helper `src/main/java/be/ugent/idlab/knows/misc/FileFinder.java`.
+- Source: `src/main/java/be/ugent/idlab/knows/functions/agent/`.
 - Tests: `src/test/java/` (JUnit 5), with fixtures in `src/test/resources/`.
 - User documentation: `README.md` (usage example, features, how composition execution works). Changes are recorded in `CHANGELOG.md`.
 
@@ -41,7 +43,7 @@ Every implementation request handled by an AI agent/LLM follows these constraint
   - This contract holds only general rules for handling a request; project-specific guidance goes in the chapter on that topic.
 - Do not stop at making tests green; align the implementation with the specification or intended design, and document the semantic reason in this handbook.
 - Never remove or change existing tests (code or fixtures) without explicit permission. A change to an existing fixture (expected output, input, or data) is validated by the maintainer before it is kept, also when a tool writes it: propose the change with its reason, and keep it only after approval.
-- Update `CHANGELOG.md` for implementation changes: keep `## Unreleased` a short summary of what changed since the last release. A feature that is new since the last release is one Added line, which later fixes update instead of getting lines of their own; lines are for what a user of the last release notices.
+- Update `CHANGELOG.md` for every change, internal ones included (tests, CI, refactoring, removed code): keep `## Unreleased` a short summary of what changed since the last release. A feature that is new since the last release is one Added line, which later fixes update instead of getting lines of their own.
 - Check whether `README.md` needs updates for user-visible behavior or workflow changes, and update it when needed.
 - Write documentation (this handbook, READMEs, `TODO.md`, `CHANGELOG.md`, code comments) as plain positive statements: say what is true and leave out the contrast ("X, not Y"). Keep a negative only when it is the point itself, such as a prohibition, a warning, or a known limitation.
 - If there are difficulties during fulfillment, document them in the most appropriate existing handbook location (create a new chapter only when truly necessary) so future requests start with better context.
@@ -50,7 +52,7 @@ Every implementation request handled by an AI agent/LLM follows these constraint
 
 ## Architecture and package layout
 
-All packages live under `be.ugent.idlab.knows.functions.agent` unless noted.
+All packages live under `be.ugent.idlab.knows.functions.agent`.
 
 - **Entry points** (package root):
   - `Agent`: the public interface. `execute(functionId, arguments)`, `execute(functionId, arguments, debug)` and `getFunctions()`. An `Agent` is `AutoCloseable` and closes loaded function libraries.
@@ -58,12 +60,12 @@ All packages live under `be.ugent.idlab.knows.functions.agent` unless noted.
   - `AgentImpl`: the implementation; it also offers `writeModel(path)` and `executeToFile(...)` to serialize the loaded model or an execution as RDF.
   - `Arguments`: the parameter-IRI-to-value(s) container passed to `execute`.
   - `DescriptionGenerator`: builds RDF descriptions from the internal model.
-- **`functionModelProvider`**: `FunctionModelProvider` is the extension point for function description formats. `fno.FnOFunctionModelProvider` reads FnO documents with Apache Jena; `fno.NAMESPACES` holds the vocabulary IRIs; `fno.exception` has one exception per missing or malformed part of a description.
+- **`functionModelProvider`**: `FunctionModelProvider` is the extension point for function description formats. `fno.FnOFunctionModelProvider` reads FnO documents with Apache Jena; `fno.Namespaces` holds the vocabulary IRIs (`LIB` is the deprecated `lib:` vocabulary for implementations, still read with a warning); `fno.exception` has one exception per missing or malformed part of a description, all subclasses of `FnOException`, thrown while loading descriptions.
 - **`model`**: the format-independent function model (`Function`, `Parameter`, `FunctionMapping`, `MethodMapping`, `Implementation`, `FunctionComposition` and the composition mapping classes). `model.fno.FnOParameter` adds the resource IRI and type IRI that FnO parameters carry.
-- **`functionInstantiation`**: `Instantiator` resolves a `Function` to a callable `ThrowableFunction`, via Java reflection for implementations and via `getCompositeMethod` for compositions. The composition algorithm (safety checks, cycle detection, execution stack, lambda construction, caching) is described step by step in `README.md` under "Function Composition - how it currently works".
+- **`functionInstantiation`**: `Instantiator` resolves a `Function` to a callable `ThrowableFunction`, via Java reflection for implementations and via `getCompositeMethod` for compositions. Its exceptions, in `functionInstantiation.exception`, are subclasses of `FunctionInstantiationException` and are thrown while executing; `FunctionNotFoundException` among them is what `Agent.execute` throws for an unknown function id. The composition algorithm (safety checks, cycle detection, execution stack, lambda construction, caching) is described step by step in `README.md` under "Function Composition - how it currently works".
 - **`dataType`**: `DataTypeConverter` implementations convert argument values to the Java types the implementation expects; `DataTypeConverterProvider` selects one per type.
 - **`exception`**: general agent exceptions.
-- **`be.ugent.idlab.knows.misc.FileFinder`**: resolves a path as a remote URL, then as a file relative to the working directory, then as a classpath resource.
+- **`util`**: `FileFinder` resolves a path as a remote URL, then as a file relative to the working directory, then as a classpath resource.
 
 Runtime dependencies are `jena-arq`, `jena-core`, `commons-collections4` and `slf4j-api`. `jena-core` shares the `jena.version` property with `jena-arq`.
 
@@ -74,7 +76,7 @@ Runtime dependencies are `jena-arq`, `jena-core`, `commons-collections4` and `sl
 - CI also includes the shared `rml/util/ci-templates` `CHANGELOG.gitlab-ci.yml` check (the `lint` stage), which requires `CHANGELOG.md` to be updated, and `Maven-Central.gitlab-ci.yml` for deployment.
 - Linter: SpotBugs 4.10.3 (`spotbugs-maven-plugin` 4.10.3.0, configured in `<pluginManagement>` as in MappingWeaver-java and not bound to a phase). Run `mvn compile spotbugs:check`. Known state: `spotbugs:check` reports 24 findings (mostly EI_EXPOSE_REP and EI_EXPOSE_REP2 in the model classes) and fails the build, so it runs on demand and CI does not run it. No formatter is configured.
 
-Test classes follow the main packages; the test package for `functionInstantiation` is `functionInstantiator`. They are `AgentTest` (end-to-end execution, compositions, partial application, overloads, writing models), `ArgumentsTest`, `GeneratorTest`, `dataType/DataTypeConverterTest`, `functionInstantiator/InstantiatorTest`, `functionModelProvider/fno/FnOFunctionProviderTest`, and `misc/FileFinderTest` and `misc/JarFileTest`. `internalfunctions/InternalTestFunctions` holds the Java methods that test FnO documents map to.
+Test classes follow the main packages; the test package for `functionInstantiation` is `functionInstantiator`. They are `AgentTest` (end-to-end execution, compositions, partial application, overloads, writing models), `ArgumentsTest`, `GeneratorTest`, `dataType/DataTypeConverterTest`, `functionInstantiator/InstantiatorTest`, `functionModelProvider/fno/FnOFunctionProviderTest`, and `util/FileFinderTest` and `util/JarFileTest`. `internalfunctions/InternalTestFunctions` holds the Java methods that test FnO documents map to.
 
 Some tests write files into the working directory (the repository root when run with Maven): `test.txt` and `test0.txt` are produced by print side effects in `sum-composition.ttl` and `complex_side_path.ttl`, `test1.txt` by `AgentTest.functionWithoutReturnValue`, and `testFileWrite.ttl` and `testExecution.ttl` by `AgentTest.testWriteModel` and `testWriteExecutionToFile`. `.gitignore` excludes them (`test*.txt`, `test*.ttl`).
 

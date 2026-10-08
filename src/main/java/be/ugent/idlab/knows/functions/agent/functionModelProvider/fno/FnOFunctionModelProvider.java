@@ -7,7 +7,7 @@ import be.ugent.idlab.knows.functions.agent.functionModelProvider.FunctionModelP
 import be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.exception.*;
 import be.ugent.idlab.knows.functions.agent.model.*;
 import be.ugent.idlab.knows.functions.agent.model.fno.FnOParameter;
-import be.ugent.idlab.knows.misc.FileFinder;
+import be.ugent.idlab.knows.functions.agent.util.FileFinder;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -19,7 +19,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.*;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.Namespaces.*;
 
 /**
  * A {@link FunctionModelProvider} for functions described using the Function Ontology (<a href="https://fno.io/">FnO</a>).
@@ -224,10 +224,10 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         String functionId = resource.getURI();
         // function that is partially applied
         Resource originalFunction = getObjectResource(resource, FNOC+"partiallyApplies")
-                .orElseThrow(() -> new FunctionNotFoundException("no function found to partially apply in partial application with id: " + functionId));
+                .orElseThrow(() -> new FunctionResourceNotFoundException("no function found to partially apply in partial application with id: " + functionId));
         Function original = functionId2Functions.get(originalFunction.getURI());
         if(original == null){
-            throw new FunctionNotFoundException("function to partially apply with id " + originalFunction.getURI() +" not found");
+            throw new FunctionResourceNotFoundException("function to partially apply with id " + originalFunction.getURI() +" not found");
         }
         // make a new composition
         FunctionComposition composition = new FunctionComposition();
@@ -295,7 +295,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
 
         // get the URI of the function resource this mapping belongs to
         String functionURI = getObjectURI(functionMappingResource, FNO + "function")
-                .orElseThrow(() -> new FunctionNotFoundException("No function resource found for fno:Mapping '" +
+                .orElseThrow(() -> new FunctionResourceNotFoundException("No function resource found for fno:Mapping '" +
                         functionMappingResource.getURI() + "'"));
 
         if (!functionId2functionMappings.containsKey(functionURI)) {
@@ -436,7 +436,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
         }
         else{ // try to find a fnoc:mapFromTerm
             final Literal literal = getLiteral(element, FNOC+"mapFromTerm")
-                    .orElseThrow(() -> new CompositionStartingPointNotFound("No composition starting point found for " + element.getId()){});
+                    .orElseThrow(() -> new CompositionStartingPointNotFoundException("No composition starting point found for " + element.getId()){});
             CompositionMappingPoint cmp = new CompositionMappingPoint("", literal.getString(), false, true);
             return cmp;
         }
@@ -451,7 +451,7 @@ public class FnOFunctionModelProvider implements FunctionModelProvider {
      */
     private CompositionMappingPoint parseCompositionMapElementEndpoint(final Resource element) throws FnOException{
         final Resource endPointResource = getObjectResource(element, FNOC+"mapTo")
-                .orElseThrow( () -> new CompositionEndPointNotFound("No mapping end point found"){});
+                .orElseThrow( () -> new CompositionEndPointNotFoundException("No mapping end point found"){});
         final String id = getObjectURI(endPointResource, FNOC+"constituentFunction")
                 .orElseThrow( () -> new ConstituentFunctionNotFoundException("No Constituent function found for endpoint"){});
         Optional<String> parameterId = getObjectURI(endPointResource, FNOC+"functionParameter");

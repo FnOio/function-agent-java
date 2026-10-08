@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.FNO;
-import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.NAMESPACES.RDF;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.Namespaces.FNO;
+import static be.ugent.idlab.knows.functions.agent.functionModelProvider.fno.Namespaces.RDF;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

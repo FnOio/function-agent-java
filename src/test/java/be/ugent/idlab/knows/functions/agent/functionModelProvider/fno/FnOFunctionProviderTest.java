@@ -27,7 +27,7 @@ import be.ugent.idlab.knows.functions.agent.model.FunctionMapping;
 import be.ugent.idlab.knows.functions.agent.model.Implementation;
 import be.ugent.idlab.knows.functions.agent.model.MethodMapping;
 import be.ugent.idlab.knows.functions.agent.model.Parameter;
-import be.ugent.idlab.knows.misc.FileFinder;
+import be.ugent.idlab.knows.functions.agent.util.FileFinder;
 
 /**
  * <p>Copyright 2022 IDLab (Ghent University - imec)</p>

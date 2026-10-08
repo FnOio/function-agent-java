@@ -5,7 +5,7 @@ package be.ugent.idlab.knows.functions.agent.functionModelProvider.fno;
  *
  * @author Gerald Haesendonck
  */
-public enum NAMESPACES {
+public enum Namespaces {
     DCTERMS("http://purl.org/dc/terms/"),
     DOAP("http://usefulinc.com/ns/doap#"),
     FNO("https://w3id.org/function/ontology#"),
@@ -18,7 +18,7 @@ public enum NAMESPACES {
     ;
     private final String uri;
 
-    NAMESPACES(String uri) {
+    Namespaces(String uri) {
         this.uri = uri;
     }
 
