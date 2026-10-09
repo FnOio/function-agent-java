@@ -14,11 +14,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - **Breaking:** `FileFinder` moved from `be.ugent.idlab.knows.misc` to `be.ugent.idlab.knows.functions.agent.util`.
 - **Breaking:** renamed exceptions: `functionInstantiation.exception.InstantiationException` → `FunctionInstantiationException`, `functionInstantiation.exception.ClassNotFoundException` → `ImplementationClassNotFoundException`, `fno.exception.FunctionNotFoundException` → `FunctionResourceNotFoundException`, `CompositionEndPointNotFound` → `CompositionEndPointNotFoundException`, `CompositionStartingPointNotFound` → `CompositionStartingPointNotFoundException`.
 - **Breaking:** the enum `fno.NAMESPACES` is renamed to `fno.Namespaces`.
+- Release tooling: `RELEASE.md` documents the steps; `bump-version.sh` checks the version format and moves to the next patch `-SNAPSHOT` after a release.
+- `commons-collections4` and `jena-core` are declared dependencies.
 
 ### Fixed
 - **Breaking:** `Agent.execute` with an unknown function id throws `functionInstantiation.exception.FunctionNotFoundException`; it threw the FnO parsing exception (a `FnOException`) before.
-- Release tooling: `RELEASE.md` documents the steps; `bump-version.sh` checks the version format and moves to the next patch `-SNAPSHOT` after a release.
-- `commons-collections4` and `jena-core` are declared dependencies.
 
 ### Removed
 - The `jar-with-dependencies` artifact; dependencies resolve transitively from the POM.

@@ -88,7 +88,7 @@ public class Instantiator {
      * Tries to get a method to execute the function with the given ID.
      * @param functionId    The identifier of the function for which a method has to be found.
      * @return              An executable method which is an implementation of the function with the given functionId.
-     * @throws FunctionInstantiationException   Something goes wrong finding a method. A subclass of this exception gives more details aboud what goes wrong.
+     * @throws FunctionInstantiationException   Something goes wrong finding a method. A subclass of this exception gives more details about what goes wrong.
      */
     public Method getMethod(final String functionId) throws FunctionInstantiationException {
         final Function function = id2functionMap.get(functionId);
