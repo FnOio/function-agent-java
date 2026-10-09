@@ -49,7 +49,7 @@
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <slf4j.version>2.0.18</slf4j.version>
         <junit.version>6.1.3</junit.version>
-        <grel.java.version>v0.10.1</grel.java.version>
+        <grel.java.version>v0.10.2</grel.java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- This is the language level, it is recommended to use the latest LTS JVM to build / run it -->
