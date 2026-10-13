@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 
 ### Changed
-- Tests load `functions_grel.ttl` from the grel-functions-java v0.11.0 jar instead of a copy in `src/test/resources`.
+- Tests load `functions_grel.ttl` from the grel-functions-java v0.11.1 jar instead of a copy in `src/test/resources`.
 
 ## [2.0.0] - 2026-10-08
 
