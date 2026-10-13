@@ -177,7 +177,7 @@ public class AgentTest {
     @Test
     public void testListFnO_ArrayImplementation() throws Exception {
         Object result;
-        try (Agent agent = AgentFactory.createFromFnO("src/test/resources/functions_grel.ttl", "grel_java_mapping.ttl")) {
+        try (Agent agent = AgentFactory.createFromFnO("functions_grel.ttl", "grel_java_mapping.ttl")) {
 
             // prepare the parameter: a list of ints to take the sum of
             Arguments arguments = new Arguments()
