@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Tests load `functions_grel.ttl` from the grel-functions-java v0.11.1 jar instead of a copy in `src/test/resources`.
+- Maven Central deployments are named after the artifact and its version, such as `function-agent-java 2.0.1`.
+- HANDBOOK: the agent request contract follows the software-handbook contract of 2026-11-18.
 
 ## [2.0.0] - 2026-10-08
 
